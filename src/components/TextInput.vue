@@ -2,8 +2,15 @@
   <div class="fieldWrapper">
     <label>
       <span class="labelText" :class="focussed || value !== '' ? 'small' : 'large'">{{ label }}</span>
-      <input :type="type" :name="name" @input="validate($event)" v-model="value" @focus="setFocus" @blur="setBlur" />
-      <span class="border"></span>
+      <input
+        :type="type"
+        :name="name"
+        :value="value"
+        :required="typeof required === 'string'"
+        @input="validate($event)"
+        @focus="setFocus"
+        @blur="setBlur($event)" />
+      <span class="border" :class="{invalid}"></span>
     </label>
     <p v-if="invalid" class="errorHint">{{ errorHint }}</p>
   </div>
@@ -14,33 +21,37 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class TextInput extends Vue {
+  @Prop({ default: '' }) value!: string
   @Prop({ default: 'text' }) type!: string;
+  @Prop({ default: false }) required: boolean
   @Prop() name!: string;
   @Prop() label!: string;
-  @Prop() validationEnabled!: boolean;
 
   hint: string = 'init error hint'
-  value: string = ''
   invalid: boolean = false
   focussed: boolean = false
+
+  constructor () {
+    super()
+    console.log('typeof this.required', typeof this.required, this.required, this.name)
+  }
 
   get errorHint () {
     return `Invalid ${this.label}`
   }
 
   validate ($event: any) {
-    console.log($event, this.value)
-    if (this.validationEnabled) {
-      this.invalid = true
-    }
-    this.$emit('input', this.value)
+    const val = $event.target.value
+    this.invalid = (this.required && val === '')
+    this.$emit('input', val)
   }
 
   setFocus () {
     this.focussed = true
   }
 
-  setBlur () {
+  setBlur ($event: any) {
+    this.invalid = this.value === ''
     this.focussed = false
   }
 }
@@ -92,8 +103,10 @@ label {
   transform: translateY(-1.5rem) scale(.8);
 }
 
-input, input:invalid {
+input, input:invalid, input:required {
   border: none;
+  outline: 0;
+  box-shadow: none;
   letter-spacing: 0.0375rem;
   padding: .25rem 0;
   display: block;
@@ -122,6 +135,15 @@ input, input:invalid {
   height: 2px;
   background-color: rgb(30, 48, 10);
   transition: width 0.15s ease-out 0s;
+}
+
+.border.invalid {
+  border-bottom-color: red;
+}
+
+.border.invalid:before,
+.border.invalid:after {
+  background-color: red;
 }
 
 .border:before {

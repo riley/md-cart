@@ -1,30 +1,32 @@
 <template>
-  <div id="shipping-info" class="card">
-    <p>{{ instructions }}</p>
+  <section id="shipping-info">
+    <Instructions text="Your Shipping Address" step="1"/>
     <fieldset>
       <legend>Shipping Info</legend>
-      <TextInput v-model="email" type="email" name="email" label="Email Address" />
+      <TextInput required v-model="email" type="email" name="email" label="Email Address" />
       <Address :address="address" />
     </fieldset>
-    <ul>
-      <li v-for="(value, fieldName) in address" v-bind:key="fieldName">{{ fieldName }}: {{ value }}</li>
-    </ul>
-  </div>
+  </section>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import TextInput from './TextInput.vue'
 import Address from './Address.vue'
-import Dropdown2 from './Dropdown2.vue'
+import Instructions from './Instructions.vue'
 
 @Component({
-  components: { TextInput, Dropdown2, Address }
+  components: { TextInput, Address, Instructions }
 })
 export default class ShippingInfo extends Vue {
-  @Prop() private instructions!: string;
   @Prop() address!: Address;
 
   email = ''
 }
 </script>
+
+<style scoped>
+section {
+  position: relative;
+}
+</style>

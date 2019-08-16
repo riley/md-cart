@@ -26,7 +26,6 @@ button {
   line-height: 1.3;
   text-align: center;
   white-space: nowrap;
-  vertical-align: middle;
   border: medium none;
   border-radius: 0.375rem;
   cursor: pointer;

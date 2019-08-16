@@ -1,23 +1,28 @@
 <template>
-  <div id="billing-info">
+  <section id="billing-info">
+    <Instructions text="Your Billing Address" step="2"/>
     <fieldset>
       <legend>Billing Info</legend>
       <Address :address="address" />
     </fieldset>
-    <ul>
-      <li v-for="(value, fieldName) in address" v-bind:key="fieldName">{{ fieldName }}: {{ value }}</li>
-    </ul>
-  </div>
+  </section>
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator'
 import Address from './Address.vue'
+import Instructions from './Instructions.vue'
 
 @Component({
-  components: { Address }
+  components: { Address, Instructions }
 })
 export default class BillingInfo extends Vue {
   @Prop() address!: Address;
 }
 </script>
+
+<style scoped>
+section {
+  position: relative;
+}
+</style>
