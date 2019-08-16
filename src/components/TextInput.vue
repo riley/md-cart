@@ -6,7 +6,7 @@
         :type="type"
         :name="name"
         :value="value"
-        :required="typeof required === 'string'"
+        :required="required"
         @input="validate($event)"
         @focus="setFocus"
         @blur="setBlur($event)" />
@@ -23,18 +23,13 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 export default class TextInput extends Vue {
   @Prop({ default: '' }) value!: string
   @Prop({ default: 'text' }) type!: string;
-  @Prop({ default: false }) required: boolean
+  @Prop({ type: Boolean, default: false }) required: boolean
   @Prop() name!: string;
   @Prop() label!: string;
 
   hint: string = 'init error hint'
   invalid: boolean = false
   focussed: boolean = false
-
-  constructor () {
-    super()
-    console.log('typeof this.required', typeof this.required, this.required, this.name)
-  }
 
   get errorHint () {
     return `Invalid ${this.label}`
