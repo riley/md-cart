@@ -20,12 +20,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 
-// <vSelect
-//         v-on:search:focus="setFocus"
-//         v-on:search:blur="setBlur"
-//         @input="setSelected"
-//         :options="options" />
-
 @Component({
   components: { vSelect },
 })
@@ -47,7 +41,6 @@ export default class Dropdown extends Vue {
   setSelected (e: any) {
     console.log('setSelected', e.target.value)
     this.selected = e.target.value
-    // console.log('setSelected', this.selected, value.code, arguments)
     this.$emit('input', e.target.value)
   }
 }
@@ -55,7 +48,8 @@ export default class Dropdown extends Vue {
 </script>
 
 <style>
-/* override vSelect styles */
+/* basis for styles https://www.filamentgroup.com/lab/select-css.html */
+
 .md__select {
   display: block;
   font-size: 16px;

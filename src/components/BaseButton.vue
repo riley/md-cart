@@ -1,9 +1,7 @@
 <template>
-  <div class="buttonWrapper">
-    <button>
-      <slot></slot>
-    </button>
-  </div>
+  <button @click="handleClick">
+    <slot></slot>
+  </button>
 </template>
 
 <script lang="ts">
@@ -12,15 +10,17 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 @Component
 export default class FormButton extends Vue {
   @Prop() loading!: boolean;
+
+  handleClick () {
+    console.log('handleClick')
+    this.$emit('click')
+  }
 }
 </script>
 
 <style scoped>
-.buttonWrapper {
-  margin-top: 1em;
-}
-
 button {
+  margin-top: 1em;
   font-style: normal;
   position: relative;
   line-height: 1.3;

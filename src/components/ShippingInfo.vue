@@ -11,9 +11,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import TextInput from './TextInput.vue'
-import Address from './Address.vue'
-import Instructions from './Instructions.vue'
+import TextInput from './BaseTextInput.vue'
+import Address from './BaseAddress.vue'
+import Instructions from './BaseInstructions.vue'
 
 @Component({
   components: { TextInput, Address, Instructions }

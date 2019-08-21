@@ -21,7 +21,6 @@
       <ShippingInfo :address="shipping" />
       <BillingInfo :address="billing" />
       <PaymentInfo />
-      <FormButton>Checkout</FormButton>
     </div>
   </div>
 </template>
@@ -32,13 +31,11 @@ import Chooser from './Chooser.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
 import PaymentInfo from './PaymentInfo.vue'
-import FormButton from './FormButton.vue'
 
 @Component({
   components: {
     ShippingInfo,
     BillingInfo,
-    FormButton,
     PaymentInfo,
     Chooser,
   }

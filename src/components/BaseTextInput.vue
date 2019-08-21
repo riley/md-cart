@@ -99,8 +99,8 @@ label {
 }
 
 input, input:invalid, input:required {
-  border: none;
-  outline: 0;
+  border: none !important;
+  outline: 0 !important;
   box-shadow: none;
   letter-spacing: 0.0375rem;
   padding: .25rem 0;

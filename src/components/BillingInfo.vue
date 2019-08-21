@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator'
-import Address from './Address.vue'
-import Instructions from './Instructions.vue'
+import Address from './BaseAddress.vue'
+import Instructions from './BaseInstructions.vue'
 
 @Component({
   components: { Address, Instructions }

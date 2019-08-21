@@ -10,6 +10,10 @@ new Vue({
 }).$mount('#app')
 
 declare global {
+
+  interface Window {
+    Stripe: any;
+  }
   interface Address {
     name: string;
     address1: string;

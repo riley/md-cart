@@ -13,8 +13,8 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import vSelect from 'vue-select'
-import Dropdown from './Dropdown.vue'
-import TextInput from './TextInput.vue'
+import Dropdown from './BaseDropdown.vue'
+import TextInput from './BaseTextInput.vue'
 import states from '../utils/states'
 import provinces from '../utils/provinces'
 import countries from '../utils/countries'
