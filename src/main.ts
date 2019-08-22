@@ -4,6 +4,9 @@ import store from './store'
 
 Vue.config.productionTip = false
 
+store.commit('increment')
+console.log('store.state.count', store.state.count)
+
 new Vue({
   store,
   render: h => h(App)
@@ -27,5 +30,10 @@ declare global {
   interface DropdownOption {
     label: string;
     code: string;
+  }
+
+  interface FormInputEvent {
+    name: string;
+    value: string;
   }
 }

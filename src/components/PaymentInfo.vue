@@ -25,7 +25,7 @@ export default class PaymentInfo extends Vue {
   hasCardErrors: boolean = false
 
   mounted () {
-    card = elements.create('card')
+    card = card || elements.create('card')
     card.mount(this.$refs.card)
   }
 

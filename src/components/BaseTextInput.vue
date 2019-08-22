@@ -1,11 +1,10 @@
 <template>
   <div class="fieldWrapper">
     <label>
-      <span class="labelText" :class="focussed || value !== '' ? 'small' : 'large'">{{ label }}</span>
+      <span class="labelText" :class="focussed || val !== '' ? 'small' : 'large'">{{ label }}</span>
       <input
         :type="type"
         :name="name"
-        :value="value"
         :required="required"
         @input="validate($event)"
         @focus="setFocus"
@@ -21,12 +20,12 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class TextInput extends Vue {
-  @Prop({ default: '' }) value!: string
   @Prop({ default: 'text' }) type!: string;
   @Prop({ type: Boolean, default: false }) required: boolean
   @Prop() name!: string;
   @Prop() label!: string;
 
+  val = ''
   hint: string = 'init error hint'
   invalid: boolean = false
   focussed: boolean = false
@@ -36,9 +35,10 @@ export default class TextInput extends Vue {
   }
 
   validate ($event: any) {
-    const val = $event.target.value
-    this.invalid = (this.required && val === '')
-    this.$emit('input', val)
+    console.log('validate', $event)
+    this.val = $event.target.value
+    this.invalid = (this.required && this.val === '')
+    this.$emit('input', { name: this.name, value: this.val })
   }
 
   setFocus () {
@@ -46,7 +46,7 @@ export default class TextInput extends Vue {
   }
 
   setBlur ($event: any) {
-    this.invalid = this.value === ''
+    this.invalid = this.val === ''
     this.focussed = false
   }
 }
@@ -122,7 +122,7 @@ input, input:invalid, input:required {
   transition: none 0s ease 0s;
 }
 
-.border:before, .border:after {
+.border::before, .border::after {
   content: '';
   position: absolute;
   bottom: -1px;
@@ -136,20 +136,20 @@ input, input:invalid, input:required {
   border-bottom-color: red;
 }
 
-.border.invalid:before,
-.border.invalid:after {
+.border.invalid::before,
+.border.invalid::after {
   background-color: red;
 }
 
-.border:before {
+.border::before {
   left: 50%;
 }
 
-.border:after {
+.border::after {
   right: 50%;
 }
 
-input:focus + .border:before, input:focus + .border:after {
+input:focus + .border::before, input:focus + .border::after {
   width: 50%;
 }
 

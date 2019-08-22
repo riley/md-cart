@@ -1,12 +1,12 @@
 <template>
   <div>
-    <TextInput v-model="address.name" required type="text" name="shipping_name" label="Name" />
-    <TextInput v-model="address.address1" required type="text" name="shipping_address_1" label="Street Address" />
-    <TextInput v-model="address.address2" type="text" name="shipping_address_2" label="Apt / Building No." />
-    <TextInput v-model="address.city" required type="text" name="shipping_city" label="City" />
-    <Dropdown v-model="address.state" required label="State" :options="states" name="shipping_state" />
-    <TextInput v-model="address.zip" required label="Zip code" type="text" name="shipping_zip" />
-    <Dropdown v-model="address.country" required label="Country" :options="countries" />
+    <TextInput @input="handleInput" required type="text" name="name" label="Name" />
+    <TextInput @input="handleInput" required type="text" name="address1" label="Street Address" />
+    <TextInput @input="handleInput" type="text" name="address2" label="Apt / Building No." />
+    <TextInput @input="handleInput" required type="text" name="city" label="City" />
+    <Dropdown @input="handleInput" required label="State" :options="states" name="state" />
+    <TextInput @input="handleInput" required label="Zip code" type="text" name="zip" />
+    <Dropdown @input="handleInput" required label="Country" :options="countries" name="country" />
   </div>
 </template>
 
@@ -20,16 +20,19 @@ import provinces from '../utils/provinces'
 import countries from '../utils/countries'
 
 @Component({
-  components: { vSelect, TextInput, Dropdown }
+  components: { vSelect, TextInput, Dropdown },
 })
 export default class Address extends Vue {
-  @Prop() address!: Address;
-
   states = states
   provinces = provinces
   countries = countries.reduce((carry: any, [label, code]) => {
     carry[label] = code
     return carry
   }, {})
+
+  handleInput ($event: FormInputEvent) {
+    console.log('handleInput', $event)
+    this.$emit('input', { name: $event.name, value: $event.value })
+  }
 }
 </script>

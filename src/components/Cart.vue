@@ -1,9 +1,12 @@
 <template>
   <div class="container">
     <div>
-      <Chooser />
+      <CartSummary />
+      count: {{ count }}
+      someComputedValue: {{ someComputedValue }}
       <div class="log-thing">
         <div>
+          <p>email: {{ email }}</p>
           <p>shipping</p>
           <ul>
             <li v-for="(value, fieldName) in shipping" v-bind:key="fieldName">{{ fieldName }}: {{ value }}</li>
@@ -18,8 +21,8 @@
       </div>
     </div>
     <div>
-      <ShippingInfo :address="shipping" />
-      <BillingInfo :address="billing" />
+      <ShippingInfo />
+      <BillingInfo />
       <PaymentInfo />
     </div>
   </div>
@@ -27,48 +30,31 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import Chooser from './Chooser.vue'
+import CartSummary from './CartSummary.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
 import PaymentInfo from './PaymentInfo.vue'
+import { mapState } from 'vuex'
 
 @Component({
   components: {
     ShippingInfo,
     BillingInfo,
     PaymentInfo,
-    Chooser,
+    CartSummary,
+  },
+  computed: {
+    ...mapState({
+      count: (state: any) => state.count,
+      email: (state: any) => state.email,
+      billing: (state: any) => state.billing.address,
+      shipping: (state: any) => state.shipping.address
+    })
   }
 })
 export default class Cart extends Vue {
-  shipping: Address = {
-    name: '',
-    address1: '',
-    address2: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: 'US'
-  }
-  billing: Address = {
-    name: '',
-    address1: '',
-    address2: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: 'US'
-  }
-
-  options = [{ label: 'foo', code: 'bar' }, { label: 'baz', code: 'boo' }]
-
-  get totalDiscount () {
-    return 0
-  }
-
-  // computed price
-  get subtotal () {
-    return 0
+  get someComputedValue () {
+    return 'foo'
   }
 }
 </script>

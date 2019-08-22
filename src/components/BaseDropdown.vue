@@ -24,6 +24,7 @@ import 'vue-select/dist/vue-select.css'
   components: { vSelect },
 })
 export default class Dropdown extends Vue {
+  @Prop() name!: string
   @Prop({ default: 'no label' }) label!: string
   @Prop() options!: DropdownOption[]
 
@@ -41,7 +42,7 @@ export default class Dropdown extends Vue {
   setSelected (e: any) {
     console.log('setSelected', e.target.value)
     this.selected = e.target.value
-    this.$emit('input', e.target.value)
+    this.$emit('input', { name: this.name, value: e.target.value })
   }
 }
 

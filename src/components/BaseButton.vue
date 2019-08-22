@@ -12,7 +12,6 @@ export default class FormButton extends Vue {
   @Prop() loading!: boolean;
 
   handleClick () {
-    console.log('handleClick')
     this.$emit('click')
   }
 }
