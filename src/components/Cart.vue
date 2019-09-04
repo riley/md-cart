@@ -1,25 +1,6 @@
 <template>
   <div class="container">
-    <div>
-      <CartSummary />
-      count: {{ count }}
-      someComputedValue: {{ someComputedValue }}
-      <div class="log-thing">
-        <div>
-          <p>email: {{ email }}</p>
-          <p>shipping</p>
-          <ul>
-            <li v-for="(value, fieldName) in shipping" v-bind:key="fieldName">{{ fieldName }}: {{ value }}</li>
-          </ul>
-        </div>
-        <div>
-          <p>billing</p>
-          <ul>
-            <li v-for="(value, fieldName) in billing" v-bind:key="fieldName">{{ fieldName }}: {{ value }}</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <CartSummary />
     <div>
       <ShippingInfo />
       <BillingInfo />
@@ -34,7 +15,7 @@ import CartSummary from './CartSummary.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
 import PaymentInfo from './PaymentInfo.vue'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 @Component({
   components: {
@@ -45,16 +26,17 @@ import { mapState } from 'vuex'
   },
   computed: {
     ...mapState({
-      count: (state: any) => state.count,
-      email: (state: any) => state.email,
-      billing: (state: any) => state.billing.address,
-      shipping: (state: any) => state.shipping.address
+      stock: (state: any) => state.stock
     })
+  },
+  methods: {
+    ...mapActions(['fetchStock', 'fetchCart'])
   }
 })
 export default class Cart extends Vue {
-  get someComputedValue () {
-    return 'foo'
+  async mounted () {
+    await this.fetchStock()
+    this.fetchCart()
   }
 }
 </script>

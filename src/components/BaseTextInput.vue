@@ -1,7 +1,7 @@
 <template>
   <div class="fieldWrapper">
     <label>
-      <span class="labelText" :class="focussed || val !== '' ? 'small' : 'large'">{{ label }}</span>
+      <span class="labelText" :class="{focussedOrValid: focussed || val}">{{ label }}</span>
       <input
         :type="type"
         :name="name"
@@ -9,7 +9,7 @@
         @input="validate($event)"
         @focus="setFocus"
         @blur="setBlur($event)" />
-      <span class="border" :class="{invalid}"></span>
+      <span class="border" :class="{invalid, success}"></span>
     </label>
     <p v-if="invalid" class="errorHint">{{ errorHint }}</p>
   </div>
@@ -29,6 +29,7 @@ export default class TextInput extends Vue {
   hint: string = 'init error hint'
   invalid: boolean = false
   focussed: boolean = false
+  success: boolean = false
 
   get errorHint () {
     return `Invalid ${this.label}`
@@ -37,8 +38,9 @@ export default class TextInput extends Vue {
   validate ($event: any) {
     console.log('validate', $event)
     this.val = $event.target.value
-    this.invalid = (this.required && this.val === '')
+    this.invalid = ((this.required && this.val === '') || !$event.target.validity.valid)
     this.$emit('input', { name: this.name, value: this.val })
+    this.success = false
   }
 
   setFocus () {
@@ -46,8 +48,10 @@ export default class TextInput extends Vue {
   }
 
   setBlur ($event: any) {
-    this.invalid = this.val === ''
+    this.invalid = this.required && this.val === ''
     this.focussed = false
+    this.success = !this.invalid
+    this.$emit('blur', this.val)
   }
 }
 </script>
@@ -87,14 +91,11 @@ label {
   transform-origin: 0px 0px;
   pointer-events: none;
   padding: 0.25rem 0px;
-  transition: transform 0.3s ease-out 0s
-}
-
-.large {
+  transition: transform 0.3s ease-out 0s;
   transform: translateY(0) scale(1);
 }
 
-.small {
+.focussedOrValid {
   transform: translateY(-1.5rem) scale(.8);
 }
 
@@ -120,6 +121,12 @@ input, input:invalid, input:required {
   border-bottom: 1px solid rgb(30, 48, 10);
   pointer-events: none;
   transition: none 0s ease 0s;
+}
+
+.border.success,
+.border.success::after,
+.border.success::before {
+  border-bottom-color: rgb(40, 214, 106);
 }
 
 .border::before, .border::after {

@@ -4,9 +4,6 @@ import store from './store'
 
 Vue.config.productionTip = false
 
-store.commit('increment')
-console.log('store.state.count', store.state.count)
-
 new Vue({
   store,
   render: h => h(App)
@@ -17,6 +14,27 @@ declare global {
   interface Window {
     Stripe: any;
   }
+
+  interface Item {
+    sku: string
+    clothingType: string
+    quantity: number
+    cost: number
+  }
+
+  interface Product {
+    cost?: number
+    sku: string
+    quantity: number
+    deprecated: boolean
+    size: string
+    forceLowStock: boolean
+    nextDelivery: string
+    clothingType: string
+    description: string
+    swatch: string
+    title: string
+  }
   interface Address {
     name: string;
     address1: string;
@@ -25,6 +43,13 @@ declare global {
     state: string;
     zip: string;
     country: string
+  }
+
+  interface SHippingRate {
+    rate: number | string;
+    est_delivery_days: number;
+    service: string;
+    postage: number;
   }
 
   interface DropdownOption {

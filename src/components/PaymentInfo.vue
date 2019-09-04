@@ -11,9 +11,6 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
 import Instructions from './BaseInstructions.vue'
 import Button from './BaseButton.vue'
 
-console.log(process.env)
-console.log(process.env.VUE_APP_STRIPE_PUBLISHABLE)
-
 const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
 const elements = stripe.elements()
 let card: any

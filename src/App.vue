@@ -20,6 +20,11 @@ export default class App extends Vue {}
 </script>
 
 <style>
+:root {
+  --main-color: rgba(210, 92, 74, .8);
+  --main-color-fade: rgba(210, 92, 74, .2);
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

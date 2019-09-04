@@ -1,5 +1,5 @@
 <template>
-  <button @click="handleClick">
+  <button :class="{ inlineBlock: inline }" @click="handleClick">
     <slot></slot>
   </button>
 </template>
@@ -9,6 +9,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class FormButton extends Vue {
+  @Prop({ type: Boolean }) inline: boolean;
   @Prop() loading!: boolean;
 
   handleClick () {
@@ -35,13 +36,30 @@ button {
   width: 100%;
   padding: 0.75rem 0.75rem 0.8125rem;
   color: rgb(255, 255, 255);
-  background: rgba(210,92,74,.8);
+  background: var(--main-color);
   font-size: 1.25rem;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625rem 0px, rgba(0, 0, 5, 0.1) 0px 0.0625rem 0.125rem, rgba(0, 0, 0, 0.05) 0px 0.3125rem 0.9375rem;
+}
+
+.inlineBlock {
+  display: inline-block;
+  width: auto;
+  background: white;
+  color: rgba(210, 92, 74, .8);
+  box-shadow: none;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: .02rem;
 }
 
 button:hover, button:focus {
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.3125rem 0.9375rem, rgba(0, 0, 0, 0.1) 0px 0.3125rem 0.3125rem, rgba(0, 0, 0, 0.05) 0px 0.125rem 0.3125rem;
   background: hsla(8,100%,70%,.99);
+}
+
+button.inlineBlock:hover, button.inlineBlock:focus {
+  box-shadow: none;
+  background: var(--main-color-fade);
 }
 </style>
