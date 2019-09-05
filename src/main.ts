@@ -45,7 +45,7 @@ declare global {
     country: string
   }
 
-  interface SHippingRate {
+  interface ShippingRate {
     rate: number | string;
     est_delivery_days: number;
     service: string;

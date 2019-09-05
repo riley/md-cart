@@ -31,6 +31,8 @@ export default new Vuex.Store({
     isSendMore: false,
     isVip: false,
     items: [],
+    refId: '',
+    returningVipCustomer: false,
     shipping: {
       address: {
         name: '',
@@ -41,26 +43,43 @@ export default new Vuex.Store({
         zip: '',
         country: 'US'
       },
-      postage: 0,
       intlDiscount: 0,
-      rates: [] // first class, priority, etc
+      modified: false,
+      postage: 0,
+      rates: [], // first class, priority, etc
+      service: null,
     },
     stock: [],
     subtotal: 5000,
     token: null,
     totalDiscount: 0,
+    totalTax: 0,
+    user: {
+      username: '',
+      shipping: {
+        address: null
+      },
+      billing: {
+        address: null
+      }
+    },
     userLoggedIn: false,
   },
   getters: {
-    total: state => state.items.reduce((carry, item: Item) => carry + item.cost, 0)
+    grandTotal: state => {
+      const itemCost = state.items.reduce((carry, item: Item) => carry + item.cost, 0)
+      return Math.max(itemCost, 0)
+    },
+    totalDiscount: state => 0,
+    referDiscountEligible: state => state.subtotal >= 4000 && state.refId !== ''
   },
   mutations: {
-    addItem (state: any, { sku, quantity }) {
-
+    addItem (state: any, item: Item) {
+      state.items = [...state.items, item]
     },
     removeItem (state: any, sku) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
-      state = state.items.filter((item: any, index: number) => index !== indexToRemove)
+      state.items = state.items.filter((item: any, index: number) => index !== indexToRemove)
     },
     setAddress (state: any, { location, field, value }) {
       state[location].address[field] = value
@@ -86,12 +105,19 @@ export default new Vuex.Store({
     },
     setShipping (state: any, shipping) {
       console.log('setShipping', shipping)
+      state.shipping.postage = shipping.postage
+      state.shipping.intlDiscount = shipping.intlDiscount
+      state.shipping.rates = shipping.rates
     },
-    setSelectedShippingService (state: any, service: any) {
-      console.log('setSelectedShippingService', service)
+    setSelectedShippingService (state: any, shippingRate: any) {
+      state.shipping.modified = true
+      state.shipping.service = shippingRate.value
     },
     setStock (state: any, stock) {
       state.stock = stock
+    },
+    setTax (state: any, tax) {
+      state.totalTax = tax
     }
   },
   actions: {
@@ -108,6 +134,7 @@ export default new Vuex.Store({
         commit('setCsrfToken', cart.csrfToken)
         commit('setFetching', false)
         commit('setShipping', cart.shipping)
+        commit('setTax', cart.totalTax)
         console.log(cart.bundles)
       } catch (e) {
         console.error(e)
@@ -123,9 +150,15 @@ export default new Vuex.Store({
         body: JSON.stringify({
           billingAddress: state.billing.address,
           shippingAddress: state.shipping.address,
-          shipping: null,
+          shipping: {
+            modified: state.shipping.modified,
+            service: state.shipping.service,
+          },
           createNewVip: null,
-          bundles: []
+          bundles: [{
+            isVip: state.isVip,
+            skus: state.items
+          }]
         })
       })
     },

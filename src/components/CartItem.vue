@@ -32,7 +32,7 @@ export default class CartItem extends Vue {
   @Prop() cost!: number
   @Prop() color!: string
 
-  incrementItemQuantity (amount) {
+  incrementItemQuantity (amount: number) {
     if (amount === 0) {
       this.removeItem(this.sku)
     } else {
@@ -79,5 +79,6 @@ export default class CartItem extends Vue {
 
 .cost {
   font-size: 2rem;
+  color: grey;
 }
 </style>
