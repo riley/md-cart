@@ -1,11 +1,12 @@
 <template>
   <div class="fieldWrapper">
     <label>
-      <span class="labelText" :class="{focussedOrValid: focussed || val}">{{ label }}</span>
+      <span class="labelText" :class="{focussedOrValid: focussed || !invalid}">{{ label }}</span>
       <input
         :type="type"
         :name="name"
         :required="required"
+        :value="value"
         @input="validate($event)"
         @focus="setFocus"
         @blur="setBlur($event)" />
@@ -20,12 +21,12 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class TextInput extends Vue {
-  @Prop({ default: 'text' }) type!: string;
+  @Prop({ default: 'text' }) type!: string
   @Prop({ type: Boolean, default: false }) required: boolean
-  @Prop() name!: string;
-  @Prop() label!: string;
+  @Prop() name!: string
+  @Prop() label!: string
+  @Prop() value: string
 
-  val = ''
   hint: string = 'init error hint'
   invalid: boolean = false
   focussed: boolean = false
@@ -37,9 +38,9 @@ export default class TextInput extends Vue {
 
   validate ($event: any) {
     console.log('validate', $event)
-    this.val = $event.target.value
-    this.invalid = ((this.required && this.val === '') || !$event.target.validity.valid)
-    this.$emit('input', { name: this.name, value: this.val })
+    const val = $event.target.value
+    this.invalid = ((this.required && val === '') || !$event.target.validity.valid)
+    this.$emit('input', val)
     this.success = false
   }
 
@@ -48,10 +49,11 @@ export default class TextInput extends Vue {
   }
 
   setBlur ($event: any) {
-    this.invalid = this.required && this.val === ''
+    const val = $event.target.value
+    this.invalid = this.required && val === ''
     this.focussed = false
     this.success = !this.invalid
-    this.$emit('blur', this.val)
+    this.$emit('blur', val)
   }
 }
 </script>

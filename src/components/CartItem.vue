@@ -13,15 +13,11 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { mapActions, mapMutations } from 'vuex'
+import { Action, Mutation } from 'vuex-class'
 import BaseIncrementer from './BaseIncrementer.vue'
 
 @Component({
   components: { BaseIncrementer },
-  methods: {
-    ...mapMutations(['addItem', 'removeItem']),
-    ...mapActions(['updateCart'])
-  }
 })
 export default class CartItem extends Vue {
   @Prop() sku!: string
@@ -31,6 +27,10 @@ export default class CartItem extends Vue {
   @Prop() clothingType!: string
   @Prop() cost!: number
   @Prop() color!: string
+
+  @Mutation addItem: any
+  @Mutation removeItem: any
+  @Action updateCart: Promise<void>
 
   incrementItemQuantity (amount: number) {
     if (amount === 0) {

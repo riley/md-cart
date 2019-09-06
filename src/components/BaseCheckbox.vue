@@ -1,6 +1,6 @@
 <template>
   <label :for="name">
-    <input @input="handleInput" type="checkbox" :name="name" />
+    <input @input="handleInput" :checked="checked" type="checkbox" :name="name" />
     <span class="checkbox-custom"></span>
     {{ label }}
   </label>
@@ -13,6 +13,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 export default class BaseCheckbox extends Vue {
   @Prop() name!: string
   @Prop() label!: string
+  @Prop() checked: boolean
 
   handleInput ($event: any) {
     this.$emit('input', $event.target.checked)

@@ -1,8 +1,9 @@
 <template>
   <div class="md__dropdown-field-wrapper">
     <label class="md__dropdown-label">
-      <span class="md__dropdown-label-text" :class="focussed || selected !== '' ? 'md__dropdown-small' : 'md__dropdown-large'">{{ label }}</span>
+      <span class="md__dropdown-label-text" :class="focussed || value !== '' ? 'md__dropdown-small' : 'md__dropdown-large'">{{ label }}</span>
       <select
+        :value="value"
         class="md__select"
         @input="setSelected"
         @focus="setFocus"
@@ -27,9 +28,9 @@ export default class Dropdown extends Vue {
   @Prop() name!: string
   @Prop({ default: 'no label' }) label!: string
   @Prop() options!: DropdownOption[]
+  @Prop() value: string
 
   focussed: boolean = false
-  selected:string = ''
 
   setFocus () {
     this.focussed = true
@@ -41,11 +42,9 @@ export default class Dropdown extends Vue {
 
   setSelected (e: any) {
     console.log('setSelected', e.target.value)
-    this.selected = e.target.value
-    this.$emit('input', { name: this.name, value: e.target.value })
+    this.$emit('input', e.target.value)
   }
 }
-
 </script>
 
 <style>
@@ -53,9 +52,9 @@ export default class Dropdown extends Vue {
 
 .md__select {
   display: block;
-  font-size: 16px;
+  font-size: 1.25rem;
   line-height: 1.3;
-  padding: .6em 1.4em .5em .8em;
+  padding: .25em 0;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;

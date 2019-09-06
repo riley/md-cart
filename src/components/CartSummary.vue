@@ -27,7 +27,7 @@
       </li>
       <li class="grandTotal">
         <span>Total</span>
-        <span>${{ grandTotal }}</span>
+        <span>${{ grandTotal / 100 }}</span>
       </li>
     </ul>
     <BaseDropdown label="" :options="rates" @input="handleShippingServiceChange" />
@@ -36,55 +36,46 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import { State, Getter, Action, Mutation } from 'vuex-class'
 import BaseDropdown from './BaseDropdown.vue'
 import Chooser from './Chooser.vue'
 import CartItem from './CartItem.vue'
-import { mapState, mapActions, mapMutations } from 'vuex'
 
 @Component({
   components: { Chooser, CartItem, BaseDropdown },
-  computed: {
-    ...mapState({
-      items: (state: any) => {
-        return state.items.reduce((carry: Item[], item: Item) => {
-          const existingSkuIndex = carry.findIndex(aggItem => aggItem.sku === item.sku)
-          const product = state.stock.find((product: Product) => product.sku === item.sku)
-          if (existingSkuIndex === -1) {
-            carry.push({ ...product, quantity: 1, cost: item.cost })
-          } else {
-            carry[existingSkuIndex].quantity += item.quantity
-            carry[existingSkuIndex].cost += item.cost
-          }
-          return carry
-        }, [])
-      },
-      postage: (state: any) => state.shipping.postage / 100,
-      rates: (state: any) => {
-        return state.shipping.rates.reduce((carry: any, rate: ShippingRate) => {
-          carry[`${rate.service} - (${rate.est_delivery_days} days): ${rate.postage === 0 ? 'Free' : `$${rate.postage / 100}`}`] = rate.service
-          return carry
-        }, {})
-      },
-      subtotal: (state: any) => state.subtotal / 100,
-      tax: (state: any) => state.totalTax / 100
-    }),
-    discount () {
-      return this.$store.getters.totalDiscount
-    },
-    referDiscountEligible () {
-      return this.$store.getters.referDiscountEligible
-    },
-    grandTotal () {
-      return this.$store.getters.grandTotal / 100
-    }
-  },
-  methods: {
-    ...mapMutations(['setSelectedShippingService']),
-    ...mapActions(['updateCart'])
-  }
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
+
+  @State((state: any) => {
+    return state.items.reduce((carry: Item[], item: Item) => {
+      const existingSkuIndex = carry.findIndex(aggItem => aggItem.sku === item.sku)
+      const product = state.stock.find((product: Product) => product.sku === item.sku)
+      if (existingSkuIndex === -1) {
+        carry.push({ ...product, quantity: 1, cost: item.cost })
+      } else {
+        carry[existingSkuIndex].quantity += item.quantity
+        carry[existingSkuIndex].cost += item.cost
+      }
+      return carry
+    }, [])
+  })
+  @State((state: any) => state.shipping.postage / 100) postage: number
+  @State((state: any) => {
+    return state.shipping.rates.reduce((carry: any, rate: ShippingRate) => {
+      carry[`${rate.service} - (${rate.est_delivery_days} days): ${rate.postage === 0 ? 'Free' : `$${rate.postage / 100}`}`] = rate.service
+      return carry
+    }, {})
+  }) rates: {[s: string]: string}
+  @State((state: any) => state.subtotal / 100) subtotal: number
+  @State((state: any) => state.totalTax / 100) tax: number
+
+  @Getter totalDiscount: number
+  @Getter referDiscountEligible: number
+  @Getter grandTotal: number
+
+  @Mutation setSelectedShippingService: any
+  @Action updateCart: () => Promise<void>
 
   handleShippingServiceChange ($value: string) {
     this.setSelectedShippingService($value)

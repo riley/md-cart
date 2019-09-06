@@ -1,12 +1,16 @@
 <template>
   <div>
-    <TextInput @input="handleInput" required type="text" name="name" label="Name" />
-    <TextInput @input="handleInput" required type="text" name="address1" label="Street Address" />
-    <TextInput @input="handleInput" type="text" name="address2" label="Apt / Building No." />
-    <TextInput @input="handleInput" required type="text" name="city" label="City" />
-    <Dropdown @input="handleInput" required label="State" :options="states" name="state" />
-    <TextInput @input="handleInput" required label="Zip code" type="text" name="zip" />
-    <Dropdown @input="handleInput" required label="Country" :options="countries" name="country" />
+    <TextInput :value="name" @input="handleName" required type="text" name="name" label="Name" />
+    <TextInput :value="address_1" @input="handleAddress1" required type="text" name="address_1" label="Street Address" />
+    <TextInput :value="address_2" @input="handleAddress2" type="text" name="address_2" label="Apt / Building No." />
+    <TextInput :value="city" @input="handleCity" required type="text" name="city" label="City" />
+
+    <Dropdown v-if="country === 'US'" :value="state" @input="handleState" required label="State" :options="states" name="state" />
+    <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" required label="Province" :options="provinces" name="state" />
+    <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" required label="Province" name="state" />
+
+    <TextInput :value="zip" @input="handleZip" required label="Zip code" :type="country === 'US' ? 'tel' : 'text'" name="zip" />
+    <Dropdown :value="country" @input="handleCountry" required label="Country" :options="countries" name="country" />
   </div>
 </template>
 
@@ -23,6 +27,14 @@ import countries from '../utils/countries'
   components: { vSelect, TextInput, Dropdown },
 })
 export default class Address extends Vue {
+  @Prop() name: string
+  @Prop() address_1: string
+  @Prop() address_2: string
+  @Prop() city: string
+  @Prop() state: string
+  @Prop() zip: string
+  @Prop() country: string
+
   states = states
   provinces = provinces
   countries = countries.reduce((carry: any, [label, code]) => {
@@ -30,9 +42,33 @@ export default class Address extends Vue {
     return carry
   }, {})
 
-  handleInput ($event: FormInputEvent) {
-    console.log('handleInput', $event)
-    this.$emit('input', { name: $event.name, value: $event.value })
+  handleName (value: string) {
+    this.$emit('input', { name: 'name', value })
+  }
+
+  handleAddress1 (value: string) {
+    this.$emit('input', { name: 'address_1', value })
+  }
+
+  handleAddress2 (value: string) {
+    this.$emit('input', { name: 'address_2', value })
+  }
+
+  handleCity (value: string) {
+    this.$emit('input', { name: 'city', value })
+  }
+
+  handleState (value: string) {
+    this.$emit('input', { name: 'state', value })
+  }
+
+  handleZip (value: string) {
+    this.$emit('input', { name: 'zip', value })
+  }
+
+  handleCountry (value: string) {
+    this.$emit('input', { name: 'country', value })
   }
 }
+
 </script>

@@ -1,10 +1,10 @@
 <template>
   <section id="billing-info">
     <Instructions text="Your Billing Address" step="2"/>
-    <BaseCheckbox @input="setBillingSameAsShipping" label="Billing address is same as shipping"/>
-    <fieldset>
+    <BaseCheckbox @input="setBillingSameAsShipping" :checked="billingSameAsShipping" label="Billing address is same as shipping"/>
+    <fieldset v-if="!billingSameAsShipping">
       <legend>Billing Info</legend>
-      <Address @input="updateAddress" />
+      <Address v-bind="address" @input="updateAddress" />
     </fieldset>
   </section>
 </template>
@@ -14,10 +14,16 @@ import { Prop, Component, Vue } from 'vue-property-decorator'
 import BaseCheckbox from './BaseCheckbox.vue'
 import Address from './BaseAddress.vue'
 import Instructions from './BaseInstructions.vue'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 
 @Component({
   components: { BaseCheckbox, Address, Instructions },
+  computed: {
+    ...mapState({
+      address: (state: any) => state.billing.address,
+      billingSameAsShipping: (state: any) => state.billingSameAsShipping,
+    })
+  },
   methods: { ...mapMutations(['setBillingSameAsShipping']) }
 })
 export default class BillingInfo extends Vue {
