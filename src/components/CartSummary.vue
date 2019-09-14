@@ -30,19 +30,19 @@
         <span>${{ grandTotal / 100 }}</span>
       </li>
     </ul>
-    <BaseDropdown label="" :options="rates" @input="handleShippingServiceChange" />
+    <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation } from 'vuex-class'
-import BaseDropdown from './BaseDropdown.vue'
+import Dropdown from './BaseDropdown.vue'
 import Chooser from './Chooser.vue'
 import CartItem from './CartItem.vue'
 
 @Component({
-  components: { Chooser, CartItem, BaseDropdown },
+  components: { Chooser, CartItem, Dropdown },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
@@ -59,7 +59,7 @@ export default class CartSummary extends Vue {
       }
       return carry
     }, [])
-  })
+  }) items: Item[]
   @State((state: any) => state.shipping.postage / 100) postage: number
   @State((state: any) => {
     return state.shipping.rates.reduce((carry: any, rate: ShippingRate) => {
@@ -67,10 +67,11 @@ export default class CartSummary extends Vue {
       return carry
     }, {})
   }) rates: {[s: string]: string}
+  @State((state: any) => state.shipping.service) service: string
   @State((state: any) => state.subtotal / 100) subtotal: number
   @State((state: any) => state.totalTax / 100) tax: number
 
-  @Getter totalDiscount: number
+  @Getter('totalDiscount') discount: number
   @Getter referDiscountEligible: number
   @Getter grandTotal: number
 

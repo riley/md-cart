@@ -5,7 +5,14 @@
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
       <form method="POST" @submit.prevent="handleClick">
         <BaseTextInput v-model="email" />
-        <BaseButton @click="handleClick">Log In</BaseButton>
+        <template v-if="loginEmailRequested">
+          <BaseButton inline @click="handleClick">Resend Email?</BaseButton>
+          <p>Code sent ✔✅</p>
+          <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
+          <BaseTextInput label="6-digit code" v-model="magicCode" />
+          <BaseButton @click="handleLoginButtonClick">Login</BaseButton>
+        </template>
+        <BaseButton v-else>Log In 🥙</BaseButton>
       </form>
     </div>
   </div>
@@ -21,12 +28,21 @@ import BaseButton from './BaseButton.vue'
   components: { BaseTextInput, BaseButton },
 })
 export default class LoginForm extends Vue {
+  @Prop({ type: Boolean }) loginEmailRequested: boolean
   @Action requestLoginEmail: any
+  @Action login: any
 
   email = ''
+  magicCode = ''
 
   handleClick () {
-    this.requestLoginEmail(this.email)
+    if (this.email !== '') {
+      this.requestLoginEmail(this.email)
+    }
+  }
+
+  handleLoginButtonClick () {
+    this.login({ email: this.email, code: this.magicCode })
   }
 }
 </script>

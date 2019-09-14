@@ -5,6 +5,14 @@ Vue.use(Vuex)
 
 const host = process.env.VUE_APP_MD_HOST
 
+const userSettings: User = {
+  username: '',
+  shipping: { address: null },
+  billing: { address: null },
+  isVipCustomer: false,
+  cardMeta: null,
+}
+
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   state: {
@@ -32,6 +40,7 @@ export default new Vuex.Store({
     isSendMore: false,
     isVip: false,
     items: [],
+    loginEmailRequested: false,
     refId: '',
     returningVipCustomer: false,
     shipping: {
@@ -55,28 +64,38 @@ export default new Vuex.Store({
     token: null,
     totalDiscount: 0,
     totalTax: 0,
-    user: {
-      username: '',
-      shipping: {
-        address: null
-      },
-      billing: {
-        address: null
-      }
-    },
-    userLoggedIn: false,
+    useStoredBillingInfo: false,
+    useStoredPaymentInfo: false,
+    useStoredShippingInfo: false,
+    user: { ...userSettings },
   },
   getters: {
     grandTotal: state => {
       const itemCost = state.items.reduce((carry, item: Item) => carry + item.cost, 0)
       return Math.max(itemCost, 0)
     },
+    userLoggedIn: state => state.user.username !== '',
     totalDiscount: state => 0,
     referDiscountEligible: state => state.subtotal >= 4000 && state.refId !== ''
   },
   mutations: {
     addItem (state: any, item: Item) {
       state.items = [...state.items, item]
+    },
+    editStoredBillingAddress (state: any) {
+      state.useStoredBillingInfo = false
+      state.useStoredPaymentInfo = false
+    },
+    editStoredPaymentInfo (state: any) {
+      state.useStoredPaymentInfo = false
+    },
+    editStoredShippingAddress (state: any) {
+      state.useStoredShippingInfo = false
+      state.useStoredBillingInfo = false
+      state.useStoredPaymentInfo = false
+    },
+    loginEmailRequested (state: any) {
+      state.loginEmailRequested = true
     },
     removeItem (state: any, sku) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
@@ -112,6 +131,7 @@ export default new Vuex.Store({
       state.shipping.postage = shipping.postage
       state.shipping.intlDiscount = shipping.intlDiscount
       state.shipping.rates = shipping.rates
+      state.shipping.service = shipping.service
     },
     setShippingAddress (state: any, address: Address) {
       state.shipping.address = address
@@ -127,7 +147,24 @@ export default new Vuex.Store({
       state.totalTax = tax
     },
     setUser (state: any, user) {
-      console.log('user', user)
+      if (user == null) {
+        state.user = { ...userSettings }
+      } else {
+        state.user = {
+          username: user.username,
+          shipping: { address: user.shippingAddress },
+          billing: { address: user.billingAddress },
+          cardMeta: user.cardMeta,
+          isVipCustomer: user.isVipCustomer,
+        }
+        state.useStoredBillingInfo = true
+        state.useStoredShippingInfo = true
+        state.useStoredPaymentInfo = true
+        state.isReturningCustomer = true
+      }
+    },
+    logout (state: any) {
+      state.user = { ...userSettings }
     }
   },
   actions: {
@@ -148,9 +185,7 @@ export default new Vuex.Store({
         commit('setFetching', false)
         commit('setShipping', cart.shipping)
         commit('setTax', cart.totalTax)
-
         commit('setUser', cart.user)
-        console.log(cart.bundles)
       } catch (e) {
         console.error(e)
       }
@@ -161,7 +196,7 @@ export default new Vuex.Store({
         method: 'PUT',
         mode: 'cors',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
         body: JSON.stringify({
           billingAddress: state.billing.address,
           shippingAddress: state.shipping.address,
@@ -210,6 +245,11 @@ export default new Vuex.Store({
         headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
         body: JSON.stringify({ username })
       })
+
+      commit('loginEmailRequested')
+    },
+    async login ({ commit }, { email, code }) {
+      // const res = await fetch(`${host}/login`)
     }
   }
 })

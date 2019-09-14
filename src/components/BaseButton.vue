@@ -1,5 +1,5 @@
 <template>
-  <button :class="{ inlineBlock: inline }" @click="handleClick">
+  <button :class="{ inlineBlock: inline }" :style="{ float: position }" @click="handleClick">
     <slot></slot>
   </button>
 </template>
@@ -10,6 +10,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 @Component
 export default class FormButton extends Vue {
   @Prop({ type: Boolean }) inline: boolean;
+  @Prop({ default: 'none' }) position: string;
   @Prop() loading!: boolean;
 
   handleClick () {

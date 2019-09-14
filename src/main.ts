@@ -45,6 +45,22 @@ declare global {
     country: string
   }
 
+  interface User {
+    username: string
+    shipping: {
+      address: Address | null
+    }
+    billing: {
+      address: Address | null
+    }
+    isVipCustomer: boolean
+    cardMeta: null | {
+      expYear: string
+      expMonth: string
+      lastFour: string
+    }
+  }
+
   interface ShippingRate {
     rate: number | string;
     est_delivery_days: number;

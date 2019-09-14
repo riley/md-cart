@@ -2,19 +2,24 @@
   <div class="container">
     <CartSummary />
     <div>
-      <BaseButton @click="showLoginForm" @close="hideLoginForm">Login</BaseButton>
+      <Button
+        v-if="!userLoggedIn"
+        inline
+        position="right"
+        @click="showLoginForm"
+        @close="hideLoginForm">Login</Button>
       <ShippingInfo />
       <BillingInfo />
       <PaymentInfo />
     </div>
-    <LoginForm v-if="loginFormActive" />
+    <LoginForm v-if="loginFormActive" :loginEmailRequested="loginEmailRequested" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { Action, State } from 'vuex-class'
-import BaseButton from './BaseButton.vue'
+import { Action, State, Getter } from 'vuex-class'
+import Button from './BaseButton.vue'
 import CartSummary from './CartSummary.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
@@ -27,12 +32,14 @@ import LoginForm from './LoginForm.vue'
     BillingInfo,
     PaymentInfo,
     CartSummary,
-    BaseButton,
+    Button,
     LoginForm,
   },
 })
 export default class Cart extends Vue {
   @State stock: Product[]
+  @State loginEmailRequested: boolean
+  @Getter userLoggedIn: boolean
   @Action fetchStock: () => Promise<void>
   @Action fetchCart: () => Promise<void>
 
