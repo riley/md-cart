@@ -1,13 +1,22 @@
 <template>
-  <section>
+  <section id="payment-info">
     <Instructions text="Your Payment Method" step="3"/>
-    <div ref="card"></div>
+    <Card v-if="useStoredPaymentInfo">
+      <Button inline position="right" @click="editStoredPaymentInfo">Edit</Button>
+      <div class="stored-payment-info">
+        •••• •••• •••• {{ user.cardMeta.lastFour }}<br>
+        {{ user.cardMeta.expMonth }} / {{ user.cardMeta.expYear }}
+      </div>
+    </Card>
+    <div ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
     <Button @click="purchase">Checkout</Button>
   </section>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
+import { State, Mutation } from 'vuex-class'
+import Card from './BaseCard.vue'
 import Instructions from './BaseInstructions.vue'
 import Button from './BaseButton.vue'
 
@@ -16,9 +25,13 @@ const elements = stripe.elements()
 let card: any
 
 @Component({
-  components: { Instructions, Button }
+  components: { Instructions, Button, Card }
 })
 export default class PaymentInfo extends Vue {
+  @State useStoredPaymentInfo: boolean
+  @State user: User
+  @Mutation editStoredPaymentInfo: boolean
+
   hasCardErrors: boolean = false
 
   mounted () {
@@ -44,5 +57,12 @@ export default class PaymentInfo extends Vue {
 <style scoped>
 section {
   position: relative;
+}
+
+.stored-payment-info {
+  text-align: left;
+  padding-left: 1rem;
+  line-height: 1.6em;
+  border-left: 5px solid rgba(0, 0, 0, .2);
 }
 </style>

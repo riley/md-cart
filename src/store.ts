@@ -41,6 +41,7 @@ export default new Vuex.Store({
     isVip: false,
     items: [],
     loginEmailRequested: false,
+    order: null,
     refId: '',
     returningVipCustomer: false,
     shipping: {
@@ -125,6 +126,9 @@ export default new Vuex.Store({
     },
     setItems (state: any, items) {
       state.items = items
+    },
+    setOrder (state: any, order: Order) {
+      state.order = order
     },
     setShipping (state: any, shipping) {
       console.log('setShipping', shipping)
@@ -218,6 +222,13 @@ export default new Vuex.Store({
       commit('setStock', stock)
       commit('setFetching', false)
     },
+    async fetchOrder ({ commit }, orderId) {
+      const order = await fetch(`${host}/order/${orderId}`, {
+        mode: 'cors',
+        credentials: 'include'
+      }).then(res => res.json())
+      commit('setOrder', order)
+    },
     async checkUsername ({ commit }, email) {
       try {
         const info = await fetch(`${host}/check-username`, {
@@ -248,8 +259,20 @@ export default new Vuex.Store({
 
       commit('loginEmailRequested')
     },
-    async login ({ commit }, { email, code }) {
-      // const res = await fetch(`${host}/login`)
+    async login ({ commit, state }, { username, magicCode }) {
+      const info = await fetch(`${host}/login-existing`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
+        body: JSON.stringify({ username, magicCode })
+      }).then(res => res.json())
+
+      if (info.loggedIn) {
+        commit('setUser', info.user)
+      } else {
+        commit('loginFailure', 'the reason your login failed')
+      }
     }
   }
 })

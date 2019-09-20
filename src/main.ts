@@ -22,6 +22,17 @@ declare global {
     cost: number
   }
 
+  interface Bundle {
+    skus: Item[]
+    recurringSkus: Item[]
+  }
+
+  interface Order {
+    id: string
+    bundles: Bundle[],
+    createdAt: Date
+  }
+
   interface Product {
     cost?: number
     sku: string
