@@ -1,13 +1,15 @@
 <template>
   <div>
-    Cart Summary
     <ul class="cart-items">
       <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
     </ul>
-    <ul class="totals">
+    <div v-if="fetching" class="spinner-container">
+      <Spinner />
+    </div>
+    <ul v-else class="totals">
       <li>
         <span>Order Subtotal</span>
-        <span>${{ subtotal }}</span>
+        <span>${{ subtotal / 100 }}</span>
       </li>
       <li>
         <span>Shipping</span>
@@ -36,18 +38,20 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { State, Getter, Action, Mutation } from 'vuex-class'
+import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import Dropdown from './BaseDropdown.vue'
-import Chooser from './Chooser.vue'
 import CartItem from './CartItem.vue'
+import Spinner from './BaseSpinner.vue'
+
+const cart = namespace('cart')
 
 @Component({
-  components: { Chooser, CartItem, Dropdown },
+  components: { CartItem, Dropdown, Spinner },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
 
-  @State((state: any) => {
+  @cart.State((state: any) => {
     return state.items.reduce((carry: Item[], item: Item) => {
       const existingSkuIndex = carry.findIndex(aggItem => aggItem.sku === item.sku)
       const product = state.stock.find((product: Product) => product.sku === item.sku)
@@ -60,23 +64,31 @@ export default class CartSummary extends Vue {
       return carry
     }, [])
   }) items: Item[]
-  @State((state: any) => state.shipping.postage / 100) postage: number
-  @State((state: any) => {
+  @cart.State((state: any) => state.shipping.postage / 100) postage: number
+  @cart.State((state: any) => {
     return state.shipping.rates.reduce((carry: any, rate: ShippingRate) => {
       carry[`${rate.service} - (${rate.est_delivery_days} days): ${rate.postage === 0 ? 'Free' : `$${rate.postage / 100}`}`] = rate.service
       return carry
     }, {})
   }) rates: {[s: string]: string}
-  @State((state: any) => state.shipping.service) service: string
-  @State((state: any) => state.subtotal / 100) subtotal: number
-  @State((state: any) => state.totalTax / 100) tax: number
+  @cart.State((state: any) => state.shipping.service) service: string
+  @cart.State((state: any) => state.totalTax / 100) tax: number
+  @cart.State fetching: boolean
 
-  @Getter('totalDiscount') discount: number
-  @Getter referDiscountEligible: number
-  @Getter grandTotal: number
+  @cart.Getter('totalDiscount') discount: number
+  @cart.Getter referDiscountEligible: number
+  @cart.Getter grandTotal: number
+  @cart.Getter subtotal: number
 
-  @Mutation setSelectedShippingService: any
-  @Action updateCart: () => Promise<void>
+  @cart.Mutation setSelectedShippingService: any
+  @cart.Action updateCart: () => Promise<void>
+  @cart.Action fetchCart: () => Promise<void>
+  @cart.Action fetchStock: () => Promise<void>
+
+  async mounted () {
+    await this.fetchStock()
+    this.fetchCart()
+  }
 
   handleShippingServiceChange ($value: string) {
     this.setSelectedShippingService($value)
@@ -103,5 +115,9 @@ export default class CartSummary extends Vue {
 
 .totals li.discount {
   color: #3f58fc;
+}
+
+.spinner-container {
+  height: 100px;
 }
 </style>

@@ -25,6 +25,7 @@ export default class BaseIncrementer extends Vue {
 <style scoped>
 .incrementer_root {
   display: flex;
+  align-items: center;
   width: 6rem;
 }
 
@@ -34,7 +35,9 @@ button {
   height: 2rem;
   cursor: pointer;
   font-size: 30px;
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 output {

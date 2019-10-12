@@ -3,15 +3,24 @@
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
       <Instructions text="Your Shipping Address" step="1"/>
       <Card>
-        <p class="loggedInAs">Logged in as <Chip>{{ user.username }}</Chip></p>
-        <Button position="right" inline @click="editStoredShippingAddress">Edit</Button>
-        <Address displayOnly v-bind="user.shipping.address" />
+        <CardContent>
+          <p class="loggedInAs">Logged in as <Chip>{{ user.username }}</Chip></p>
+          <Button position="right" inline @click="editStoredShippingAddress">Edit</Button>
+          <Address displayOnly v-bind="user.shipping.address" />
+        </CardContent>
       </Card>
     </div>
     <div v-else>
       <fieldset>
         <legend>Shipping Info</legend>
-        <TextInput :value="email" required @input="setEmail" @blur="checkUsername" type="email" name="email" label="Email Address" />
+        <TextInput
+          required
+          :value="email"
+          @input="setEmail"
+          @blur="handleBlurEmail"
+          type="email"
+          name="email"
+          label="Email Address" />
         <Banner v-if="isReturningCustomer" title="Welcome Back!" @main="expressCheckout" @secondary="closeBanner">
           <template v-slot:copy>
             Looks like you've ordered from us before! Use express checkout to use your previous info, or continue as normal and we'll link to your account.
@@ -36,25 +45,29 @@ import Address from './BaseAddress.vue'
 import Banner from './BaseBanner.vue'
 import Button from './BaseButton.vue'
 import Card from './BaseCard.vue'
+import CardContent from './BaseCardContent.vue'
 import Chip from './BaseChip.vue'
 import Instructions from './BaseInstructions.vue'
-import { State, Getter, Action, Mutation } from 'vuex-class'
+import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
+
+const cart = namespace('cart')
 
 @Component({
-  components: { TextInput, Address, Banner, Button, Card, Chip, Instructions },
+  components: { TextInput, Address, Banner, Button, Card, CardContent, Chip, Instructions },
 })
 export default class ShippingInfo extends Vue {
-  @State email: string
-  @State((state: any) => state.shipping.address) address: Address
-  @State isReturningCustomer: boolean
-  @State user: boolean
-  @State useStoredShippingInfo: boolean
-  @Mutation setEmail: any
-  @Mutation editStoredShippingAddress: any
-  @Action checkUsername: () => Promise<void>
+  @cart.State email: string
+  @cart.State((state: any) => state.shipping.address) address: Address
+  @cart.State isReturningCustomer: boolean
+  @cart.State user: boolean
+  @cart.State useStoredShippingInfo: boolean
+  @cart.Mutation setEmail: any
+  @cart.Mutation setAddress: any
+  @cart.Mutation editStoredShippingAddress: any
+  @cart.Action checkUsername: (email: string) => Promise<void>
 
   updateAddress ($event: FormInputEvent) {
-    this.$store.commit('setAddress', {
+    this.setAddress({
       location: 'shipping',
       field: $event.name,
       value: $event.value,
@@ -66,12 +79,18 @@ export default class ShippingInfo extends Vue {
   closeBanner () {
     console.log('closeBanner')
   }
+
+  handleBlurEmail (email: string) {
+    this.checkUsername(email)
+    window.woopra && window.woopra.identify({ email })
+  }
 }
 </script>
 
 <style scoped>
 section {
   position: relative;
+  margin-bottom: 2rem;
 }
 
 .loggedInShippingInfo {
@@ -80,5 +99,16 @@ section {
 
 .loggedInAs {
   margin-top: 0;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  visibility: hidden;
+  height: 0;
 }
 </style>

@@ -22,14 +22,12 @@ h3 {
   -moz-box-align: center;
   align-items: center;
   width: 100%;
-  margin: 1rem 0px 2rem;
+  margin: 0px 0px 2rem;
+  pointer-events: none;
 }
 
 .step {
   display: flex;
-  position: absolute;
-  top: 0;
-  right: 100%;
   margin-right: 1.25rem;
   -moz-box-align: center;
   align-items: center;

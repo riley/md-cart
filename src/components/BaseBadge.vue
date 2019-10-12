@@ -1,7 +1,7 @@
 <template>
   <div class="badge-root">
     <slot></slot>
-    <span class="badge"></span>
+    <span class="badge">{{ count }}</span>
   </div>
 </template>
 
@@ -25,6 +25,8 @@ export default class Badge extends Vue {
 .badge {
   top: 0;
   right: 0;
+  background-color: red;
+  color: white;
   transform: translate(50%, -50%);
   transform-origin: 100% 0%;
   height: 20px;

@@ -1,10 +1,4 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-
-Vue.use(Vuex)
-
-const host = process.env.VUE_APP_MD_HOST
-
+const host = window.location.host === 'mrdavis.com' ? '//account.mrdavis.com' : 'https://localhost'
 const userSettings: User = {
   username: '',
   shipping: { address: null },
@@ -13,8 +7,8 @@ const userSettings: User = {
   cardMeta: null,
 }
 
-export default new Vuex.Store({
-  strict: process.env.NODE_ENV !== 'production',
+export default {
+  namespaced: true,
   state: {
     billing: {
       address: {
@@ -61,7 +55,7 @@ export default new Vuex.Store({
       service: null,
     },
     stock: [],
-    subtotal: 5000,
+    subtotal: 0,
     token: null,
     totalDiscount: 0,
     totalTax: 0,
@@ -71,13 +65,14 @@ export default new Vuex.Store({
     user: { ...userSettings },
   },
   getters: {
-    grandTotal: state => {
-      const itemCost = state.items.reduce((carry, item: Item) => carry + item.cost, 0)
+    grandTotal: (state: any) => {
+      const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
       return Math.max(itemCost, 0)
     },
-    userLoggedIn: state => state.user.username !== '',
-    totalDiscount: state => 0,
-    referDiscountEligible: state => state.subtotal >= 4000 && state.refId !== ''
+    userLoggedIn: (state: any) => state.user.username !== '',
+    totalDiscount: (state: any) => 0,
+    referDiscountEligible: (state: any) => state.subtotal >= 4000 && state.refId !== '',
+    subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
   },
   mutations: {
     addItem (state: any, item: Item) {
@@ -98,11 +93,17 @@ export default new Vuex.Store({
     loginEmailRequested (state: any) {
       state.loginEmailRequested = true
     },
-    removeItem (state: any, sku) {
+    logout (state: any) {
+      state.user = { ...userSettings }
+      state.useStoredShippingInfo = false
+      state.useStoredBillingInfo = false
+      state.useStoredPaymentInfo = false
+    },
+    removeItem (state: any, sku: string) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
       state.items = state.items.filter((item: any, index: number) => index !== indexToRemove)
     },
-    setAddress (state: any, { location, field, value }) {
+    setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
       state[location].address[field] = value
     },
     setBillingAddress (state: any, address: Address) {
@@ -111,26 +112,23 @@ export default new Vuex.Store({
     setBillingSameAsShipping (state: any, checked: boolean) {
       state.billingSameAsShipping = checked
     },
-    setCartId (state, id) {
+    setCartId (state: any, id: string) {
       console.log('setCartId', id)
       state.cartId = id
     },
-    setCsrfToken (state, token) {
+    setCsrfToken (state: any, token: string) {
       state.csrfToken = token
     },
-    setEmail (state: any, { value }) {
+    setEmail (state: any, value: string) {
       state.email = value
     },
     setFetching (state: any, status: boolean) {
       state.fetching = status
     },
-    setItems (state: any, items) {
+    setItems (state: any, items: Item[]) {
       state.items = items
     },
-    setOrder (state: any, order: Order) {
-      state.order = order
-    },
-    setShipping (state: any, shipping) {
+    setShipping (state: any, shipping: ServerShipping) {
       console.log('setShipping', shipping)
       state.shipping.postage = shipping.postage
       state.shipping.intlDiscount = shipping.intlDiscount
@@ -144,13 +142,13 @@ export default new Vuex.Store({
       state.shipping.modified = true
       state.shipping.service = shippingRate.value
     },
-    setStock (state: any, stock) {
+    setStock (state: any, stock: Product[]) {
       state.stock = stock
     },
-    setTax (state: any, tax) {
+    setTax (state: any, tax: number) {
       state.totalTax = tax
     },
-    setUser (state: any, user) {
+    setUser (state: any, user: any) {
       if (user == null) {
         state.user = { ...userSettings }
       } else {
@@ -165,14 +163,17 @@ export default new Vuex.Store({
         state.useStoredShippingInfo = true
         state.useStoredPaymentInfo = true
         state.isReturningCustomer = true
+
+        window.woopra && window.woopra.identify({
+          email: user.username,
+          name: user.shippingAddress.name
+        })
+        window.woopra && window.woopra.track()
       }
     },
-    logout (state: any) {
-      state.user = { ...userSettings }
-    }
   },
   actions: {
-    async fetchCart ({ commit }) {
+    async fetchCart ({ commit }: Action) {
       commit('setFetching', true)
       const cartId = '5c0fd4f60d256a00046157b1'
       try {
@@ -180,13 +181,14 @@ export default new Vuex.Store({
           mode: 'cors',
           credentials: 'include',
         }).then(res => res.json())
+
+        commit('setFetching', false)
         commit('setCartId', cart._id)
-        commit('setEmail', { value: cart.email })
+        commit('setEmail', cart.email)
         commit('setShippingAddress', cart.shippingAddress)
         commit('setBillingAddress', cart.billingAddress)
         commit('setItems', cart.bundles[0].skus)
         commit('setCsrfToken', cart.csrfToken)
-        commit('setFetching', false)
         commit('setShipping', cart.shipping)
         commit('setTax', cart.totalTax)
         commit('setUser', cart.user)
@@ -194,42 +196,46 @@ export default new Vuex.Store({
         console.error(e)
       }
     },
-    async updateCart ({ commit, state }) {
+    async updateCart ({ commit, state }: Action) {
       commit('setFetching', true)
-      await fetch(`${host}/v2/cart`, {
-        method: 'PUT',
-        mode: 'cors',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
-        body: JSON.stringify({
-          billingAddress: state.billing.address,
-          shippingAddress: state.shipping.address,
-          shipping: {
-            modified: state.shipping.modified,
-            service: state.shipping.service,
-          },
-          createNewVip: null,
-          bundles: [{
-            isVip: state.isVip,
-            skus: state.items
-          }]
-        })
-      })
+      try {
+        const cart = await fetch(`${host}/v2/cart`, {
+          method: 'PUT',
+          mode: 'cors',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
+          body: JSON.stringify({
+            billingAddress: state.billing.address,
+            shippingAddress: state.shipping.address,
+            shipping: {
+              modified: state.shipping.modified,
+              service: state.shipping.service,
+            },
+            createNewVip: null,
+            bundles: [{
+              isVip: state.isVip,
+              skus: state.items
+            }]
+          })
+        }).then(res => res.json())
+
+        commit('setFetching', false)
+        commit('setItems', cart.bundles[0].skus)
+        commit('setTax', cart.totalTax)
+        commit('setShipping', cart.shipping)
+      } catch (e) {
+        // maybe there was a 401 or something?
+        console.error(e)
+        console.error('failed to updateCart')
+      }
     },
-    async fetchStock ({ commit }) {
+    async fetchStock ({ commit }: Action) {
       commit('setFetching', true)
       const stock = await fetch(`${host}/v1/products`).then(res => res.json())
       commit('setStock', stock)
       commit('setFetching', false)
     },
-    async fetchOrder ({ commit }, orderId) {
-      const order = await fetch(`${host}/order/${orderId}`, {
-        mode: 'cors',
-        credentials: 'include'
-      }).then(res => res.json())
-      commit('setOrder', order)
-    },
-    async checkUsername ({ commit }, email) {
+    async checkUsername ({ commit }: Action, email: string) {
       try {
         const info = await fetch(`${host}/check-username`, {
           method: 'POST',
@@ -247,9 +253,11 @@ export default new Vuex.Store({
         console.error(e)
       }
     },
-    async requestLoginEmail ({ commit, state }, username) {
-      console.log('requestLoginEmail', username)
-      const res = await fetch(`${host}/request-login-code`, {
+    async requestLoginEmail ({ commit, state }: Action, username: string) {
+      window.woopra && window.woopra.idenify({ email: username })
+      window.woopra && window.woopra.track('request-login-code', { username })
+
+      await fetch(`${host}/request-login-code`, {
         method: 'POST',
         mode: 'cors',
         credentials: 'include',
@@ -259,7 +267,9 @@ export default new Vuex.Store({
 
       commit('loginEmailRequested')
     },
-    async login ({ commit, state }, { username, magicCode }) {
+    async login ({ commit, state }: Action, { username, magicCode }: {username: string, magicCode: string}) {
+      window.woopra && window.woopra.track('login-attempt', { username, code: magicCode })
+
       const info = await fetch(`${host}/login-existing`, {
         method: 'POST',
         mode: 'cors',
@@ -272,7 +282,20 @@ export default new Vuex.Store({
         commit('setUser', info.user)
       } else {
         commit('loginFailure', 'the reason your login failed')
+        window.woopra && window.woopra.track('login-failure', { username, info })
       }
+    },
+    async logout ({ commit }: Action) {
+      await fetch(`${host}/logout-cart`, {
+        mode: 'cors',
+        credentials: 'include',
+      }).then(res => {
+        if (res.status < 400) {
+          commit('logout')
+        } else {
+          commit('errorMessage', `Something went wrong while trying to log out. ${res.statusText}`)
+        }
+      })
     }
   }
-})
+}

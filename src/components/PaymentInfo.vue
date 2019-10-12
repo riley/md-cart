@@ -15,11 +15,12 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { State, Mutation } from 'vuex-class'
+import { State, Mutation, namespace } from 'vuex-class'
 import Card from './BaseCard.vue'
 import Instructions from './BaseInstructions.vue'
 import Button from './BaseButton.vue'
 
+const cart = namespace('cart')
 const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
 const elements = stripe.elements()
 let card: any
@@ -28,9 +29,9 @@ let card: any
   components: { Instructions, Button, Card }
 })
 export default class PaymentInfo extends Vue {
-  @State useStoredPaymentInfo: boolean
-  @State user: User
-  @Mutation editStoredPaymentInfo: boolean
+  @cart.State useStoredPaymentInfo: boolean
+  @cart.State user: User
+  @cart.Mutation editStoredPaymentInfo: boolean
 
   hasCardErrors: boolean = false
 
@@ -57,6 +58,7 @@ export default class PaymentInfo extends Vue {
 <style scoped>
 section {
   position: relative;
+  margin-bottom: 2rem;
 }
 
 .stored-payment-info {

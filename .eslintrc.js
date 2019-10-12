@@ -12,7 +12,19 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'comma-dangle': 'off',
-    'camelcase': ['error', {allow: ['est_delivery_days', 'address_1', 'address_2']}]
+    'camelcase': [
+      'error',
+      {
+        allow: [
+          'est_delivery_days',
+          'address_1',
+          'address_2',
+          'transaction_id',
+          'list_name',
+          'list_position'
+        ]
+      }
+    ]
   },
   parserOptions: {
     parser: '@typescript-eslint/parser'

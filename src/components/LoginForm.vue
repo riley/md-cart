@@ -15,22 +15,25 @@
         <BaseButton v-else>Log In 🥙</BaseButton>
       </form>
     </div>
+    <span class="close-button">×</span>
   </div>
 </template>
 
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator'
-import { Action } from 'vuex-class'
+import { Action, namespace } from 'vuex-class'
 import BaseTextInput from './BaseTextInput.vue'
 import BaseButton from './BaseButton.vue'
+
+const cart = namespace('cart')
 
 @Component({
   components: { BaseTextInput, BaseButton },
 })
 export default class LoginForm extends Vue {
   @Prop({ type: Boolean }) loginEmailRequested: boolean
-  @Action requestLoginEmail: any
-  @Action login: any
+  @cart.Action requestLoginEmail: any
+  @cart.Action login: any
 
   email = ''
   magicCode = ''
@@ -75,5 +78,12 @@ export default class LoginForm extends Vue {
 
 .subhead {
   font-size: 14px;
+}
+
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 100px;
 }
 </style>

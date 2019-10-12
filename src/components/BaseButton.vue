@@ -8,7 +8,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class FormButton extends Vue {
+export default class BaseButton extends Vue {
   @Prop({ type: Boolean }) inline: boolean;
   @Prop({ default: 'none' }) position: string;
   @Prop() loading!: boolean;
@@ -37,7 +37,7 @@ button {
   width: 100%;
   padding: 0.75rem 0.75rem 0.8125rem;
   color: rgb(255, 255, 255);
-  background: var(--main-color);
+  background: rgba(210, 92, 74, .8);
   font-size: 1.25rem;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625rem 0px, rgba(0, 0, 5, 0.1) 0px 0.0625rem 0.125rem, rgba(0, 0, 0, 0.05) 0px 0.3125rem 0.9375rem;
 }
@@ -61,6 +61,6 @@ button:hover, button:focus {
 
 button.inlineBlock:hover, button.inlineBlock:focus {
   box-shadow: none;
-  background: var(--main-color-fade);
+  background: rgba(210, 92, 74, .2);
 }
 </style>

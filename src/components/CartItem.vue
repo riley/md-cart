@@ -1,23 +1,32 @@
 <template>
   <li class="cartItem_root">
-    <div class="thumbnail" :style="{'background-color': color, 'background-image': `url(${imageURLs[0]})`}" />
+    <Badge :count="quantity" class="thumb-container">
+      <div class="thumbnail" :style="{'background-color': color, 'background-image': `url(${imageURLs[0]})`}" />
+    </Badge>
     <div class="product-info">
       <p class="title">{{ title }}</p>
       <div class="bottom-row">
-        <span class="cost">${{ cost / 100 }}</span>
-        <BaseIncrementer @input="incrementItemQuantity" :value="quantity" />
+        <div v-if="fetching" class="spinner-container">
+          <Spinner />
+        </div>
+        <span v-else class="cost">${{ cost / 100 }}</span>
       </div>
     </div>
+    <Incrementer class="incrementer" @input="incrementItemQuantity" :value="quantity" />
   </li>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { Action, Mutation } from 'vuex-class'
-import BaseIncrementer from './BaseIncrementer.vue'
+import { Action, Mutation, namespace } from 'vuex-class'
+import Incrementer from './BaseIncrementer.vue'
+import Badge from './BaseBadge.vue'
+import Spinner from './BaseSpinner.vue'
+
+const cart = namespace('cart')
 
 @Component({
-  components: { BaseIncrementer },
+  components: { Incrementer, Spinner, Badge },
 })
 export default class CartItem extends Vue {
   @Prop() sku!: string
@@ -28,18 +37,24 @@ export default class CartItem extends Vue {
   @Prop() cost!: number
   @Prop() color!: string
 
-  @Mutation addItem: any
-  @Mutation removeItem: any
-  @Action updateCart: Promise<void>
+  @cart.Mutation addItem: any
+  @cart.Mutation removeItem: any
+  @cart.Action updateCart: () => Promise<void>
 
-  incrementItemQuantity (amount: number) {
-    if (amount === 0) {
+  fetching = false
+
+  async incrementItemQuantity (amount: number) {
+    if (this.fetching) return
+
+    if (amount < this.quantity) {
       this.removeItem(this.sku)
     } else {
       this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
     }
+    this.fetching = true
     console.log('incrementItemQuantity', amount, this.sku)
-    // this.setItemQuantity()
+    await this.updateCart()
+    this.fetching = false
   }
 }
 </script>
@@ -58,8 +73,10 @@ export default class CartItem extends Vue {
   width: 4rem;
   height: 4rem;
   background-size: cover;
-  border-radius: 2rem;
-  margin-right: .5rem;
+}
+
+.thumb-container {
+  margin-right: 1rem;
 }
 
 .product-info {
@@ -80,5 +97,9 @@ export default class CartItem extends Vue {
 .cost {
   font-size: 2rem;
   color: grey;
+}
+
+.spinner-container {
+  display: inline-block;
 }
 </style>

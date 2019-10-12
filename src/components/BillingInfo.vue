@@ -3,8 +3,10 @@
     <Instructions text="Your Billing Address" step="2"/>
     <div v-if="useStoredBillingInfo" class="loggedInBillingInfo">
       <Card>
-        <Button inline position="right" @click="editStoredShippingAddress">Edit</Button>
-        <Address displayOnly v-bind="user.billing.address" />
+        <CardContent>
+          <Button inline position="right" @click="editStoredShippingAddress">Edit</Button>
+          <Address displayOnly v-bind="user.billing.address" />
+        </CardContent>
       </Card>
     </div>
     <div v-else>
@@ -23,23 +25,27 @@ import Checkbox from './BaseCheckbox.vue'
 import Address from './BaseAddress.vue'
 import Button from './BaseButton.vue'
 import Card from './BaseCard.vue'
+import CardContent from './BaseCardContent.vue'
 import Instructions from './BaseInstructions.vue'
-import { State, Mutation } from 'vuex-class'
+import { State, Mutation, namespace } from 'vuex-class'
+
+const cart = namespace('cart')
 
 @Component({
-  components: { Button, Card, Checkbox, Address, Instructions }
+  components: { Button, Card, CardContent, Checkbox, Address, Instructions }
 })
 export default class BillingInfo extends Vue {
-  @State((state: any) => state.billing.address) address: Address
-  @State billingSameAsShipping: boolean
-  @State useStoredBillingInfo: boolean
-  @State user: User
-  @Mutation setBillingSameAsShipping: () => void
-  @Mutation editStoredShippingAddress: () => void
+  @cart.State((state: any) => state.billing.address) address: Address
+  @cart.State billingSameAsShipping: boolean
+  @cart.State useStoredBillingInfo: boolean
+  @cart.State user: User
+  @cart.Mutation setAddress: any
+  @cart.Mutation setBillingSameAsShipping: () => void
+  @cart.Mutation editStoredShippingAddress: () => void
 
   updateAddress ($event: FormInputEvent) {
     console.log('updateAddress', $event)
-    this.$store.commit('setAddress', {
+    this.setAddress({
       location: 'billing',
       field: $event.name,
       value: $event.value,
@@ -51,9 +57,21 @@ export default class BillingInfo extends Vue {
 <style scoped>
 section {
   position: relative;
+  margin-bottom: 2rem;
 }
 
 .loggedInBillingInfo {
   text-align: left;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  visibility: hidden;
+  height: 0;
 }
 </style>

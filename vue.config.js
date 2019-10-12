@@ -9,7 +9,7 @@ module.exports = {
     },
     thankyou: {
       entry: 'src/thankyou.ts',
-      template: 'public/index.html',
+      template: 'public/thankyou.html',
       filename: 'thankyou.html',
       title: 'Thank You - Mr. Davis'
     }
