@@ -55,7 +55,6 @@ export default {
       service: null,
     },
     stock: [],
-    subtotal: 0,
     token: null,
     totalDiscount: 0,
     totalTax: 0,
