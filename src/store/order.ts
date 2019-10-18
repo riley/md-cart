@@ -1,4 +1,11 @@
-const host = window.location.host === 'mrdavis.com' ? '//account.mrdavis.com' : 'https://localhost'
+let host: string
+if (window.location.host === 'mrdavis.com') {
+  host = process.env.VUE_APP_PROD_HOST
+} else if (window.location.host === 'staging-mrdavis.kinsta.com') {
+  host = process.env.VUE_APP_STG_HOST
+} else {
+  host = process.env.VUE_APP_DEV_HOST
+}
 
 export default {
   namespaced: true,

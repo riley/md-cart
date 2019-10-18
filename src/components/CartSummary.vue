@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="refer-notification">
+      Referral discount of $10 applied upon checkout to orders $40 or more with a new account [{{ refId }}]
+    </div>
     <ul class="cart-items">
       <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
     </ul>
@@ -74,6 +77,7 @@ export default class CartSummary extends Vue {
   @cart.State((state: any) => state.shipping.service) service: string
   @cart.State((state: any) => state.totalTax / 100) tax: number
   @cart.State fetching: boolean
+  @cart.State refId: string
 
   @cart.Getter('totalDiscount') discount: number
   @cart.Getter referDiscountEligible: number
@@ -98,6 +102,18 @@ export default class CartSummary extends Vue {
 </script>
 
 <style scoped>
+.refer-notification {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: .5rem;
+  text-align: center;
+  background: blue;
+  color: white;
+  z-index: 100;
+}
+
 .cart-items {
   padding: 0;
 }

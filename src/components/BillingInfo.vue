@@ -9,13 +9,13 @@
         </CardContent>
       </Card>
     </div>
-    <div v-else>
+    <form v-else @submit.prevent="() => {}">
       <Checkbox @input="setBillingSameAsShipping" :checked="billingSameAsShipping" label="Billing address is same as shipping"/>
       <fieldset v-if="!billingSameAsShipping">
         <legend>Billing Info</legend>
-        <Address v-bind="address" @input="updateAddress" />
+        <Address v-bind="address" @input="updateAddress" @replaceAddress="replaceBillingAddress" />
       </fieldset>
-    </div>
+    </form>
   </section>
 </template>
 
@@ -39,6 +39,7 @@ export default class BillingInfo extends Vue {
   @cart.State billingSameAsShipping: boolean
   @cart.State useStoredBillingInfo: boolean
   @cart.State user: User
+  @cart.Mutation replaceBillingAddress: any
   @cart.Mutation setAddress: any
   @cart.Mutation setBillingSameAsShipping: () => void
   @cart.Mutation editStoredShippingAddress: () => void

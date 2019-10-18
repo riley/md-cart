@@ -8,7 +8,7 @@
         @input="setSelected"
         @focus="setFocus"
         @blur="setBlur">
-        <option value=""></option>
+        <option disabled value="">Select {{ name }}</option>
         <option v-for="(code, label) in options" :value="code" :key="code">{{ label }}</option>
       </select>
       <span class="md__dropdown-border"></span>

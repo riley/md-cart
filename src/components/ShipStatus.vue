@@ -17,7 +17,7 @@
 import { Vue, Prop, Component } from 'vue-property-decorator'
 import Spinner from './BaseSpinner.vue'
 
-const MAPS_API_KEY = 'AIzaSyDVxVeHOWujABozmN_3mI-s6Jjy8i68hPU'
+const MAPS_API_KEY = process.env.VUE_APP_MAPS_API_KEY
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 @Component({

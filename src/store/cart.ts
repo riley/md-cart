@@ -1,4 +1,12 @@
-const host = window.location.host === 'mrdavis.com' ? '//account.mrdavis.com' : 'https://localhost'
+let host: string
+if (window.location.host === 'mrdavis.com') {
+  host = process.env.VUE_APP_PROD_HOST
+} else if (window.location.host === 'staging-mrdavis.kinsta.com') {
+  host = process.env.VUE_APP_STG_HOST
+} else {
+  host = process.env.VUE_APP_DEV_HOST
+}
+
 const userSettings: User = {
   username: '',
   shipping: { address: null },
@@ -102,6 +110,12 @@ export default {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
       state.items = state.items.filter((item: any, index: number) => index !== indexToRemove)
     },
+    replaceBillingAddress (state: any, address: Address) {
+      state.billing.address = address
+    },
+    replaceShippingAddress (state: any, address: Address) {
+      state.shipping.address = address
+    },
     setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
       state[location].address[field] = value
     },
@@ -126,6 +140,9 @@ export default {
     },
     setItems (state: any, items: Item[]) {
       state.items = items
+    },
+    setRefId (state: any, refId: string) {
+      state.refId = refId
     },
     setShipping (state: any, shipping: ServerShipping) {
       console.log('setShipping', shipping)
@@ -176,7 +193,7 @@ export default {
       commit('setFetching', true)
       const cartId = '5c0fd4f60d256a00046157b1'
       try {
-        const cart = await fetch(`${host}/v2/cart?id=${cartId}`, {
+        const cart = await fetch(`${host}/v2/cart`, {
           mode: 'cors',
           credentials: 'include',
         }).then(res => res.json())
@@ -186,6 +203,7 @@ export default {
         commit('setEmail', cart.email)
         commit('setShippingAddress', cart.shippingAddress)
         commit('setBillingAddress', cart.billingAddress)
+        commit('setRefId', cart.refId)
         commit('setItems', cart.bundles[0].skus)
         commit('setCsrfToken', cart.csrfToken)
         commit('setShipping', cart.shipping)

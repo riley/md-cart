@@ -5,7 +5,12 @@ import store from './store/store'
 
 Vue.config.productionTip = false
 
-// get cartId from
+// set up google maps
+const script = document.createElement('script')
+script.async = true
+script.defer = true
+script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VUE_APP_MAPS_API_KEY}&libraries=places`
+document.head.appendChild(script)
 
 new Vue({
   store,
@@ -64,6 +69,15 @@ declare global {
     swatch: string
     title: string
     color?: string
+  }
+
+  interface GooglePlace {
+    streetNumber: string
+    route: string
+    city: string
+    state: string
+    zip: string
+    country: string
   }
 
   interface GoogleAnalyticsConversionItem {

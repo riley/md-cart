@@ -21,7 +21,8 @@ module.exports = {
           'address_2',
           'transaction_id',
           'list_name',
-          'list_position'
+          'list_position',
+          'short_name'
         ]
       }
     ]

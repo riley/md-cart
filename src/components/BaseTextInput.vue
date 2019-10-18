@@ -3,11 +3,13 @@
     <label>
       <span class="labelText" :class="{focussedOrValid: focussed || !invalid}">{{ label }}</span>
       <input
+        ref="input"
         :type="type"
         :name="name"
         :required="required"
         :value="value"
         @input="validate($event)"
+        @change="validate($event)"
         @focus="setFocus"
         @blur="setBlur($event)" />
       <span class="border" :class="{invalid, success}"></span>
@@ -19,8 +21,22 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+const MAPS_API_KEY = process.env.VUE_APP_MAPS_API_KEY
+
+function arraysEqual (a: any[], b: any[]) {
+  if (a === b) return true
+  if (a == null || b == null) return false
+  if (a.length !== b.length) return false
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false
+  }
+  return true
+}
+
 @Component
 export default class TextInput extends Vue {
+  @Prop({ type: Boolean, default: false }) autocomplete: boolean
   @Prop({ default: 'text' }) type!: string
   @Prop({ type: Boolean, default: false }) required: boolean
   @Prop() name!: string
@@ -31,6 +47,64 @@ export default class TextInput extends Vue {
   invalid: boolean = false
   focussed: boolean = false
   success: boolean = false
+  googlePoll: number
+  googleAutocomplete: any
+
+  mounted () {
+    // set up poll for google maps to add autocomplete
+    if (this.autocomplete) {
+      this.googlePoll = setInterval(this.mapsCallback, 150)
+    }
+  }
+
+  mapsCallback () {
+    if (window.google && window.google.maps) {
+      window.clearInterval(this.googlePoll)
+
+      let streetNumber: string
+      let route: string
+      let city: string
+      let state: string
+      let zip: string
+      let country: string
+
+      // eslint-disable-next-line
+      this.googleAutocomplete = new window.google.maps.places.Autocomplete( this.$refs.input, { types: ['geocode'] } )
+      this.googleAutocomplete.addListener('place_changed', () => {
+        const place = this.googleAutocomplete.getPlace()
+        console.log('place', place)
+        // I guess build an Address object?
+        if (place && place.address_components) {
+          place.address_components.forEach(({ short_name, types }: { short_name: string, types: string[] }) => {
+            if (arraysEqual(types, ['street_number'])) {
+              streetNumber = short_name
+            } else if (arraysEqual(types, ['route'])) {
+              route = short_name
+            } else if (arraysEqual(types, ['locality', 'political'])) {
+              city = short_name
+            } else if (arraysEqual(types, ['administrative_area_level_1', 'political'])) {
+              state = short_name
+            } else if (arraysEqual(types, ['postal_code'])) {
+              zip = short_name
+            } else if (arraysEqual(types, ['country', 'political'])) {
+              country = short_name
+            }
+          })
+
+          const address: GooglePlace = {
+            streetNumber,
+            route,
+            city,
+            state,
+            zip,
+            country,
+          }
+
+          this.$emit('googlePlaceChange', address)
+        }
+      })
+    }
+  }
 
   get errorHint () {
     return `Invalid ${this.label}`

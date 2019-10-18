@@ -10,7 +10,7 @@
         </CardContent>
       </Card>
     </div>
-    <div v-else>
+    <form v-else @submit.prevent="() => {}">
       <fieldset>
         <legend>Shipping Info</legend>
         <TextInput
@@ -32,9 +32,9 @@
             Continue
           </template>
         </Banner>
-        <Address @input="updateAddress" v-bind="address" />
+        <Address @input="updateAddress" @replaceAddress="replaceShippingAddress" v-bind="address" />
       </fieldset>
-    </div>
+    </form>
   </section>
 </template>
 
@@ -63,6 +63,7 @@ export default class ShippingInfo extends Vue {
   @cart.State useStoredShippingInfo: boolean
   @cart.Mutation setEmail: any
   @cart.Mutation setAddress: any
+  @cart.Mutation replaceShippingAddress: any
   @cart.Mutation editStoredShippingAddress: any
   @cart.Action checkUsername: (email: string) => Promise<void>
 
