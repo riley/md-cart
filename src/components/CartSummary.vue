@@ -1,47 +1,54 @@
 <template>
   <div>
-    <div class="refer-notification">
+    <div class="refer-notification" v-if="refId">
       Referral discount of $10 applied upon checkout to orders $40 or more with a new account [{{ refId }}]
     </div>
-    <ul class="cart-items">
-      <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
-    </ul>
-    <div v-if="fetching" class="spinner-container">
-      <Spinner />
+    <div v-if="items.length">
+      <ul class="cart-items">
+        <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
+      </ul>
+      <div v-if="fetching" class="spinner-container">
+        <Spinner />
+      </div>
+      <ul v-else class="totals">
+        <li>
+          <span>Order Subtotal</span>
+          <span>${{ subtotal / 100 }}</span>
+        </li>
+        <li>
+          <span>Shipping</span>
+          <span>${{ postage }}</span>
+        </li>
+        <li v-if="discount > 0" class="discount">
+          <span>Mr. Davis Rewards</span>
+          <span>-${{ discount }}</span>
+        </li>
+        <li v-if="referDiscountEligible" class="discount">
+          <span>Refer Discount</span>
+          <span>-$10</span>
+        </li>
+        <li v-if="tax > 0">
+          <span>Tax</span>
+          <span>${{ tax }}</span>
+        </li>
+        <li class="grandTotal">
+          <span>Total</span>
+          <span>${{ grandTotal / 100 }}</span>
+        </li>
+      </ul>
+      <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
     </div>
-    <ul v-else class="totals">
-      <li>
-        <span>Order Subtotal</span>
-        <span>${{ subtotal / 100 }}</span>
-      </li>
-      <li>
-        <span>Shipping</span>
-        <span>${{ postage }}</span>
-      </li>
-      <li v-if="discount > 0" class="discount">
-        <span>Mr. Davis Rewards</span>
-        <span>-${{ discount }}</span>
-      </li>
-      <li v-if="referDiscountEligible" class="discount">
-        <span>Refer Discount</span>
-        <span>-$10</span>
-      </li>
-      <li v-if="tax > 0">
-        <span>Tax</span>
-        <span>${{ tax }}</span>
-      </li>
-      <li class="grandTotal">
-        <span>Total</span>
-        <span>${{ grandTotal / 100 }}</span>
-      </li>
-    </ul>
-    <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
+    <div v-else>
+      <h2 class="empty-cart">Your cart is empty</h2>
+      <Button href="/best-undershirt">Continue Shopping</Button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
+import Button from './BaseButton.vue'
 import Dropdown from './BaseDropdown.vue'
 import CartItem from './CartItem.vue'
 import Spinner from './BaseSpinner.vue'
@@ -49,7 +56,7 @@ import Spinner from './BaseSpinner.vue'
 const cart = namespace('cart')
 
 @Component({
-  components: { CartItem, Dropdown, Spinner },
+  components: { CartItem, Button, Dropdown, Spinner },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
@@ -114,12 +121,10 @@ export default class CartSummary extends Vue {
   z-index: 100;
 }
 
-.cart-items {
+.cart-items, .totals {
   padding: 0;
-}
-
-.totals {
-  padding: 0;
+  margin-bottom: 0;
+  margin-left: 0;
 }
 
 .totals li {
@@ -135,5 +140,10 @@ export default class CartSummary extends Vue {
 
 .spinner-container {
   height: 100px;
+}
+
+.empty-cart {
+  text-align: center;
+  color: #666;
 }
 </style>

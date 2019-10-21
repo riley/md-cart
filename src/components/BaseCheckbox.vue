@@ -28,9 +28,9 @@ label {
   padding-left: 40px;
   display: block;
   position: relative;
-  margin: auto;
   cursor: pointer;
   clear: both;
+  margin-bottom: 1.75rem;
 }
 
 label input {
@@ -43,8 +43,8 @@ label .checkbox-custom {
   position: absolute;
   top: 0px;
   left: 0px;
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 28px;
   background-color: transparent;
   border-radius: 5px;
   transition: all 0.3s ease-out;

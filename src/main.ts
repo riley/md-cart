@@ -143,5 +143,6 @@ declare global {
   interface Action {
     commit: any
     state?: any
+    getters?: any
   }
 }

@@ -65,7 +65,7 @@ export default class BaseAddress extends Vue {
 
     const address: Address = {
       name: this.name,
-      address_1: `${value.streetNumber} ${value.route}`,
+      address_1: (value.streetNumber && value.route) ? `${value.streetNumber} ${value.route}` : '',
       address_2: '',
       city: value.city,
       state: value.state,

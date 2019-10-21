@@ -9,7 +9,10 @@
       </div>
     </Card>
     <div ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
-    <Button @click="purchase">Checkout</Button>
+    <Button
+      @click="purchase"
+      :loading="attemptingPurchase"
+      :disabled="attemptingPurchase">{{ attemptingPurchase ? 'PROCESSING' : 'CHECKOUT' }}</Button>
   </section>
 </template>
 
@@ -29,19 +32,22 @@ let card: any
   components: { Instructions, Button, Card }
 })
 export default class PaymentInfo extends Vue {
+  @cart.State attemptingPurchase: boolean
   @cart.State useStoredPaymentInfo: boolean
   @cart.State user: User
   @cart.Mutation editStoredPaymentInfo: boolean
+  @cart.Action attemptPurchase: (token: string) => Promise<void>
 
   hasCardErrors: boolean = false
 
   mounted () {
-    card = card || elements.create('card')
+    card = card || elements.create('card', { hidePostalCode: true })
     card.mount(this.$refs.card)
   }
 
   async purchase () {
     const result = await stripe.createToken(card)
+    console.log('result', result)
 
     if (result.error) {
       this.hasCardErrors = true
@@ -49,8 +55,7 @@ export default class PaymentInfo extends Vue {
       return
     }
 
-    console.log(result.token.id)
-    console.log(result)
+    this.attemptPurchase(result.token)
   }
 }
 </script>

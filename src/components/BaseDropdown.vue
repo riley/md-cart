@@ -1,7 +1,7 @@
 <template>
   <div class="md__dropdown-field-wrapper">
     <label class="md__dropdown-label">
-      <span class="md__dropdown-label-text" :class="focussed || value !== '' ? 'md__dropdown-small' : 'md__dropdown-large'">{{ label }}</span>
+      <span class="md__dropdown-label-text">{{ label }}</span>
       <select
         :value="value"
         class="md__select"
@@ -62,6 +62,7 @@ export default class Dropdown extends Vue {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  box-shadow: none !important;
   margin: 0;
   border: none;
   -moz-appearance: none;
@@ -93,8 +94,6 @@ export default class Dropdown extends Vue {
 
 .md__dropdown-field-wrapper {
   position: relative;
-  padding-right: .75rem;
-  padding-left: .75rem;
   margin-bottom: 1.75rem;
 }
 
@@ -120,14 +119,7 @@ export default class Dropdown extends Vue {
   transform-origin: 0px 0px;
   pointer-events: none;
   padding: 0.25rem 0px;
-  transition: transform 0.3s ease-out 0s
-}
-
-.md__dropdown-large {
-  transform: translateY(0) scale(1);
-}
-
-.md__dropdown-small {
+  transition: transform 0.3s ease-out 0s;
   transform: translateY(-1.5rem) scale(.8);
 }
 

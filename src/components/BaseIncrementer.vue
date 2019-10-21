@@ -25,7 +25,7 @@ export default class BaseIncrementer extends Vue {
 <style scoped>
 .incrementer_root {
   display: flex;
-  align-items: center;
+  align-items: top;
   width: 6rem;
 }
 

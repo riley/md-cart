@@ -8,6 +8,7 @@
         :name="name"
         :required="required"
         :value="value"
+        :autocomplete="auto"
         @input="validate($event)"
         @change="validate($event)"
         @focus="setFocus"
@@ -20,8 +21,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-
-const MAPS_API_KEY = process.env.VUE_APP_MAPS_API_KEY
 
 function arraysEqual (a: any[], b: any[]) {
   if (a === b) return true
@@ -49,6 +48,21 @@ export default class TextInput extends Vue {
   success: boolean = false
   googlePoll: number
   googleAutocomplete: any
+
+  get auto () {
+    if (this.name === 'name') return 'name'
+    if (this.name === 'email') return 'email'
+    if (this.name === 'address_1' && !this.focussed) return 'address-line1'
+    if (this.name === 'address_2') return 'address-line2'
+    if (this.name === 'city') return 'address-level2'
+    if (this.name === 'state') return 'address-level1'
+    if (this.name === 'zip') return 'postal-code'
+    if (this.name === 'country') return 'country'
+    // if the prop is autocomplete, we turn on google's places api
+    // but if the field doesn't have focus, just turn it on (like if they enter their name first)
+    if (this.name === 'address_1' && this.focussed) return 'off'
+    return 'on'
+  }
 
   mounted () {
     // set up poll for google maps to add autocomplete
@@ -111,7 +125,6 @@ export default class TextInput extends Vue {
   }
 
   validate ($event: any) {
-    console.log('validate', $event)
     const val = $event.target.value
     this.invalid = ((this.required && val === '') || !$event.target.validity.valid)
     this.$emit('input', val)
@@ -135,8 +148,6 @@ export default class TextInput extends Vue {
 <style scoped>
 .fieldWrapper {
   position: relative;
-  padding-right: .75rem;
-  padding-left: .75rem;
   margin-bottom: 1.75rem;
 }
 
@@ -178,12 +189,12 @@ label {
 input, input:invalid, input:required {
   border: none !important;
   outline: 0 !important;
-  box-shadow: none;
+  box-shadow: none !important;
   letter-spacing: 0.0375rem;
-  padding: .25rem 0;
+  padding: .25rem 0 !important;
   display: block;
   width: 100%;
-  font-size: 1.25rem;
+  font-size: 1.25rem !important;
   background: white;
   outline: currentColor none 0;
 }

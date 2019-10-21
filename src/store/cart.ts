@@ -18,6 +18,7 @@ const userSettings: User = {
 export default {
   namespaced: true,
   state: {
+    attemptingPurchase: false,
     billing: {
       address: {
         name: '',
@@ -76,6 +77,9 @@ export default {
       const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
       return Math.max(itemCost, 0)
     },
+    isStoredInfo: (state: any) => {
+      return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
+    },
     userLoggedIn: (state: any) => state.user.username !== '',
     totalDiscount: (state: any) => 0,
     referDiscountEligible: (state: any) => state.subtotal >= 4000 && state.refId !== '',
@@ -84,6 +88,9 @@ export default {
   mutations: {
     addItem (state: any, item: Item) {
       state.items = [...state.items, item]
+    },
+    attemptingPurchase (state: any, status: boolean) {
+      state.attemptingPurchase = status
     },
     editStoredBillingAddress (state: any) {
       state.useStoredBillingInfo = false
@@ -313,6 +320,33 @@ export default {
           commit('errorMessage', `Something went wrong while trying to log out. ${res.statusText}`)
         }
       })
+    },
+    async attemptPurchase ({ commit, state, getters }: Action, token: any) {
+      commit('attemptingPurchase', true)
+      const result = await fetch(`${host}/buy`, {
+        mode: 'cors',
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'csrf-token': state.csrfToken
+        },
+        body: JSON.stringify({
+          isStoredInfo: getters.isStoredInfo,
+          billingSameAsShipping: state.billingSameAsShipping,
+          email: state.email,
+          shippingAddress: state.shipping.address,
+          billingAddress: state.billing.address,
+          token,
+        })
+      }).then((res: any) => res.json())
+
+      if (result.processed) {
+        location.href = `/thankyou/${result.orderId}`
+        return
+      }
+
+      console.log(result)
     }
   }
 }
