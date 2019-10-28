@@ -152,7 +152,7 @@ export default class TextInput extends Vue {
 }
 
 .errorHint {
-  color: red;
+  color: #ff9100;
   text-align: left;
 }
 
@@ -197,6 +197,7 @@ input, input:invalid, input:required {
   font-size: 1.25rem !important;
   background: white;
   outline: currentColor none 0;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 .border {
@@ -227,12 +228,12 @@ input, input:invalid, input:required {
 }
 
 .border.invalid {
-  border-bottom-color: red;
+  border-bottom-color: #ff9100;
 }
 
 .border.invalid::before,
 .border.invalid::after {
-  background-color: red;
+  background-color: #ff9100;
 }
 
 .border::before {

@@ -12,7 +12,7 @@
           <BaseTextInput label="6-digit code" v-model="magicCode" />
           <BaseButton @click="handleLoginButtonClick">Login</BaseButton>
         </template>
-        <BaseButton v-else>Log In 🥙</BaseButton>
+        <BaseButton v-else>Log In</BaseButton>
       </form>
     </div>
     <span class="close-button">×</span>
@@ -82,7 +82,7 @@ export default class LoginForm extends Vue {
 
 .close-button {
   position: absolute;
-  top: 20px;
+  top: 70px;
   right: 20px;
   font-size: 100px;
 }

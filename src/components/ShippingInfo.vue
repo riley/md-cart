@@ -1,7 +1,7 @@
 <template>
   <section id="shipping-info">
+    <Instructions text="Your Shipping Address" step="1"/>
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
-      <Instructions text="Your Shipping Address" step="1"/>
       <Card>
         <CardContent>
           <p class="loggedInAs">Logged in as <Chip>{{ user.username }}</Chip></p>

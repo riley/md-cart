@@ -32,6 +32,7 @@ export default {
     },
     billingSameAsShipping: true,
     cartId: null,
+    createRecurringVIP: false,
     csrfToken: '',
     email: '',
     emailInvalid: false, // this is an invalid email
@@ -145,8 +146,17 @@ export default {
     setFetching (state: any, status: boolean) {
       state.fetching = status
     },
+    setIsVip (state: any, isVip: boolean) {
+      state.isVip = isVip
+    },
     setItems (state: any, items: Item[]) {
       state.items = items
+    },
+    setRecurringVIP (state: any, recurring: boolean) {
+      state.createRecurringVIP = recurring
+    },
+    setReturningVipCustomer (state: any, returning: boolean) {
+      state.returningVipCustomer = returning
     },
     setRefId (state: any, refId: string) {
       state.refId = refId
@@ -211,6 +221,7 @@ export default {
         commit('setShippingAddress', cart.shippingAddress)
         commit('setBillingAddress', cart.billingAddress)
         commit('setRefId', cart.refId)
+        commit('setIsVip', cart.bundles[0].isVip)
         commit('setItems', cart.bundles[0].skus)
         commit('setCsrfToken', cart.csrfToken)
         commit('setShipping', cart.shipping)
@@ -272,13 +283,17 @@ export default {
         })
           .then(res => res.json())
 
+        if (info.cart) {
+          commit('setReturningVipCustomer', !!info.cart.returningVipCustomer)
+        }
+
         console.log(info)
       } catch (e) {
         console.error(e)
       }
     },
     async requestLoginEmail ({ commit, state }: Action, username: string) {
-      window.woopra && window.woopra.idenify({ email: username })
+      window.woopra && window.woopra.identify({ email: username })
       window.woopra && window.woopra.track('request-login-code', { username })
 
       await fetch(`${host}/request-login-code`, {
@@ -332,6 +347,7 @@ export default {
           'csrf-token': state.csrfToken
         },
         body: JSON.stringify({
+          createRecurringVIP: state.createRecurringVIP,
           isStoredInfo: getters.isStoredInfo,
           billingSameAsShipping: state.billingSameAsShipping,
           email: state.email,
@@ -342,7 +358,7 @@ export default {
       }).then((res: any) => res.json())
 
       if (result.processed) {
-        location.href = `/thankyou/${result.orderId}`
+        location.href = `/thank-you?order=${result.orderId}`
         return
       }
 

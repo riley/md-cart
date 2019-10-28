@@ -89,7 +89,8 @@ export default class Dropdown extends Vue {
   outline: none;
 }
 .md__select option {
-  font-weight:normal;
+  font-weight: normal;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 .md__dropdown-field-wrapper {

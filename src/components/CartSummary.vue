@@ -42,6 +42,7 @@
       <h2 class="empty-cart">Your cart is empty</h2>
       <Button href="/best-undershirt">Continue Shopping</Button>
     </div>
+    <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setRecurringVIP" :makeRecurring="createRecurringVIP" />
   </div>
 </template>
 
@@ -51,12 +52,13 @@ import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import Button from './BaseButton.vue'
 import Dropdown from './BaseDropdown.vue'
 import CartItem from './CartItem.vue'
+import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
 import Spinner from './BaseSpinner.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { CartItem, Button, Dropdown, Spinner },
+  components: { CartItem, Button, Dropdown, Spinner, ConfirmRecurringVIP },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
@@ -84,7 +86,10 @@ export default class CartSummary extends Vue {
   @cart.State((state: any) => state.shipping.service) service: string
   @cart.State((state: any) => state.totalTax / 100) tax: number
   @cart.State fetching: boolean
+  @cart.State isVip: boolean
   @cart.State refId: string
+  @cart.State returningVipCustomer: boolean
+  @cart.State createRecurringVIP: boolean
 
   @cart.Getter('totalDiscount') discount: number
   @cart.Getter referDiscountEligible: number
@@ -92,6 +97,7 @@ export default class CartSummary extends Vue {
   @cart.Getter subtotal: number
 
   @cart.Mutation setSelectedShippingService: any
+  @cart.Mutation setRecurringVIP: () => void
   @cart.Action updateCart: () => Promise<void>
   @cart.Action fetchCart: () => Promise<void>
   @cart.Action fetchStock: () => Promise<void>

@@ -51,6 +51,10 @@ button, a {
   text-decoration: none;
 }
 
+a {
+  width: auto;
+}
+
 .inlineBlock {
   display: inline-block;
   width: auto;

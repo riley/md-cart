@@ -8,7 +8,7 @@
         {{ user.cardMeta.expMonth }} / {{ user.cardMeta.expYear }}
       </div>
     </Card>
-    <div ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
+    <div class="stripe-input" ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
     <Button
       @click="purchase"
       :loading="attemptingPurchase"
@@ -41,7 +41,15 @@ export default class PaymentInfo extends Vue {
   hasCardErrors: boolean = false
 
   mounted () {
-    card = card || elements.create('card', { hidePostalCode: true })
+    card = card || elements.create('card', {
+      hidePostalCode: true,
+      style: {
+        base: {
+          fontFamily: '"Open Sans", "Helvetica Neue", Helvetica, sans-serif',
+          fontSize: '1.25rem',
+        }
+      }
+    })
     card.mount(this.$refs.card)
   }
 
@@ -71,5 +79,11 @@ section {
   padding-left: 1rem;
   line-height: 1.6em;
   border-left: 5px solid rgba(0, 0, 0, .2);
+}
+
+.stripe-input {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgb(30, 48, 10);
+  padding: .25rem 0;
 }
 </style>

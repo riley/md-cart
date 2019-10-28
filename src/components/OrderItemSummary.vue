@@ -8,11 +8,11 @@
       </li>
       <li>
         <span>Shipping</span>
-        <span>${{ postage }}</span>
+        <span>${{ postage / 100 }}</span>
       </li>
       <li v-if="discount > 0" class="discount">
         <span>Mr. Davis Rewards</span>
-        <span>-${{ discount }}</span>
+        <span>-${{ discount / 100 }}</span>
       </li>
       <li v-if="referDiscount" class="discount">
         <span>Refer Discount</span>
