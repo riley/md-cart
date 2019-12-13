@@ -61,8 +61,6 @@ export default class BaseAddress extends Vue {
   }, {})
 
   handleGooglePlaceChange (value: GooglePlace) {
-    console.log('handle place chagne', value)
-
     const address: Address = {
       name: this.name,
       address_1: (value.streetNumber && value.route) ? `${value.streetNumber} ${value.route}` : '',

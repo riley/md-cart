@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { State, Getter, Action, namespace } from 'vuex-class'
+import { State, Getter, Mutation, namespace } from 'vuex-class'
 import Button from './BaseButton.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
@@ -28,7 +28,7 @@ const cart = namespace('cart')
 export default class CustomerInfoInputs extends Vue {
   @cart.Getter userLoggedIn: boolean
   @cart.State loginEmailRequested: boolean
-  @cart.Action logout: () => Promise<void>
+  @cart.Mutation logout: any
 
   loginFormActive: boolean = false
 

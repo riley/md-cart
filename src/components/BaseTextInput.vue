@@ -1,7 +1,7 @@
 <template>
-  <div class="fieldWrapper">
+  <div class="fieldWrapper" :class="{invalid, success}">
     <label>
-      <span class="labelText" :class="{focussedOrValid: focussed || !invalid}">{{ label }}</span>
+      <span class="labelText" :style="{display: autocomplete && gmapsLoaded ? 'none' : 'inline'}" :class="{focussedOrValid: focussed || !invalid}">{{ label }}</span>
       <input
         ref="input"
         :type="type"
@@ -13,14 +13,14 @@
         @change="validate($event)"
         @focus="setFocus"
         @blur="setBlur($event)" />
-      <span class="border" :class="{invalid, success}"></span>
+      <span class="border"></span>
     </label>
     <p v-if="invalid" class="errorHint">{{ errorHint }}</p>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 
 function arraysEqual (a: any[], b: any[]) {
   if (a === b) return true
@@ -35,7 +35,7 @@ function arraysEqual (a: any[], b: any[]) {
 
 @Component
 export default class TextInput extends Vue {
-  @Prop({ type: Boolean, default: false }) autocomplete: boolean
+  @Prop({ type: Boolean, default: false }) autocomplete: boolean // whether google places autocomplete is turned on for this field
   @Prop({ default: 'text' }) type!: string
   @Prop({ type: Boolean, default: false }) required: boolean
   @Prop() name!: string
@@ -48,6 +48,7 @@ export default class TextInput extends Vue {
   success: boolean = false
   googlePoll: number
   googleAutocomplete: any
+  gmapsLoaded: boolean = false
 
   get auto () {
     if (this.name === 'name') return 'name'
@@ -71,9 +72,19 @@ export default class TextInput extends Vue {
     }
   }
 
+  @Watch('value')
+  handleValueChange (val: string) {
+    if (val) {
+      this.invalid = false
+      this.success = true
+    }
+  }
+
   mapsCallback () {
     if (window.google && window.google.maps) {
       window.clearInterval(this.googlePoll)
+
+      this.gmapsLoaded = true
 
       let streetNumber: string
       let route: string
@@ -128,7 +139,7 @@ export default class TextInput extends Vue {
     const val = $event.target.value
     this.invalid = ((this.required && val === '') || !$event.target.validity.valid)
     this.$emit('input', val)
-    this.success = false
+    this.success = !this.invalid
   }
 
   setFocus () {
@@ -211,10 +222,19 @@ input, input:invalid, input:required {
   transition: none 0s ease 0s;
 }
 
-.border.success,
-.border.success::after,
-.border.success::before {
+.success .border,
+.success .border::after,
+.success .border::before {
   border-bottom-color: rgb(40, 214, 106);
+}
+
+.success::after {
+  content: '✓';
+  color: rgb(40, 214, 106);
+  position: absolute;
+  right: 4px;
+  top: 10px;
+  font-size: 24px;
 }
 
 .border::before, .border::after {
@@ -227,12 +247,12 @@ input, input:invalid, input:required {
   transition: width 0.15s ease-out 0s;
 }
 
-.border.invalid {
+.invalid .border {
   border-bottom-color: #ff9100;
 }
 
-.border.invalid::before,
-.border.invalid::after {
+.invalid .border::before,
+.invalid .border::after {
   background-color: #ff9100;
 }
 

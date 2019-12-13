@@ -2,8 +2,14 @@ import Vue from 'vue'
 import CartSummary from './components/CartSummary.vue'
 import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
 import store from './store/store'
+import { setToken } from './utils/storage'
 
 Vue.config.productionTip = false
+
+const url = new URL(location.href)
+if (url.searchParams.get('token')) {
+  setToken(url.searchParams.get('token') + '')
+}
 
 // set up google maps
 const script = document.createElement('script')

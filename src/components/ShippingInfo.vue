@@ -66,6 +66,7 @@ export default class ShippingInfo extends Vue {
   @cart.Mutation replaceShippingAddress: any
   @cart.Mutation editStoredShippingAddress: any
   @cart.Action checkUsername: (email: string) => Promise<void>
+  @cart.Action updateCart: () => Promise<void>
 
   updateAddress ($event: FormInputEvent) {
     this.setAddress({
@@ -73,6 +74,10 @@ export default class ShippingInfo extends Vue {
       field: $event.name,
       value: $event.value,
     })
+
+    if ($event.name === 'country') {
+      this.updateCart()
+    }
   }
   expressCheckout () {
     console.log('expressCheckout')

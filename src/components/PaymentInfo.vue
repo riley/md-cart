@@ -8,7 +8,7 @@
         {{ user.cardMeta.expMonth }} / {{ user.cardMeta.expYear }}
       </div>
     </Card>
-    <div class="stripe-input" ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
+    <div class="stripe-input" :class="{success}" ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
     <Button
       @click="purchase"
       :loading="attemptingPurchase"
@@ -39,6 +39,7 @@ export default class PaymentInfo extends Vue {
   @cart.Action attemptPurchase: (token: string) => Promise<void>
 
   hasCardErrors: boolean = false
+  success: boolean = false
 
   mounted () {
     card = card || elements.create('card', {
@@ -46,11 +47,16 @@ export default class PaymentInfo extends Vue {
       style: {
         base: {
           fontFamily: '"Open Sans", "Helvetica Neue", Helvetica, sans-serif',
-          fontSize: '1.25rem',
+          fontSize: '20px',
         }
       }
     })
+    card.on('change', this.handlePaymentInfoChange)
     card.mount(this.$refs.card)
+  }
+
+  handlePaymentInfoChange (e: any) {
+    this.success = e.complete
   }
 
   async purchase () {
@@ -85,5 +91,9 @@ section {
   margin-bottom: 2rem;
   border-bottom: 1px solid rgb(30, 48, 10);
   padding: .25rem 0;
+}
+
+.stripe-input.success {
+  border-bottom-color: rgb(40, 214, 106);
 }
 </style>

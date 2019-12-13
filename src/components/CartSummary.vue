@@ -39,7 +39,8 @@
       <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
     </div>
     <div v-else>
-      <h2 class="empty-cart">Your cart is empty</h2>
+      <CartItemSkeleton v-if="fetching" />
+      <h2 v-else class="empty-cart">Your cart is empty</h2>
       <Button href="/best-undershirt">Continue Shopping</Button>
     </div>
     <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setRecurringVIP" :makeRecurring="createRecurringVIP" />
@@ -52,13 +53,14 @@ import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import Button from './BaseButton.vue'
 import Dropdown from './BaseDropdown.vue'
 import CartItem from './CartItem.vue'
+import CartItemSkeleton from './CartItemSkeleton.vue'
 import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
 import Spinner from './BaseSpinner.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { CartItem, Button, Dropdown, Spinner, ConfirmRecurringVIP },
+  components: { CartItem, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]

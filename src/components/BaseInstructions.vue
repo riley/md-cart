@@ -22,7 +22,7 @@ h3 {
   -moz-box-align: center;
   align-items: center;
   width: 100%;
-  margin: 0px 0px 2rem;
+  margin: 0px 0px 2rem !important;
   pointer-events: none;
 }
 
@@ -40,7 +40,7 @@ h3 {
   line-height: 1.375;
   color: rgb(255, 255, 255);
   border-radius: 50%;
-  background-color: rgb(109, 128, 180);
+  background-color: #5C7975;
 }
 
 .text {

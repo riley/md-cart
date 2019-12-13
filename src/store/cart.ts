@@ -1,3 +1,5 @@
+import { getToken, setToken, logoutToken } from '../utils/storage'
+
 let host: string
 if (window.location.host === 'mrdavis.com') {
   host = process.env.VUE_APP_PROD_HOST
@@ -113,6 +115,7 @@ export default {
       state.useStoredShippingInfo = false
       state.useStoredBillingInfo = false
       state.useStoredPaymentInfo = false
+      logoutToken()
     },
     removeItem (state: any, sku: string) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
@@ -208,13 +211,16 @@ export default {
   actions: {
     async fetchCart ({ commit }: Action) {
       commit('setFetching', true)
-      const cartId = '5c0fd4f60d256a00046157b1'
       try {
+        console.log('getToken', getToken())
         const cart = await fetch(`${host}/v2/cart`, {
           mode: 'cors',
-          credentials: 'include',
+          headers: new Headers({
+            'Authorization': `Bearer ${getToken()}`
+          })
         }).then(res => res.json())
 
+        setToken(cart.token)
         commit('setFetching', false)
         commit('setCartId', cart._id)
         commit('setEmail', cart.email)
@@ -235,10 +241,13 @@ export default {
       commit('setFetching', true)
       try {
         const cart = await fetch(`${host}/v2/cart`, {
-          method: 'PUT',
+          method: 'PATCH',
           mode: 'cors',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'csrf-token': state.csrfToken,
+            'Authorization': `Bearer ${getToken()}`
+          }),
           body: JSON.stringify({
             billingAddress: state.billing.address,
             shippingAddress: state.shipping.address,
@@ -301,7 +310,7 @@ export default {
         mode: 'cors',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({ username, brand: 'mrdavis' })
       })
 
       commit('loginEmailRequested')
@@ -319,22 +328,11 @@ export default {
 
       if (info.loggedIn) {
         commit('setUser', info.user)
+        setToken(info.token)
       } else {
         commit('loginFailure', 'the reason your login failed')
         window.woopra && window.woopra.track('login-failure', { username, info })
       }
-    },
-    async logout ({ commit }: Action) {
-      await fetch(`${host}/logout-cart`, {
-        mode: 'cors',
-        credentials: 'include',
-      }).then(res => {
-        if (res.status < 400) {
-          commit('logout')
-        } else {
-          commit('errorMessage', `Something went wrong while trying to log out. ${res.statusText}`)
-        }
-      })
     },
     async attemptPurchase ({ commit, state, getters }: Action, token: any) {
       commit('attemptingPurchase', true)
@@ -344,7 +342,8 @@ export default {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'csrf-token': state.csrfToken
+          'csrf-token': state.csrfToken,
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({
           createRecurringVIP: state.createRecurringVIP,
@@ -357,12 +356,14 @@ export default {
         })
       }).then((res: any) => res.json())
 
-      if (result.processed) {
-        location.href = `/thank-you?order=${result.orderId}`
-        return
-      }
-
       console.log(result)
+
+      if (result.processed) {
+        setToken(result.token)
+        location.href = `/thankyou`
+      } else {
+        console.log('some error happened')
+      }
     }
   }
 }

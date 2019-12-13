@@ -56,6 +56,7 @@ a {
 }
 
 .inlineBlock {
+  margin: 0;
   display: inline-block;
   width: auto;
   background: white;

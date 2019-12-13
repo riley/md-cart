@@ -4,7 +4,7 @@
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
       <form method="POST" @submit.prevent="handleClick">
-        <BaseTextInput v-model="email" />
+        <BaseTextInput v-model="email" type="email" />
         <template v-if="loginEmailRequested">
           <BaseButton inline @click="handleClick">Resend Email?</BaseButton>
           <p>Code sent ✔✅</p>

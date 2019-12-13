@@ -1,3 +1,5 @@
+import { getToken, setToken, logoutToken } from '../utils/storage'
+
 let host: string
 if (window.location.host === 'mrdavis.com') {
   host = process.env.VUE_APP_PROD_HOST
@@ -5,14 +7,6 @@ if (window.location.host === 'mrdavis.com') {
   host = process.env.VUE_APP_STG_HOST
 } else {
   host = process.env.VUE_APP_DEV_HOST
-}
-
-let orderId = null
-if (typeof window.URLSearchParams !== 'undefined') {
-  const searchParams = new URLSearchParams(location.search)
-  orderId = searchParams.get('order')
-} else {
-  alert('Please view this page in a more recent browser. Thank you!')
 }
 
 export default {
@@ -36,7 +30,7 @@ export default {
     fetching: false,
     fetchingUser: false,
     grandTotal: 0,
-    id: orderId, // fetched off query param on load
+    id: null, // fetched off query param on load
     refId: '',
     orderError: null,
     orderLoadedOnce: false,
@@ -59,7 +53,6 @@ export default {
     status: '',
     subtotal: 0,
     totalDiscount: 0,
-    totalPrice: 0,
     totalTax: 0,
     userId: '',
     userRefId: ''
@@ -102,7 +95,6 @@ export default {
       state.status = order.status
       state.subtotal = order.subtotal
       state.totalDiscount = order.totalDiscount
-      state.totalPrice = order.totalPrice
       state.totalTax = order.totalTax
       state.userId = order.userId
     },
@@ -116,9 +108,11 @@ export default {
   actions: {
     async fetchOrder ({ commit, state }: Action) {
       commit('fetchingOrder', true)
-      const order = await fetch(`${host}/order/${state.id}`, {
+      const order = await fetch(`${host}/order-thankyou`, {
         mode: 'cors',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${getToken()}`
+        }
       }).then(res => res.json())
       console.log('order', order)
       commit('fetchingOrder', false)
