@@ -34,6 +34,7 @@ export default {
     refId: '',
     orderError: null,
     orderLoadedOnce: false,
+    paymentMethod: '',
     shipping: {
       address: {
         name: '',
@@ -79,8 +80,8 @@ export default {
     missingIdError (state: any) {
       state.orderError = 'The order id is missing.'
     },
-    setOrder (state: any, order: any) {
-      console.log('we got the order', order)
+    setOrder (state: any, { order, token }: any) {
+      setToken(token)
       state.billing.address = order.billingAddress
       state.bundles = order.bundles
       state.createdAt = new Date(order.createdAt)
@@ -89,8 +90,10 @@ export default {
       state.id = order.id
       state._id = order._id
       state.orderLoadedOnce = true
+      state.paymentMethod = order.stripeCharge.source.brand.toLowerCase()
       state.shipping.address = order.shippingAddress
       state.shipping.postage = order.shipping.postage
+      state.shipping.service = order.shipping.service
       state.refId = order.refId
       state.status = order.status
       state.subtotal = order.subtotal
@@ -108,34 +111,34 @@ export default {
   actions: {
     async fetchOrder ({ commit, state }: Action) {
       commit('fetchingOrder', true)
-      const order = await fetch(`${host}/order-thankyou`, {
+      const response = await fetch(`${host}/order-thankyou`, {
         mode: 'cors',
         headers: {
           'Authorization': `Bearer ${getToken()}`
         }
       }).then(res => res.json())
-      console.log('order', order)
+      console.log('order response', response)
       commit('fetchingOrder', false)
-      if (order === null) {
+      if (response.order === null) {
         commit('errorLoadingOrder', `Couldn't find order: ${state.id}`)
-      } else if (order.id) {
-        commit('setOrder', order)
+      } else if (response.order.id) {
+        commit('setOrder', response)
       } else {
-        commit('errorLoadingOrder', order.message)
+        commit('errorLoadingOrder', response.message)
       }
     },
     async fetchUserMeta ({ commit, state }: Action) {
       commit('fetchingUser', true)
-      const userMeta = await fetch(`${host}/user/${state.userId}/meta`, {
+      const userMeta = await fetch(`${host}/user/meta`, {
         mode: 'cors',
-        credentials: 'include'
+        headers: { 'Authorization': `Bearer ${getToken()}` }
       }).then(res => res.json())
-
       commit('fetchingUser', false)
-      if (userMeta !== null || userMeta.meta) {
+
+      console.log('userMeta', userMeta)
+      if (userMeta !== null && userMeta.meta) {
         commit('setUserRefId', userMeta.refId)
       }
-      console.log('userMeta', userMeta)
     }
   }
 }

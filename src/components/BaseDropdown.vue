@@ -127,7 +127,7 @@ export default class Dropdown extends Vue {
 .md__dropdown-border {
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: 1px;
   left: 0;
   display: block;
   border-bottom: 1px solid rgb(30, 48, 10);

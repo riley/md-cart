@@ -48,15 +48,15 @@ label .checkbox-custom {
   background-color: transparent;
   border-radius: 5px;
   transition: all 0.3s ease-out;
-  border: 2px solid purple;
+  border: 2px solid #5C7975;
 }
 
 label input:checked ~ .checkbox-custom {
-  background-color: purple;
+  background-color: #5C7975;
   border-radius: 5px;
   transform: rotate(0deg) scale(1);
   opacity:1;
-  border: 2px solid purple;
+  border: 2px solid #5C7975;
 }
 
 label .checkbox-custom::after {
@@ -96,7 +96,7 @@ label .checkbox-custom::before {
   width: 0px;
   height: 0px;
   border-radius: 5px;
-  border: 2px solid purple;
+  border: 2px solid #5C7975;
   transform: scale(0);
 }
 

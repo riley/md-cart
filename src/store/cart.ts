@@ -20,7 +20,6 @@ const userSettings: User = {
 export default {
   namespaced: true,
   state: {
-    attemptingPurchase: false,
     billing: {
       address: {
         name: '',
@@ -48,6 +47,7 @@ export default {
     items: [],
     loginEmailRequested: false,
     order: null,
+    processing: false,
     refId: '',
     returningVipCustomer: false,
     shipping: {
@@ -92,8 +92,8 @@ export default {
     addItem (state: any, item: Item) {
       state.items = [...state.items, item]
     },
-    attemptingPurchase (state: any, status: boolean) {
-      state.attemptingPurchase = status
+    setProcessing (state: any, status: boolean) {
+      state.processing = status
     },
     editStoredBillingAddress (state: any) {
       state.useStoredBillingInfo = false
@@ -284,7 +284,6 @@ export default {
         const info = await fetch(`${host}/check-username`, {
           method: 'POST',
           mode: 'cors',
-          credentials: 'include',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
           },
@@ -308,7 +307,6 @@ export default {
       await fetch(`${host}/request-login-code`, {
         method: 'POST',
         mode: 'cors',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
         body: JSON.stringify({ username, brand: 'mrdavis' })
       })
@@ -321,7 +319,6 @@ export default {
       const info = await fetch(`${host}/login-existing`, {
         method: 'POST',
         mode: 'cors',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'csrf-token': state.csrfToken },
         body: JSON.stringify({ username, magicCode })
       }).then(res => res.json())
@@ -335,10 +332,9 @@ export default {
       }
     },
     async attemptPurchase ({ commit, state, getters }: Action, token: any) {
-      commit('attemptingPurchase', true)
+      commit('setProcessing', true)
       const result = await fetch(`${host}/buy`, {
         mode: 'cors',
-        credentials: 'include',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -362,6 +358,7 @@ export default {
         setToken(result.token)
         location.href = `/thankyou`
       } else {
+        commit('setProcessing', false)
         console.log('some error happened')
       }
     }

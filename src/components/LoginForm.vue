@@ -1,5 +1,5 @@
 <template>
-  <div id="login-form" class="login-form">
+  <div id="login-form" class="login-form" @click="emitClose">
     <div class="login-content">
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
@@ -15,7 +15,7 @@
         <BaseButton v-else>Log In</BaseButton>
       </form>
     </div>
-    <span class="close-button">×</span>
+    <span class="close-button" @click="emitClose">×</span>
   </div>
 </template>
 
@@ -46,6 +46,10 @@ export default class LoginForm extends Vue {
 
   handleLoginButtonClick () {
     this.login({ email: this.email, code: this.magicCode })
+  }
+
+  emitClose () {
+    this.$emit('close')
   }
 }
 </script>
@@ -85,5 +89,6 @@ export default class LoginForm extends Vue {
   top: 70px;
   right: 20px;
   font-size: 100px;
+  cursor: pointer;
 }
 </style>

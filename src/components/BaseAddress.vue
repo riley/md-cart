@@ -20,12 +20,12 @@
         label="Street Address" />
       <TextInput :value="address_2" @input="handleAddress2" type="text" name="address_2" label="Apt / Building No." />
       <TextInput :value="city" @input="handleCity" required type="text" name="city" label="City" />
-
-      <Dropdown v-if="country === 'US'" :value="state" @input="handleState" required label="State" :options="states" name="state" />
-      <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" required label="Province" :options="provinces" name="state" />
-      <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" required label="Province" name="state" />
-
-      <TextInput :value="zip" @input="handleZip" required label="Zip code" :type="country === 'US' ? 'tel' : 'text'" name="zip" />
+      <div class="state-zip-holder">
+        <Dropdown v-if="country === 'US'" :value="state" @input="handleState" required label="State" :options="states" name="state" />
+        <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" required label="Province" :options="provinces" name="state" />
+        <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" required label="Province" name="state" />
+        <TextInput :value="zip" @input="handleZip" required label="Zip code" :type="country === 'US' ? 'tel' : 'text'" name="zip" />
+      </div>
       <Dropdown :value="country" @input="handleCountry" required label="Country" :options="countries" name="country" />
     </div>
   </div>
@@ -109,5 +109,14 @@ address {
   padding-left: 1rem;
   line-height: 1.6em;
   border-left: 5px solid rgba(0, 0, 0, .2);
+}
+
+.state-zip-holder {
+  display: flex;
+}
+
+.state-zip-holder > div:first-child {
+  margin-right: 1rem;
+  flex-grow: 1;
 }
 </style>

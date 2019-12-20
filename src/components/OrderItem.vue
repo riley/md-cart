@@ -5,7 +5,6 @@
     </Badge>
     <div class="meta">
       <p class="title">{{ title }}</p>
-      <p class="description">{{ description }}</p>
     </div>
     <div class="item-cost">
       ${{ cost / 100 }}
@@ -34,11 +33,20 @@ export default {
   position: relative;
   display: flex;
   border-bottom: 1px solid #ccc;
+  padding: 1rem 0;
+}
+
+.item-root:first-child {
+  padding-top: 0;
+}
+
+.item-root:last-child {
+  padding-bottom: 0;
 }
 
 .item-thumb-container {
   width: 100px;
-  margin: .5rem;
+  margin-right: .5rem;
 }
 
 .item-thumb {
@@ -69,6 +77,7 @@ export default {
   width: 100px;
   padding: .5rem;
   font-weight: bold;
+  font-family: Oswald, sans-serif;
   font-size: 40px;
 }
 </style>

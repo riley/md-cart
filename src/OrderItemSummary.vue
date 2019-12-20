@@ -10,7 +10,7 @@
         <span>Shipping</span>
         <span>${{ postage / 100 }}</span>
       </li>
-      <li v-if="discount > 0" class="discount">
+      <li v-if="discountBeforeReferralBonus > 0" class="discount">
         <span>Mr. Davis Rewards</span>
         <span>-${{ discountBeforeReferralBonus / 100 }}</span>
       </li>
@@ -62,7 +62,11 @@ export default class OrderItemSummary extends Vue {
   googleCheckoutTracked = false
 
   get items () {
-    return this.bundles[0].skus.reduce((carry: any[], item) => {
+    let items = []
+
+    if (this.bundles.length === 0) return
+
+    items = this.bundles[0].skus.reduce((carry: any[], item) => {
       const product = this.stock.find((product: Product) => product.sku === item.sku)
       const productIndex = carry.findIndex((fmtItem: Item) => fmtItem.sku === item.sku)
       if (productIndex === -1) {
@@ -73,13 +77,14 @@ export default class OrderItemSummary extends Vue {
       }
       return carry
     }, [])
+
+    return items
   }
 
   async mounted () {
+    console.log('mounted', this.id)
     await this.fetchStock()
     if (this.id === null) {
-      this.missingIdError()
-    } else {
       await this.fetchOrder()
       this.fetchUserMeta()
     }
@@ -131,13 +136,14 @@ export default class OrderItemSummary extends Vue {
 
 <style scoped>
 .order-item-summary {
-  padding: 4rem;
+  padding: 1rem;
   max-width: 30rem;
   background-color: rgba(0, 0, 0, .07);
 }
 
 .totals {
   padding: 0;
+  margin: 1rem 0 0;
 }
 
 .totals li {

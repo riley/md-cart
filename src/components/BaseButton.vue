@@ -27,7 +27,6 @@ export default class BaseButton extends Vue {
 
 <style scoped>
 button, a {
-  margin-top: 1em;
   font-style: normal;
   position: relative;
   line-height: 1.3;

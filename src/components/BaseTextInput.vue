@@ -9,6 +9,7 @@
         :required="required"
         :value="value"
         :autocomplete="auto"
+        :placeholder="name === 'address_1' ? 'Street Address' : null"
         @input="validate($event)"
         @change="validate($event)"
         @focus="setFocus"
@@ -163,7 +164,7 @@ export default class TextInput extends Vue {
 }
 
 .errorHint {
-  color: #ff9100;
+  color: #a00;
   text-align: left;
 }
 
@@ -225,12 +226,12 @@ input, input:invalid, input:required {
 .success .border,
 .success .border::after,
 .success .border::before {
-  border-bottom-color: rgb(40, 214, 106);
+  border-bottom-color: #33441f;
 }
 
 .success::after {
   content: '✓';
-  color: rgb(40, 214, 106);
+  color: #33441f;
   position: absolute;
   right: 4px;
   top: 10px;
@@ -248,12 +249,12 @@ input, input:invalid, input:required {
 }
 
 .invalid .border {
-  border-bottom-color: #ff9100;
+  border-bottom-color: #a00;
 }
 
 .invalid .border::before,
 .invalid .border::after {
-  background-color: #ff9100;
+  background-color: #a00;
 }
 
 .border::before {

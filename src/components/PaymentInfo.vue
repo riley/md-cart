@@ -11,8 +11,8 @@
     <div class="stripe-input" :class="{success}" ref="card" :style="{ display: useStoredPaymentInfo ? 'none' : 'block' }"></div>
     <Button
       @click="purchase"
-      :loading="attemptingPurchase"
-      :disabled="attemptingPurchase">{{ attemptingPurchase ? 'PROCESSING' : 'CHECKOUT' }}</Button>
+      :loading="processing"
+      :disabled="processing">{{ processing ? 'PROCESSING' : 'CHECKOUT' }}</Button>
   </section>
 </template>
 
@@ -32,9 +32,10 @@ let card: any
   components: { Instructions, Button, Card }
 })
 export default class PaymentInfo extends Vue {
-  @cart.State attemptingPurchase: boolean
+  @cart.State processing: boolean
   @cart.State useStoredPaymentInfo: boolean
   @cart.State user: User
+  @cart.Mutation setProcessing: any
   @cart.Mutation editStoredPaymentInfo: boolean
   @cart.Action attemptPurchase: (token: string) => Promise<void>
 
@@ -60,12 +61,14 @@ export default class PaymentInfo extends Vue {
   }
 
   async purchase () {
+    this.setProcessing(true)
     const result = await stripe.createToken(card)
-    console.log('result', result)
+    console.log('stripe token result', result)
 
     if (result.error) {
       this.hasCardErrors = true
       this.$forceUpdate() // force the DOM to update so Stripe can update
+      this.setProcessing(false)
       return
     }
 
