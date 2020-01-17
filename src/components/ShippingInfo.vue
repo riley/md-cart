@@ -1,5 +1,10 @@
 <template>
   <section id="shipping-info">
+    <LoginForm v-if="loginFormActive" :loginErrorMessage="loginErrorMessage" :loginEmailRequested="loginEmailRequested" @close="clearLoginForm" />
+    <p class="login-prompt">Ordered from us before?
+      <Button class="login-button" v-if="!userLoggedIn" inline @click="toggleLoginForm(true)">Login</Button>
+      <Button xlass="logout-button" v-else inline @click="logout">Logout</Button>
+    </p>
     <Instructions text="Your Shipping Address" step="1"/>
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
       <Card>
@@ -21,7 +26,7 @@
           type="email"
           name="email"
           label="Email Address" />
-        <Banner v-if="isReturningCustomer" title="Welcome Back!" @main="expressCheckout" @secondary="closeBanner">
+        <Banner v-if="isReturningCustomer && !userLoggedIn && !welcomeBackCardDismissed" title="Welcome Back!" @main="toggleLoginForm(true)" @secondary="setWelcomeBackCardDismissed(true)">
           <template v-slot:copy>
             Looks like you've ordered from us before! Use express checkout to use your previous info, or continue as normal and we'll link to your account.
           </template>
@@ -39,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import TextInput from './BaseTextInput.vue'
 import Address from './BaseAddress.vue'
 import Banner from './BaseBanner.vue'
@@ -48,23 +53,33 @@ import Card from './BaseCard.vue'
 import CardContent from './BaseCardContent.vue'
 import Chip from './BaseChip.vue'
 import Instructions from './BaseInstructions.vue'
+import LoginForm from './LoginForm.vue'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { TextInput, Address, Banner, Button, Card, CardContent, Chip, Instructions },
+  components: { TextInput, Address, Banner, Button, Card, CardContent, Chip, Instructions, LoginForm },
 })
 export default class ShippingInfo extends Vue {
-  @cart.State email: string
   @cart.State((state: any) => state.shipping.address) address: Address
+  @cart.State email: string
   @cart.State isReturningCustomer: boolean
+  @cart.State loginEmailRequested: boolean
+  @cart.State loginFormActive: boolean
+  @cart.State loginErrorMessage: string
   @cart.State user: boolean
   @cart.State useStoredShippingInfo: boolean
+  @cart.State welcomeBackCardDismissed: boolean
+  @cart.Getter userLoggedIn: string
   @cart.Mutation setEmail: any
   @cart.Mutation setAddress: any
   @cart.Mutation replaceShippingAddress: any
+  @cart.Mutation toggleLoginForm: any
+  @cart.Mutation clearLoginForm: any
   @cart.Mutation editStoredShippingAddress: any
+  @cart.Mutation setWelcomeBackCardDismissed: any
+  @cart.Action logout: any
   @cart.Action checkUsername: (email: string) => Promise<void>
   @cart.Action updateCart: () => Promise<void>
 
@@ -79,12 +94,6 @@ export default class ShippingInfo extends Vue {
       this.updateCart()
     }
   }
-  expressCheckout () {
-    console.log('expressCheckout')
-  }
-  closeBanner () {
-    console.log('closeBanner')
-  }
 
   handleBlurEmail (email: string) {
     this.checkUsername(email)
@@ -97,6 +106,14 @@ export default class ShippingInfo extends Vue {
 section {
   position: relative;
   margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-prompt {
+  margin: 0 0 .5rem 0;
+  text-align: right;
 }
 
 .loggedInShippingInfo {

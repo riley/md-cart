@@ -3,8 +3,8 @@ module.exports = {
   pages: {
     cart: {
       entry: 'src/main.ts',
-      template: 'public/index.html',
-      filename: 'index.html',
+      template: 'public/cart.html',
+      filename: 'cart.html',
       title: 'Your Cart',
     },
     thankyou: {

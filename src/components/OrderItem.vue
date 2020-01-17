@@ -34,6 +34,7 @@ export default {
   display: flex;
   border-bottom: 1px solid #ccc;
   padding: 1rem 0;
+  width: 100%;
 }
 
 .item-root:first-child {
@@ -59,6 +60,7 @@ export default {
 
 .meta {
   margin: 0 .5rem;
+  flex-grow: 1;
 }
 
 .title {
@@ -79,5 +81,6 @@ export default {
   font-weight: bold;
   font-family: Oswald, sans-serif;
   font-size: 40px;
+  text-align: right;
 }
 </style>

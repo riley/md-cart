@@ -32,7 +32,6 @@ export default class Badge extends Vue {
   height: 20px;
   display: flex;
   padding: 0 6px;
-  z-index: 1;
   position: absolute;
   flex-wrap: wrap;
   font-size: 0.75rem;

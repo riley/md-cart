@@ -1,49 +1,50 @@
 <template>
-  <div>
-    <div class="refer-notification" v-if="refId">
-      Referral discount of $10 applied upon checkout to orders $40 or more with a new account [{{ refId }}]
-    </div>
-    <div v-if="items.length">
-      <ul class="cart-items">
-        <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
-      </ul>
-      <div v-if="fetching" class="spinner-container">
-        <Spinner />
+  <div class="root">
+    <div class="box">
+      <div v-if="items.length">
+        <ul class="cart-items">
+          <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
+        </ul>
+        <div v-if="fetching" class="spinner-container">
+          <Spinner />
+        </div>
+        <ul v-else class="totals">
+          <li>
+            <span>Order Subtotal</span>
+            <span>${{ subtotal / 100 }}</span>
+          </li>
+          <li>
+            <span>Shipping</span>
+            <span>${{ postage }}</span>
+          </li>
+          <li v-if="discount > 0" class="discount">
+            <span>Mr. Davis Rewards</span>
+            <span>-${{ discount }}</span>
+          </li>
+          <li v-if="referDiscountEligible" class="discount">
+            <span>Refer Discount</span>
+            <span>-$10</span>
+          </li>
+          <li v-if="tax > 0">
+            <span>Tax</span>
+            <span>${{ tax }}</span>
+          </li>
+          <li class="grandTotal">
+            <span>Total</span>
+            <span>${{ grandTotal / 100 }}</span>
+          </li>
+        </ul>
+        <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
       </div>
-      <ul v-else class="totals">
-        <li>
-          <span>Order Subtotal</span>
-          <span>${{ subtotal / 100 }}</span>
-        </li>
-        <li>
-          <span>Shipping</span>
-          <span>${{ postage }}</span>
-        </li>
-        <li v-if="discount > 0" class="discount">
-          <span>Mr. Davis Rewards</span>
-          <span>-${{ discount }}</span>
-        </li>
-        <li v-if="referDiscountEligible" class="discount">
-          <span>Refer Discount</span>
-          <span>-$10</span>
-        </li>
-        <li v-if="tax > 0">
-          <span>Tax</span>
-          <span>${{ tax }}</span>
-        </li>
-        <li class="grandTotal">
-          <span>Total</span>
-          <span>${{ grandTotal / 100 }}</span>
-        </li>
-      </ul>
-      <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
+      <div v-else>
+        <CartItemSkeleton v-if="fetching" />
+        <div v-else class="empty-cart">Your cart is empty</div>
+        <p class="continue-shopping">
+          <Button inline href="/best-undershirt">Continue Shopping</Button>
+        </p>
+      </div>
+      <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setRecurringVIP" :makeRecurring="createRecurringVIP" />
     </div>
-    <div v-else>
-      <CartItemSkeleton v-if="fetching" />
-      <h2 v-else class="empty-cart">Your cart is empty</h2>
-      <Button href="/best-undershirt">Continue Shopping</Button>
-    </div>
-    <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setRecurringVIP" :makeRecurring="createRecurringVIP" />
   </div>
 </template>
 
@@ -89,7 +90,6 @@ export default class CartSummary extends Vue {
   @cart.State((state: any) => state.totalTax / 100) tax: number
   @cart.State fetching: boolean
   @cart.State isVip: boolean
-  @cart.State refId: string
   @cart.State returningVipCustomer: boolean
   @cart.State createRecurringVIP: boolean
 
@@ -106,6 +106,7 @@ export default class CartSummary extends Vue {
 
   async mounted () {
     await this.fetchStock()
+    console.log('fetch cart once')
     this.fetchCart()
   }
 
@@ -117,21 +118,18 @@ export default class CartSummary extends Vue {
 </script>
 
 <style scoped>
-.refer-notification {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: .5rem;
+.box {
+  background: #fff;
+  padding: 1.5rem;
+}
+
+.continue-shopping {
   text-align: center;
-  background: blue;
-  color: white;
-  z-index: 100;
 }
 
 .cart-items, .totals {
   padding: 0;
-  margin-bottom: 0;
+  margin-bottom: 1rem;
   margin-left: 0;
 }
 
@@ -140,6 +138,7 @@ export default class CartSummary extends Vue {
   justify-content: space-between;
   line-height: 1.5em;
   color: #555;
+  font-size: 1.25rem;
 }
 
 .totals li.discount {
@@ -153,5 +152,7 @@ export default class CartSummary extends Vue {
 .empty-cart {
   text-align: center;
   color: #666;
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 </style>

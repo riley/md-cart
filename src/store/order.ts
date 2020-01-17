@@ -119,7 +119,7 @@ export default {
       }).then(res => res.json())
       console.log('order response', response)
       commit('fetchingOrder', false)
-      if (response.order === null) {
+      if (!response.order) {
         commit('errorLoadingOrder', `Couldn't find order: ${state.id}`)
       } else if (response.order.id) {
         commit('setOrder', response)

@@ -58,7 +58,9 @@ export default class BillingInfo extends Vue {
 <style scoped>
 section {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  padding: 1.5rem;
 }
 
 .loggedInBillingInfo {

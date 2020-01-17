@@ -56,10 +56,11 @@ export default class Dropdown extends Vue {
 
 .md__select {
   display: block;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   line-height: 1.3;
   padding: .25em 0;
   width: 100%;
+  filter: none;
   max-width: 100%;
   box-sizing: border-box;
   box-shadow: none !important;
@@ -114,7 +115,6 @@ export default class Dropdown extends Vue {
   letter-spacing: 0.0375rem;
   position: absolute;
   left: 0px;
-  z-index: 1;
   font-size: 1.25rem;
   color: rgb(163, 163, 163);
   transform-origin: 0px 0px;
@@ -128,7 +128,7 @@ export default class Dropdown extends Vue {
   position: absolute;
   right: 0;
   bottom: 1px;
-  left: 0;
+left: 0;
   display: block;
   border-bottom: 1px solid rgb(30, 48, 10);
   pointer-events: none;

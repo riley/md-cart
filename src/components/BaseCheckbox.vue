@@ -108,7 +108,7 @@ label input:checked ~ .checkbox-custom::before {
   border-radius: 5px;
   transform: scale(3);
   opacity:0;
-  z-index: 999;
+  z-index: 20;
   transition: all 0.3s ease-out;
 }
 

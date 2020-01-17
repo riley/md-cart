@@ -1,13 +1,13 @@
 <template>
   <div>
-    <LoginForm v-if="loginFormActive" :loginEmailRequested="loginEmailRequested" @close="hideLoginForm" />
-    <div class="access-buttons">
-      <Button v-if="!userLoggedIn" inline @click="showLoginForm">Login</Button>
-      <Button v-else inline @click="logout">Logout</Button>
-    </div>
     <ShippingInfo />
     <BillingInfo />
     <PaymentInfo />
+    <div class="notification-container">
+      <Notification v-if="refId" global type="primary" :message="referralMessage" />
+      <Notification v-if="isNonVIPCheckIn" global type="primary" message="Thanks for coming back! 🙌 your discount of $10 will be applied at checkout on orders more than $50." />
+      <Notification v-if="globalErrorMessage" global type="error" :message="globalErrorMessage" @close="dismissNotification" />
+    </div>
   </div>
 </template>
 
@@ -18,32 +18,39 @@ import Button from './BaseButton.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
 import PaymentInfo from './PaymentInfo.vue'
-import LoginForm from './LoginForm.vue'
+import Notification from './BaseNotification.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { Button, ShippingInfo, BillingInfo, PaymentInfo, LoginForm },
+  components: { Button, Notification, ShippingInfo, BillingInfo, PaymentInfo },
 })
 export default class CustomerInfoInputs extends Vue {
-  @cart.Getter userLoggedIn: boolean
-  @cart.State loginEmailRequested: boolean
-  @cart.Mutation logout: any
+  @cart.State globalErrorMessage: string
+  @cart.State isNonVIPCheckIn: boolean
+  @cart.State refId: string
+  @cart.Mutation setGlobalError: any
 
-  loginFormActive: boolean = false
-
-  showLoginForm () {
-    this.loginFormActive = true
+  get referralMessage () {
+    return `Referral discount of $10 applied upon checkout to orders $40 or more with a new account [${this.refId}]`
   }
 
-  hideLoginForm () {
-    this.loginFormActive = false
+  dismissNotification () {
+    this.setGlobalError(null)
   }
 }
 </script>
 
 <style scoped>
-.access-buttons {
-  text-align: right;
+.notification-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.notification-container p {
+  margin-bottom: 0;
+  z-index: 40;
 }
 </style>

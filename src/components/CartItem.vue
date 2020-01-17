@@ -1,16 +1,8 @@
 <template>
   <li class="cartItem_root">
-    <Badge :count="quantity" class="thumb-container">
-      <div class="thumbnail" :style="{'background-color': color, 'background-image': `url(${imageURLs[0]})`}" />
-    </Badge>
+    <div class="thumbnail" :style="{'background-color': color, 'background-image': `url(${imageURLs[0]})`}" />
     <div class="product-info">
       <p class="title">{{ title }}</p>
-      <div class="bottom-row">
-        <div v-if="fetching" class="spinner-container">
-          <Spinner />
-        </div>
-        <span v-else class="cost">${{ cost / 100 }}</span>
-      </div>
     </div>
     <Incrementer class="incrementer" @input="incrementItemQuantity" :value="quantity" />
   </li>
@@ -66,16 +58,13 @@ export default class CartItem extends Vue {
   border-bottom: 1px solid #ccc;
   background-color: white;
   font-weight: 300;
-  padding: 1rem 1rem 1rem 0;
+  padding: 1rem 0;
 }
 
 .thumbnail {
   width: 4rem;
   height: 4rem;
   background-size: cover;
-}
-
-.thumb-container {
   margin-right: 1rem;
 }
 
@@ -87,11 +76,6 @@ export default class CartItem extends Vue {
   font-size: 17px;
   margin: 0;
   text-align: left;
-}
-
-.bottom-row {
-  display: flex;
-  justify-content: space-between;
 }
 
 .cost {

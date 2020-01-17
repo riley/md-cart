@@ -24,6 +24,6 @@ export const setToken = (token) => {
   }
 }
 
-export const logoutToken = () => {
-  store.removeItem('auth_token')
+export const getRefId = () => {
+  return store.getItem('refId')
 }

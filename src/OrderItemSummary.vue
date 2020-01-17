@@ -135,12 +135,6 @@ export default class OrderItemSummary extends Vue {
 </script>
 
 <style scoped>
-.order-item-summary {
-  padding: 1rem;
-  max-width: 30rem;
-  background-color: rgba(0, 0, 0, .07);
-}
-
 .totals {
   padding: 0;
   margin: 1rem 0 0;

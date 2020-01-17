@@ -1,6 +1,7 @@
 import Vue from 'vue'
-import CartSummary from './components/CartSummary.vue'
-import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
+// import CartSummary from './components/CartSummary.vue'
+// import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
+import Cart from './Cart.vue'
 import store from './store/store'
 import { setToken } from './utils/storage'
 
@@ -20,13 +21,18 @@ document.head.appendChild(script)
 
 new Vue({
   store,
-  render: h => h(CartSummary)
-}).$mount('#cart-summary')
+  render: h => h(Cart)
+}).$mount('#app')
 
-new Vue({
-  store,
-  render: h => h(CustomerInfoInputs)
-}).$mount('#forms-target')
+// new Vue({
+//   store,
+//   render: h => h(CartSummary)
+// }).$mount('#cart-summary')
+
+// new Vue({
+//   store,
+//   render: h => h(CustomerInfoInputs)
+// }).$mount('#forms-target')
 declare global {
 
   interface Window {
@@ -144,6 +150,11 @@ declare global {
   interface FormInputEvent {
     name: string;
     value: string;
+  }
+
+  interface PaymentError {
+    param: string
+    msg: string
   }
 
   interface Action {

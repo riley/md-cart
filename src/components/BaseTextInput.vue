@@ -1,7 +1,7 @@
 <template>
   <div class="fieldWrapper" :class="{invalid, success}">
     <label>
-      <span class="labelText" :style="{display: autocomplete && gmapsLoaded ? 'none' : 'inline'}" :class="{focussedOrValid: focussed || !invalid}">{{ label }}</span>
+      <span class="labelText" :style="{display: autocomplete && gmapsLoaded ? 'none' : 'inline'}" :class="{focussedOrValid: focussed || value}">{{ label }}</span>
       <input
         ref="input"
         :type="type"
@@ -16,7 +16,7 @@
         @blur="setBlur($event)" />
       <span class="border"></span>
     </label>
-    <p v-if="invalid" class="errorHint">{{ errorHint }}</p>
+    <p class="errorHint" v-html="invalid ? errorHint : '&nbsp;'"></p>
   </div>
 </template>
 
@@ -160,12 +160,14 @@ export default class TextInput extends Vue {
 <style scoped>
 .fieldWrapper {
   position: relative;
-  margin-bottom: 1.75rem;
+  margin-bottom: .75rem;
 }
 
 .errorHint {
   color: #a00;
   text-align: left;
+  margin: 0;
+  font-size: 13px;
 }
 
 label {
@@ -183,13 +185,12 @@ label {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   letter-spacing: 0.0375rem;
   position: absolute;
-  left: 0px;
-  z-index: 1;
+  left: 0;
   font-size: 1.25rem;
   color: rgb(163, 163, 163);
-  transform-origin: 0px 0px;
+  transform-origin: 0 0;
   pointer-events: none;
-  padding: 0.25rem 0px;
+  padding: 0.15rem 0px;
   transition: transform 0.3s ease-out 0s;
   transform: translateY(0) scale(1);
 }
@@ -204,9 +205,10 @@ input, input:invalid, input:required {
   box-shadow: none !important;
   letter-spacing: 0.0375rem;
   padding: .25rem 0 !important;
+  filter: none;
   display: block;
   width: 100%;
-  font-size: 1.25rem !important;
+  font-size: 1.15rem !important;
   background: white;
   outline: currentColor none 0;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
@@ -226,12 +228,12 @@ input, input:invalid, input:required {
 .success .border,
 .success .border::after,
 .success .border::before {
-  border-bottom-color: #33441f;
+  border-bottom-color: #3BA462;
 }
 
 .success::after {
   content: '✓';
-  color: #33441f;
+  color: #3BA462;
   position: absolute;
   right: 4px;
   top: 10px;

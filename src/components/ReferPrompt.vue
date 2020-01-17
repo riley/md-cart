@@ -3,10 +3,18 @@
     <p class="cta">Give a little.</p>
     <div class="refer-callout-bubbles">
       <div class="callout left" :class="{on}">
-        <span class="earn">give</span><span class="dollaz">$10</span>
+        <div class="text-holder">
+          <span class="earn">give</span>
+          <br>
+          <span class="dollaz">$10</span>
+        </div>
       </div>
       <div class="callout right" :class="{on}">
-        <span class="earn">earn</span><span class="dollaz">$10</span>
+        <div class="text-holder">
+          <span class="earn">earn</span>
+          <br>
+          <span class="dollaz">$10</span>
+        </div>
       </div>
     </div>
     <p class="cta">Get a little.</p>
@@ -69,15 +77,22 @@ export default class ReferPrompt extends Vue {
   transition: transform .5s 2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+.text-holder {
+  text-align: center;
+  word-wrap: normal;
+  width: 100%;
+}
+
 .earn {
   font-size: 2.5em;
-  margin-bottom: -50px;
 }
 
 .dollaz {
+  margin-top: 15px;
   font-size: 4em;
   letter-spacing: -0.08em;
   transform: translateX(-4px);
+  display: inline-block;
 }
 
 .left {

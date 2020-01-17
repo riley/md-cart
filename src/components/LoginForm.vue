@@ -1,18 +1,21 @@
 <template>
-  <div id="login-form" class="login-form" @click="emitClose">
+  <div id="login-form" class="login-form" @click.self="emitClose">
     <div class="login-content">
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
-      <form method="POST" @submit.prevent="handleClick">
-        <BaseTextInput v-model="email" type="email" />
+      <form method="POST" @submit.prevent="onSubmit">
+        <TextInput v-model="email" type="email" />
         <template v-if="loginEmailRequested">
-          <BaseButton inline @click="handleClick">Resend Email?</BaseButton>
-          <p>Code sent ✔✅</p>
+          <p class="code-sent">
+            <Button inline @click="handleClick">Resend Email?</Button>
+            <span>Code sent ✅</span>
+          </p>
           <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
-          <BaseTextInput label="6-digit code" v-model="magicCode" />
-          <BaseButton @click="handleLoginButtonClick">Login</BaseButton>
+          <TextInput label="6-digit code" v-model="magicCode" />
+          <Notification v-if="loginErrorMessage" type="error" :message="loginErrorMessage" />
+          <Button @click="handleLoginButtonClick">Login</Button>
         </template>
-        <BaseButton v-else>Log In</BaseButton>
+        <Button @click="handleClick" v-if="!loginEmailRequested">Log In</Button>
       </form>
     </div>
     <span class="close-button" @click="emitClose">×</span>
@@ -22,33 +25,42 @@
 <script lang="ts">
 import { Prop, Component, Vue } from 'vue-property-decorator'
 import { Action, namespace } from 'vuex-class'
-import BaseTextInput from './BaseTextInput.vue'
-import BaseButton from './BaseButton.vue'
+import TextInput from './BaseTextInput.vue'
+import Notification from './BaseNotification.vue'
+import Button from './BaseButton.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { BaseTextInput, BaseButton },
+  components: { TextInput, Button, Notification },
 })
 export default class LoginForm extends Vue {
   @Prop({ type: Boolean }) loginEmailRequested: boolean
+  @Prop() loginErrorMessage: string
   @cart.Action requestLoginEmail: any
   @cart.Action login: any
+  @cart.Mutation clearLoginForm: any
 
   email = ''
   magicCode = ''
 
+  onSubmit () {
+    console.log('onSubmit')
+  }
+
   handleClick () {
+    console.log('LoginForm handleClick')
     if (this.email !== '') {
       this.requestLoginEmail(this.email)
     }
   }
 
   handleLoginButtonClick () {
-    this.login({ email: this.email, code: this.magicCode })
+    this.login({ username: this.email, magicCode: this.magicCode })
   }
 
   emitClose () {
+    this.clearLoginForm()
     this.$emit('close')
   }
 }
@@ -80,13 +92,18 @@ export default class LoginForm extends Vue {
   letter-spacing: 1px;
 }
 
+.code-sent {
+  display: flex;
+  justify-content: space-between;
+}
+
 .subhead {
   font-size: 14px;
 }
 
 .close-button {
   position: absolute;
-  top: 70px;
+  top: 100px;
   right: 20px;
   font-size: 100px;
   cursor: pointer;
