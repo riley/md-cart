@@ -44,7 +44,6 @@ export default class ShipStatus extends Vue {
   }
 
   mapsCallback () {
-    console.log('mapsCallback', this)
     const geocoder = new window.google.maps.Geocoder()
     const map = new window.google.maps.Map(this.$refs.map, {
       disableDefaultUI: true,

@@ -1,5 +1,5 @@
 <template>
-  <p :class="[type]" class="root" role="alert" v-if="!riley" @click="hide">
+  <p :class="[type]" class="root" role="alert" v-if="!hidden" @click="hide">
     <span v-html="message"></span>
     <span v-if="global" class="dismiss-button" aria-label="dismiss button">×</span>
   </p>
@@ -14,10 +14,10 @@ export default class BaseNotification extends Vue {
   @Prop({ type: Boolean, default: false }) global: boolean
   @Prop({ type: String, default: 'default' }) type: string
 
-  riley = false
+  hidden = false
 
   hide () {
-    this.riley = true
+    this.hidden = true
     this.$emit('close')
   }
 }
@@ -29,7 +29,7 @@ export default class BaseNotification extends Vue {
   margin: 0 0 1rem 0;
   font-size: 1rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   border-bottom: 1px solid white;
   cursor: pointer;
 }
@@ -37,6 +37,9 @@ export default class BaseNotification extends Vue {
 .dismiss-button {
   font-size: 2em;
   line-height: .5em;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
 }
 
 .default {

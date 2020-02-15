@@ -1,8 +1,15 @@
 <template>
   <section id="shipping-info">
+    welcomeBackCardDismissed {{ welcomeBackCardDismissed }}<br>
+    isReturningCustomer {{ isReturningCustomer }}<br>
+    returningVipCustomer {{ returningVipCustomer }}<br>
+    userLoggedIn {{ userLoggedIn }}<br>
+    bundle isVip {{ isVip }}<br>
     <LoginForm v-if="loginFormActive" :loginErrorMessage="loginErrorMessage" :loginEmailRequested="loginEmailRequested" @close="clearLoginForm" />
-    <p class="login-prompt">Ordered from us before?
-      <Button class="login-button" v-if="!userLoggedIn" inline @click="toggleLoginForm(true)">Login</Button>
+    <p class="login-prompt">
+      <span v-if="!userLoggedIn">Ordered from us before?
+        <Button class="login-button" inline @click="toggleLoginForm(true)">Login</Button>
+      </span>
       <Button xlass="logout-button" v-else inline @click="logout">Logout</Button>
     </p>
     <Instructions text="Your Shipping Address" step="1"/>
@@ -26,20 +33,28 @@
           type="email"
           name="email"
           label="Email Address" />
-        <Banner v-if="isReturningCustomer && !userLoggedIn && !welcomeBackCardDismissed" title="Welcome Back!" @main="toggleLoginForm(true)" @secondary="setWelcomeBackCardDismissed(true)">
-          <template v-slot:copy>
-            Looks like you've ordered from us before! Use express checkout to use your previous info, or continue as normal and we'll link to your account.
-          </template>
-          <template v-slot:main>
-            Express Checkout
-          </template>
-          <template v-slot:secondary>
-            Continue
-          </template>
-        </Banner>
         <Address @input="updateAddress" @replaceAddress="replaceShippingAddress" v-bind="address" />
       </fieldset>
     </form>
+
+    <!-- for a non-vip returning customer -->
+    <Banner
+      v-if="isReturningCustomer && !returningVipCustomer && !userLoggedIn && !welcomeBackCardDismissed"
+      title="Welcome Back!"
+      @main="toggleLoginForm(true)"
+      @secondary="welcomeBackCardDismissed = true"
+      class="welcome-back">
+      <template v-slot:copy>
+        Looks like you've ordered from us before! Log in to use your previous info, or continue as normal and we'll link to your account.
+      </template>
+      <template v-slot:main>
+        Log In
+      </template>
+      <template v-slot:secondary>
+        Close
+      </template>
+    </Banner>
+
   </section>
 </template>
 
@@ -65,12 +80,13 @@ export default class ShippingInfo extends Vue {
   @cart.State((state: any) => state.shipping.address) address: Address
   @cart.State email: string
   @cart.State isReturningCustomer: boolean
+  @cart.State isVip: boolean
+  @cart.State returningVipCustomer: boolean
   @cart.State loginEmailRequested: boolean
   @cart.State loginFormActive: boolean
   @cart.State loginErrorMessage: string
   @cart.State user: boolean
   @cart.State useStoredShippingInfo: boolean
-  @cart.State welcomeBackCardDismissed: boolean
   @cart.Getter userLoggedIn: string
   @cart.Mutation setEmail: any
   @cart.Mutation setAddress: any
@@ -78,10 +94,11 @@ export default class ShippingInfo extends Vue {
   @cart.Mutation toggleLoginForm: any
   @cart.Mutation clearLoginForm: any
   @cart.Mutation editStoredShippingAddress: any
-  @cart.Mutation setWelcomeBackCardDismissed: any
   @cart.Action logout: any
   @cart.Action checkUsername: (email: string) => Promise<void>
   @cart.Action updateCart: () => Promise<void>
+
+  welcomeBackCardDismissed: boolean = false
 
   updateAddress ($event: FormInputEvent) {
     this.setAddress({
@@ -111,6 +128,10 @@ section {
   margin-bottom: 1.5rem;
 }
 
+.welcome-back {
+  margin-bottom: 1rem;
+}
+
 .login-prompt {
   margin: 0 0 .5rem 0;
   text-align: right;
@@ -118,6 +139,10 @@ section {
 
 .loggedInShippingInfo {
   text-align: left;
+}
+
+.loggedInShippingInfo + .banner {
+  margin-top: 1rem;
 }
 
 .loggedInAs {

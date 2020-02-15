@@ -32,7 +32,7 @@ export default class CustomerInfoInputs extends Vue {
   @cart.Mutation setGlobalError: any
 
   get referralMessage () {
-    return `Referral discount of $10 applied upon checkout to orders $40 or more with a new account [${this.refId}]`
+    return `Referral discount of $10 applied upon checkout to orders $40 or more with a new account`
   }
 
   dismissNotification () {

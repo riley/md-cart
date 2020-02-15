@@ -1,39 +1,49 @@
 <template>
   <div class="order-item-summary">
-    <Item v-for="item in items" :key="item.sku" v-bind="item" />
-    <ul class="totals">
-      <li>
-        <span>Order Subtotal</span>
-        <span>${{ subtotal / 100 }}</span>
-      </li>
-      <li>
-        <span>Shipping</span>
-        <span>${{ postage / 100 }}</span>
-      </li>
-      <li v-if="discountBeforeReferralBonus > 0" class="discount">
-        <span>Mr. Davis Rewards</span>
-        <span>-${{ discountBeforeReferralBonus / 100 }}</span>
-      </li>
-      <li v-if="referDiscount" class="discount">
-        <span>Refer Discount</span>
-        <span>-$10</span>
-      </li>
-      <li v-if="totalTax > 0">
-        <span>Tax</span>
-        <span>${{ totalTax }}</span>
-      </li>
-      <li class="grandTotal">
-        <span>Total</span>
-        <span>${{ grandTotal / 100 }}</span>
-      </li>
-    </ul>
+    <div class="palette">
+      <Item v-for="item in items" :key="item.sku" v-bind="item" />
+      <div v-if="recurringPrice">
+        <p class="recurring-notification"><strong>{{ recurringItems.length }}x</strong> recurring every 60 days ${{ recurringPrice / 100 }}</p>
+        <ul class="recurring-items">
+          <li v-for="item in recurringItems" :key="item.sku">
+            {{ item.quantity }}x {{ item.title }}
+          </li>
+        </ul>
+      </div>
+      <ul class="totals">
+        <li>
+          <span>Order Subtotal</span>
+          <span>${{ subtotal / 100 }}</span>
+        </li>
+        <li>
+          <span>Shipping</span>
+          <span>${{ postage / 100 }}</span>
+        </li>
+        <li v-if="discountBeforeReferralBonus > 0" class="discount">
+          <span>Mr. Davis Rewards</span>
+          <span>-${{ discountBeforeReferralBonus / 100 }}</span>
+        </li>
+        <li v-if="referDiscount" class="discount">
+          <span>Refer Discount</span>
+          <span>-$10</span>
+        </li>
+        <li v-if="totalTax > 0">
+          <span>Tax</span>
+          <span>${{ totalTax }}</span>
+        </li>
+        <li class="grandTotal">
+          <span>Total</span>
+          <span>${{ grandTotal / 100 }}</span>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 import { State, namespace } from 'vuex-class'
-import Item from './components/OrderItem.vue'
+import Item from './OrderItem.vue'
 
 const order = namespace('order')
 const cart = namespace('cart')
@@ -50,9 +60,12 @@ export default class OrderItemSummary extends Vue {
   @cart.State stock: Product[]
   @order.Getter referDiscount: boolean
   @order.State bundles: Bundle[]
+  @order.State email: string
+  @order.State estimatedDeliveryDate: Date
   @order.State grandTotal: number
   @order.State id: string
   @order.State orderLoadedOnce: boolean
+  @order.State(state => state.shipping.address) shippingAddress: Address
   @order.State subtotal: number
   @order.State(state => state.shipping.postage) postage: number
   @order.Getter discountBeforeReferralBonus: number
@@ -62,11 +75,24 @@ export default class OrderItemSummary extends Vue {
   googleCheckoutTracked = false
 
   get items () {
+    return this.getItems(false)
+  }
+
+  get recurringItems () {
+    return this.getItems(true)
+  }
+
+  get recurringPrice () {
+    return this.bundles && this.bundles[0] ? this.bundles[0].recurringPrice : 0
+  }
+
+  getItems (recurring: boolean) {
     let items = []
+    const set = recurring ? 'recurringSkus' : 'skus'
 
     if (this.bundles.length === 0) return
 
-    items = this.bundles[0].skus.reduce((carry: any[], item) => {
+    items = this.bundles[0][set].reduce((carry: any[], item) => {
       const product = this.stock.find((product: Product) => product.sku === item.sku)
       const productIndex = carry.findIndex((fmtItem: Item) => fmtItem.sku === item.sku)
       if (productIndex === -1) {
@@ -82,11 +108,36 @@ export default class OrderItemSummary extends Vue {
   }
 
   async mounted () {
-    console.log('mounted', this.id)
     await this.fetchStock()
     if (this.id === null) {
       await this.fetchOrder()
       this.fetchUserMeta()
+    }
+
+    const threeDaysFromNow = new Date()
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
+    const ed = new Date(this.estimatedDeliveryDate || threeDaysFromNow)
+    const fmtDeliveryDate = `${ed.getFullYear()}-${ed.getMonth().toString().padStart(2, '0')}-${ed.getDate().toString().padStart(2, '0')}`
+
+    const orderSummary = this
+
+    window.renderOptIn = function () {
+      window.gapi.load('surveyoptin', function () {
+        window.gapi.surveyoptin.render({
+          'merchant_id': 111805534,
+          'order_id': orderSummary.id,
+          'email': orderSummary.email,
+          'delivery_country': orderSummary.shippingAddress.country,
+          'estimated_delivery_date': fmtDeliveryDate,
+          'products': orderSummary.bundles[0].skus.reduce((carry: any[], item: Item) => {
+            const product = orderSummary.stock.find((p: Product) => p.sku === item.sku)
+            if (product) {
+              carry.push({ gtin: product.gtin12 })
+            }
+            return carry
+          }, [])
+        })
+      })
     }
   }
 
@@ -135,6 +186,30 @@ export default class OrderItemSummary extends Vue {
 </script>
 
 <style scoped>
+.palette {
+  background: white;
+  padding: 1rem;
+}
+
+.recurring-notification {
+  background: #5C7975;
+  color: white;
+  margin: 0;
+  padding: .5rem 1rem;
+}
+
+.recurring-items {
+  margin: 0 0 1rem 0;
+  padding: 0;
+  background: #efefef;
+}
+
+.recurring-items li {
+  border-bottom: 1px solid #ccc;
+  list-style: none;
+  padding: .5rem 1rem;
+}
+
 .totals {
   padding: 0;
   margin: 1rem 0 0;
@@ -144,6 +219,7 @@ export default class OrderItemSummary extends Vue {
   display: flex;
   justify-content: space-between;
   line-height: 1.5em;
+  font-size: 1.25rem;
   color: #555;
 }
 

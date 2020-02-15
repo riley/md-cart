@@ -1,4 +1,4 @@
-import { getToken, setToken, getRefId } from '../utils/storage'
+import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
 
@@ -19,13 +19,27 @@ if (urlParams.get('token') != null) {
   setToken(urlParams.get('token'))
 }
 
-history.replaceState(null, document.title, `https://${location.host}/cart/`)
+if (window.location.pathname.includes('cart')) {
+  // if this is the cart page, hide the url params
+  history.replaceState(null, document.title, `https://${location.host}/cart/`)
+}
+
+type ResponseHandler = (response: Response) => Promise<any>
+// this either returns the JSON promise or throws
+const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHandler => {
+  return function (response: Response) {
+    if (response.status > 399) {
+      throw new Error(`status ${response.status}: ${errorString}`)
+    }
+
+    return response.json()
+  }
+}
 
 const userSettings: User = {
   username: '',
   shipping: { address: null },
   billing: { address: null },
-  isVipCustomer: false,
   cardMeta: null,
 }
 
@@ -52,6 +66,7 @@ export default {
     emailTaken: false, // is the entered email in our system?
     fetching: false,
     globalErrorMessage: null,
+    host,
     isNonVIPCheckIn: false,
     isReturningCustomer: false,
     isSendMore: false,
@@ -62,8 +77,9 @@ export default {
     loginFormActive: false,
     order: null,
     processing: false,
+    processingError: null,
     refId: refId || '', // this is initialized above (might be null)
-    returningVipCustomer: false,
+    returningVipCustomer: null, // if set, it's an id
     shipping: {
       address: {
         name: '',
@@ -88,12 +104,11 @@ export default {
     useStoredPaymentInfo: false,
     useStoredShippingInfo: false,
     user: { ...userSettings },
-    welcomeBackCardDismissed: false,
   },
   getters: {
     grandTotal: (state: any) => {
       const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
-      return Math.max(itemCost, 0)
+      return Math.max(itemCost + state.shipping.postage - state.credit, 0)
     },
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
@@ -131,9 +146,12 @@ export default {
     },
     logout (state: any) {
       state.user = { ...userSettings }
+      state.credit = 0
       state.useStoredShippingInfo = false
       state.useStoredBillingInfo = false
       state.useStoredPaymentInfo = false
+      state.isReturningCustomer = false
+      state.returningVipCustomer = false
     },
     removeItem (state: any, sku: string) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
@@ -157,6 +175,9 @@ export default {
     setCartId (state: any, id: string) {
       state.cartId = id
     },
+    setCreateRecurringVIP (state: any, recurring: boolean) {
+      state.createRecurringVIP = recurring
+    },
     setCredit (state: any, credit: number) {
       state.credit = credit
     },
@@ -178,8 +199,8 @@ export default {
     setProcessing (state: any, status: boolean) {
       state.processing = status
     },
-    setRecurringVIP (state: any, recurring: boolean) {
-      state.createRecurringVIP = recurring
+    setProcessingError (state: any, error: string) {
+      state.processingError = error
     },
     setReturningCustomer (state: any, returning: boolean) {
       state.isReturningCustomer = returning
@@ -218,7 +239,6 @@ export default {
           shipping: { address: user.shippingAddress },
           billing: { address: user.billingAddress },
           cardMeta: user.cardMeta,
-          isVipCustomer: user.isVipCustomer,
         }
         state.useStoredBillingInfo = true
         state.useStoredShippingInfo = true
@@ -232,23 +252,30 @@ export default {
         window.woopra && window.woopra.track()
       }
     },
-    setWelcomeBackCardDismissed (state: any, dismissed: boolean) {
-      state.welcomeBackCardDismissed = dismissed
-    },
     toggleLoginForm (state: any, active: boolean) {
       state.loginFormActive = active
     }
   },
+
+  /**
+   *
+   * Actions
+   *
+   */
+
   actions: {
-    async fetchCart ({ commit }: Action) {
+    /**
+     * get the cart from the server initially
+     */
+    async fetchCart ({ commit, state }: Action) {
       commit('setFetching', true)
       try {
-        const cart = await fetch(`${host}/v2/cart`, {
+        const cart = await fetch(`${state.host}/v2/cart`, {
           mode: 'cors',
           headers: new Headers({
             'Authorization': `Bearer ${getToken()}`
           })
-        }).then(res => res.json())
+        }).then(handleJSONResponse({ errorString: 'failed to fetch cart' }))
 
         setToken(cart.token)
         commit('setFetching', false)
@@ -260,18 +287,22 @@ export default {
         commit('setIsVip', cart.bundles[0].isVip)
         commit('setItems', cart.bundles[0].skus)
         commit('setShipping', cart.shipping)
-        commit('setCredit', cart.priceModification.userCredit + cart.priceModification.ks)
+        commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
         commit('setTax', cart.totalTax)
         commit('setUser', cart.user)
+        commit('setReturningVipCustomer', cart.user && cart.user.isVipCustomer)
       } catch (e) {
         commit('setGlobalError', `Oh no! something went wrong while fetching your cart. Please contact us at ${supportEmail}.`)
         console.error(e)
       }
     },
+    /**
+     * update the cart upon user input
+     */
     async updateCart ({ commit, state }: Action) {
       commit('setFetching', true)
       try {
-        const { cart, token } = await fetch(`${host}/v2/cart`, {
+        const { cart, token } = await fetch(`${state.host}/v2/cart`, {
           method: 'PATCH',
           mode: 'cors',
           headers: new Headers({
@@ -285,13 +316,13 @@ export default {
               modified: state.shipping.modified,
               service: state.shipping.service,
             },
-            createNewVip: null,
+            createNewVip: state.createRecurringVIP,
             bundles: [{
               isVip: state.isVip,
               skus: state.items
             }]
           })
-        }).then(res => res.json())
+        }).then(handleJSONResponse({ errorString: 'Failed to update cart' }))
 
         commit('setFetching', false)
         commit('setItems', cart.bundles[0].skus)
@@ -304,42 +335,55 @@ export default {
         commit('setGlobalError', `Uh oh! We weren't able to update the cart. Please contact us at ${supportEmail}`)
       }
     },
-    async fetchStock ({ commit }: Action) {
+    /**
+     * get stock levels from the server
+     */
+    async fetchStock ({ commit, state }: Action) {
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${host}/v1/products`).then(res => res.json())
+        const stock = await fetch(`${state.host}/v1/products`)
+          .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {
         // show an error
-        console.log('oops', e)
         commit('setGlobalError', 'Oh no! We\'re having trouble getting product informtion for this page. The site might be having trouble, try reloading the page.')
       }
 
       commit('setFetching', false)
     },
+    /**
+     *
+     * @param Action
+     * @param email
+     *
+     * get various info about the user from the server
+     */
     async checkUsername ({ commit, state }: Action, email: string) {
       try {
-        const info = await fetch(`${host}/check-username`, {
+        const info = await fetch(`${state.host}/check-username`, {
           method: 'POST',
           mode: 'cors',
           headers: {
+            // going to leave this as form input because of the validation plugin on the backend
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
             'Authorization': `Bearer ${getToken()}`
           },
           body: `username=${encodeURIComponent(email)}`
         })
-          .then(res => res.json())
+          .then(handleJSONResponse({ errorString: 'Could not get username info' }))
 
         if (info.cart) {
           commit('setReturningVipCustomer', !!info.cart.returningVipCustomer)
+          commit('setItems', info.cart.bundles[0].skus) // cart pricing might have updated
+          commit('setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount)
+          commit('setShipping', info.cart.shipping)
+          // we don't set the shipping and billing here, that would be leaking PII
         }
 
         if (info.available === false) {
           commit('setReturningCustomer', true)
         }
-
-        console.log(info)
       } catch (e) {
         commit('setGlobalError', `Uh oh! We weren't able to update the cart. Please contact us at ${supportEmail}`)
         console.error(e)
@@ -349,38 +393,51 @@ export default {
       window.woopra && window.woopra.identify({ email: username })
       window.woopra && window.woopra.track('request-login-code', { username })
 
-      await fetch(`${host}/cart-request-login-code`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
-        },
-        body: JSON.stringify({ username, brand: 'mrdavis' })
-      })
+      try {
+        await fetch(`${state.host}/cart-request-login-code`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+          },
+          body: JSON.stringify({ username, brand: 'mrdavis' })
+        }).then(res => {
+          if (res.status !== 200) throw new Error('Login request failed to send code.')
+        })
+      } catch (e) {
+        console.log(e)
+        commit('loginFailure', 'We\'re having trouble sending your login email. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
+        return
+      }
 
       commit('loginEmailRequested', true)
     },
     async login ({ commit, state }: Action, { username, magicCode }: {username: string, magicCode: string}) {
       window.woopra && window.woopra.track('login-attempt', { username, code: magicCode })
+      let info
 
-      const info = await fetch(`${host}/login-existing`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
-        },
-        body: JSON.stringify({ username, magicCode })
-      }).then(res => res.json())
-
-      console.log('info from login-existing', info)
+      try {
+        info = await fetch(`${state.host}/login-existing`, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+          },
+          body: JSON.stringify({ username, magicCode })
+        }).then(handleJSONResponse({ errorString: 'code failed to login user' }))
+      } catch (e) {
+        commit('loginFailure', 'Something went wrong with our login service. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
+        return
+      }
 
       if (info.token) {
         commit('setUser', info.user)
         commit('setBillingAddress', info.cart.billingAddress)
         commit('setShippingAddress', info.cart.shippingAddress)
         commit('setEmail', info.cart.email)
+        commit('setCredit', info.user.credit)
         commit('clearLoginForm')
         setToken(info.token)
       } else {
@@ -391,7 +448,7 @@ export default {
     async logout ({ commit, state }: Action) {
       commit('logout')
 
-      const response = await fetch(`${host}/logout-cart`, {
+      const response = await fetch(`${state.host}/logout-cart`, {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -399,44 +456,53 @@ export default {
         }
       })
 
-      console.log('logout response', response)
-
       const token = await response.text()
-
-      console.log('token?', token)
 
       setToken(token)
     },
-    async attemptPurchase ({ commit, state, getters }: Action, token: any) {
+    async attemptPurchase ({ commit, state, getters }: Action, stripeToken: any) {
       commit('setProcessing', true)
-      const result = await fetch(`${host}/buy`, {
-        mode: 'cors',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
-        },
-        body: JSON.stringify({
-          createRecurringVIP: state.createRecurringVIP,
-          isStoredInfo: getters.isStoredInfo,
-          billingSameAsShipping: state.billingSameAsShipping,
-          email: state.email,
-          shippingAddress: state.shipping.address,
-          billingAddress: state.billing.address,
-          token,
+      let result
+      try {
+        result = await fetch(`${state.host}/buy`, {
+          mode: 'cors',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+          },
+          body: JSON.stringify({
+            createRecurringVIP: state.createRecurringVIP,
+            isStoredInfo: getters.isStoredInfo,
+            billingSameAsShipping: state.billingSameAsShipping,
+            email: state.email,
+            shippingAddress: state.shipping.address,
+            billingAddress: state.billing.address,
+            token: stripeToken,
+          })
+        }).then(response => {
+          if (response.status <= 400) {
+            return response.json()
+          } else {
+            // something has gone wrong with the service, not bad user input.
+            // probably improve this process at some point.
+            throw new Error('Something has gone wrong with our credit card processor. Please notify support@mrdavis.com.')
+          }
         })
-      }).then((res: any) => res.json())
-
-      console.log(result)
+      } catch (e) {
+        commit('setProcessingError', e.message)
+        return
+      }
 
       if (result.processed) {
         setToken(result.token)
+        // it worked! unset the referring user
+        unsetRefId()
         location.href = `/thankyou`
       } else {
         const errorMessage = result.errors.map((err: PaymentError) => err.msg).join('\n')
-        commit('setGlobalError', errorMessage)
+        commit('setProcessingError', errorMessage)
         commit('setProcessing', false)
-        console.log('some error happened')
       }
     }
   }

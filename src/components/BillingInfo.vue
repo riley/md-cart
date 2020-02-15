@@ -45,7 +45,6 @@ export default class BillingInfo extends Vue {
   @cart.Mutation editStoredShippingAddress: () => void
 
   updateAddress ($event: FormInputEvent) {
-    console.log('updateAddress', $event)
     this.setAddress({
       location: 'billing',
       field: $event.name,

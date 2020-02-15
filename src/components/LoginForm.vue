@@ -49,7 +49,6 @@ export default class LoginForm extends Vue {
   }
 
   handleClick () {
-    console.log('LoginForm handleClick')
     if (this.email !== '') {
       this.requestLoginEmail(this.email)
     }

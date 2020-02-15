@@ -27,6 +27,7 @@ export default {
     bundles: [],
     createdAt: null,
     email: '',
+    estimatedDeliveryDate: null,
     fetching: false,
     fetchingUser: false,
     grandTotal: 0,
@@ -86,11 +87,14 @@ export default {
       state.bundles = order.bundles
       state.createdAt = new Date(order.createdAt)
       state.email = order.email
+      if (order.estimatedDeliveryDate) {
+        state.estimatedDeliveryDate = new Date(order.estimatedDeliveryDate)
+      }
       state.grandTotal = order.totalPrice
       state.id = order.id
       state._id = order._id
       state.orderLoadedOnce = true
-      state.paymentMethod = order.stripeCharge.source.brand.toLowerCase()
+      state.paymentMethod = order.stripeCharge ? order.stripeCharge.source.brand.toLowerCase() : 'Free'
       state.shipping.address = order.shippingAddress
       state.shipping.postage = order.shipping.postage
       state.shipping.service = order.shipping.service
@@ -117,7 +121,6 @@ export default {
           'Authorization': `Bearer ${getToken()}`
         }
       }).then(res => res.json())
-      console.log('order response', response)
       commit('fetchingOrder', false)
       if (!response.order) {
         commit('errorLoadingOrder', `Couldn't find order: ${state.id}`)
@@ -135,7 +138,6 @@ export default {
       }).then(res => res.json())
       commit('fetchingUser', false)
 
-      console.log('userMeta', userMeta)
       if (userMeta !== null && userMeta.meta) {
         commit('setUserRefId', userMeta.refId)
       }

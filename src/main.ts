@@ -23,16 +23,6 @@ new Vue({
   store,
   render: h => h(Cart)
 }).$mount('#app')
-
-// new Vue({
-//   store,
-//   render: h => h(CartSummary)
-// }).$mount('#cart-summary')
-
-// new Vue({
-//   store,
-//   render: h => h(CustomerInfoInputs)
-// }).$mount('#forms-target')
 declare global {
 
   interface Window {
@@ -42,6 +32,9 @@ declare global {
     gtag: any
     fbq: any
     mapsCallback: any
+    location: Location
+    gapi: any
+    renderOptIn: () => void
   }
 
   interface Item {
@@ -55,6 +48,7 @@ declare global {
     skus: Item[]
     recurringSkus: Item[]
     isVip: boolean
+    recurringPrice: number
   }
 
   interface Order {
@@ -81,6 +75,8 @@ declare global {
     swatch: string
     title: string
     color?: string
+    icon: string
+    gtin12: string
   }
 
   interface GooglePlace {
@@ -121,7 +117,6 @@ declare global {
     billing: {
       address: Address | null
     }
-    isVipCustomer: boolean
     cardMeta: null | {
       expYear: string
       expMonth: string

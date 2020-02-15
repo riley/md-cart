@@ -2,6 +2,7 @@
   <section id="payment-info">
     <Instructions text="Your Payment Method" step="3"/>
     <Notification v-if="paymentErrorMessage" type="error" :message="paymentErrorMessage" />
+    <Notification v-if="processingError" type="error" :message="processingError" />
     <Card v-if="useStoredPaymentInfo" class="use-stored-payment-info">
       <CardContent>
         <Button inline position="right" @click="editStoredPaymentInfo">Edit</Button>
@@ -21,7 +22,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { State, Mutation, namespace } from 'vuex-class'
+import { State, Getter, Mutation, namespace } from 'vuex-class'
 import Card from './BaseCard.vue'
 import CardContent from './BaseCardContent.vue'
 import Instructions from './BaseInstructions.vue'
@@ -37,12 +38,15 @@ let card: any
   components: { Instructions, Notification, Button, Card, CardContent }
 })
 export default class PaymentInfo extends Vue {
+  @cart.State processingError: string
   @cart.State processing: boolean
   @cart.State useStoredPaymentInfo: boolean
   @cart.State user: User
-  @cart.Mutation setProcessing: any
+  @cart.Getter isStoredInfo: boolean
   @cart.Mutation editStoredPaymentInfo: boolean
-  @cart.Action attemptPurchase: (token: string) => Promise<void>
+  @cart.Mutation setProcessing: any
+  @cart.Mutation setProcessingError: any
+  @cart.Action attemptPurchase: (token: any) => Promise<void>
 
   paymentErrorMessage: string | null = null
   success: boolean = false
@@ -66,18 +70,22 @@ export default class PaymentInfo extends Vue {
   }
 
   async purchase () {
-    this.setProcessing(true)
-    const result = await stripe.createToken(card)
-    console.log('stripe token result', result)
+    if (!this.isStoredInfo) {
+      this.setProcessingError(null)
+      this.setProcessing(true)
+      const result = await stripe.createToken(card)
 
-    if (result.error) {
-      this.paymentErrorMessage = result.error.message
-      this.$forceUpdate() // force the DOM to update so Stripe can update
-      this.setProcessing(false)
-      return
+      if (result.error) {
+        this.paymentErrorMessage = result.error.message
+        this.$forceUpdate() // force the DOM to update so Stripe can update
+        this.setProcessing(false)
+        return
+      }
+
+      this.attemptPurchase(result.token)
+    } else {
+      this.attemptPurchase(null)
     }
-
-    this.attemptPurchase(result.token)
   }
 }
 </script>

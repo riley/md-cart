@@ -19,7 +19,7 @@
           </li>
           <li v-if="discount > 0" class="discount">
             <span>Mr. Davis Rewards</span>
-            <span>-${{ discount }}</span>
+            <span>-${{ discount / 100 }}</span>
           </li>
           <li v-if="referDiscountEligible" class="discount">
             <span>Refer Discount</span>
@@ -27,7 +27,7 @@
           </li>
           <li v-if="tax > 0">
             <span>Tax</span>
-            <span>${{ tax }}</span>
+            <span>${{ tax / 100}}</span>
           </li>
           <li class="grandTotal">
             <span>Total</span>
@@ -36,14 +36,31 @@
         </ul>
         <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
       </div>
-      <div v-else>
+      <div v-if="!items.length">
         <CartItemSkeleton v-if="fetching" />
         <div v-else class="empty-cart">Your cart is empty</div>
-        <p class="continue-shopping">
-          <Button inline href="/best-undershirt">Continue Shopping</Button>
-        </p>
       </div>
-      <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setRecurringVIP" :makeRecurring="createRecurringVIP" />
+
+      <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setCreateRecurringVIP" :makeRecurring="createRecurringVIP" class="confirm-recurring" />
+      <VipToggle v-if="!returningVipCustomer" :isVip="isVip" @toggleVip="toggleVip" />
+
+      <!-- a separate banner for returning VIP customers -->
+      <Banner
+        v-if="returningVipCustomer && !welcomeBackVipDismissed && !isVip"
+        title="Welcome Back"
+        @main="welcomeBackVipDismissed = true"
+        class="welcome-back">
+        <template v-slot:copy>
+          We noticed that you've purchased a VIP from us before so we went ahead and gave you the VIP pricing. Thanks again!
+        </template>
+        <template v-slot:main>
+          Dismiss
+        </template>
+      </Banner>
+
+      <p class="continue-shopping">
+        <Button inline href="/best-undershirt">Continue Shopping</Button>
+      </p>
     </div>
   </div>
 </template>
@@ -51,17 +68,19 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
+import Banner from './BaseBanner.vue'
 import Button from './BaseButton.vue'
 import Dropdown from './BaseDropdown.vue'
 import CartItem from './CartItem.vue'
 import CartItemSkeleton from './CartItemSkeleton.vue'
 import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
 import Spinner from './BaseSpinner.vue'
+import VipToggle from './BaseVipToggle.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { CartItem, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP },
+  components: { Banner, CartItem, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP, VipToggle },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
@@ -98,20 +117,27 @@ export default class CartSummary extends Vue {
   @cart.Getter grandTotal: number
   @cart.Getter subtotal: number
 
+  @cart.Mutation setIsVip: any
   @cart.Mutation setSelectedShippingService: any
-  @cart.Mutation setRecurringVIP: () => void
+  @cart.Mutation setCreateRecurringVIP: () => void
   @cart.Action updateCart: () => Promise<void>
   @cart.Action fetchCart: () => Promise<void>
   @cart.Action fetchStock: () => Promise<void>
 
+  welcomeBackVipDismissed: boolean = false
+
   async mounted () {
     await this.fetchStock()
-    console.log('fetch cart once')
     this.fetchCart()
   }
 
   handleShippingServiceChange ($value: string) {
     this.setSelectedShippingService($value)
+    this.updateCart()
+  }
+
+  toggleVip (isVip: boolean) {
+    this.setIsVip(isVip)
     this.updateCart()
   }
 }
@@ -153,6 +179,10 @@ export default class CartSummary extends Vue {
   text-align: center;
   color: #666;
   font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.confirm-recurring {
   margin-bottom: 1rem;
 }
 </style>

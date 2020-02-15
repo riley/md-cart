@@ -32,10 +32,6 @@ export default class Dropdown extends Vue {
 
   focussed: boolean = false
 
-  mounted () {
-    console.log('dropdown value', this.name, this.value)
-  }
-
   setFocus () {
     this.focussed = true
   }
@@ -45,7 +41,6 @@ export default class Dropdown extends Vue {
   }
 
   setSelected (e: any) {
-    console.log('setSelected', e.target.value)
     this.$emit('input', e.target.value)
   }
 }

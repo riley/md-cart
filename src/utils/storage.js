@@ -1,6 +1,6 @@
 function isSupported (getStorage) {
   try {
-    const key = '__some_random_key_you_are_not_going_to_use__'
+    const key = '__some_rando_key__'
     getStorage().setItem(key, key)
     getStorage().removeItem(key)
     return true
@@ -26,4 +26,8 @@ export const setToken = (token) => {
 
 export const getRefId = () => {
   return store.getItem('refId')
+}
+
+export const unsetRefId = () => {
+  return store.removeItem('refId')
 }

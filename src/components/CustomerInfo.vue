@@ -41,7 +41,6 @@ export default class CustomerInfo extends Vue {
   @Prop() shippingMethod: string
 
   get cardImage () {
-    console.log('get cardImage', this.paymentMethod)
     if (['amex', 'jcb', 'discover', 'mastercard', 'visa', 'diners'].includes(this.paymentMethod)) {
       return `<img width="64" height="40" srcset src="/img/${this.paymentMethod}.png" />`
     } else {

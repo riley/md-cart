@@ -1,6 +1,6 @@
 <template>
   <li class="cartItem_root">
-    <div class="thumbnail" :style="{'background-color': color, 'background-image': `url(${imageURLs[0]})`}" />
+    <div class="thumbnail" :style="{'background-image': `url(/img/icons/${icon})`}" />
     <div class="product-info">
       <p class="title">{{ title }}</p>
     </div>
@@ -24,11 +24,12 @@ export default class CartItem extends Vue {
   @Prop() sku!: string
   @Prop() quantity!: number
   @Prop() title!: string
-  @Prop() imageURLs!: string[]
+  @Prop() icon!: string
   @Prop() clothingType!: string
   @Prop() cost!: number
   @Prop() color!: string
 
+  @cart.State host: string
   @cart.Mutation addItem: any
   @cart.Mutation removeItem: any
   @cart.Action updateCart: () => Promise<void>
@@ -44,7 +45,6 @@ export default class CartItem extends Vue {
       this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
     }
     this.fetching = true
-    console.log('incrementItemQuantity', amount, this.sku)
     await this.updateCart()
     this.fetching = false
   }
@@ -62,9 +62,11 @@ export default class CartItem extends Vue {
 }
 
 .thumbnail {
-  width: 4rem;
-  height: 4rem;
-  background-size: cover;
+  min-width: 4rem;
+  min-height: 4rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
   margin-right: 1rem;
 }
 

@@ -106,9 +106,7 @@ export default class BaseAddress extends Vue {
 
 <style scoped>
 address {
-  padding-left: 1rem;
   line-height: 1.6em;
-  border-left: 5px solid rgba(0, 0, 0, .2);
 }
 
 .state-zip-holder {

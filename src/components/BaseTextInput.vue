@@ -98,7 +98,6 @@ export default class TextInput extends Vue {
       this.googleAutocomplete = new window.google.maps.places.Autocomplete( this.$refs.input, { types: ['geocode'] } )
       this.googleAutocomplete.addListener('place_changed', () => {
         const place = this.googleAutocomplete.getPlace()
-        console.log('place', place)
         // I guess build an Address object?
         if (place && place.address_components) {
           place.address_components.forEach(({ short_name, types }: { short_name: string, types: string[] }) => {
@@ -160,7 +159,7 @@ export default class TextInput extends Vue {
 <style scoped>
 .fieldWrapper {
   position: relative;
-  margin-bottom: .75rem;
+  margin-bottom: 0;
 }
 
 .errorHint {

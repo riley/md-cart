@@ -1,30 +1,23 @@
 <template>
   <div class="item-root">
-    <Badge class="item-thumb-container" :count="quantity">
-      <div class="item-thumb" :style="{ 'background-image': `url(${imageURLs[0]})` }" />
-    </Badge>
-    <div class="meta">
+    <div class="thumbnail" :style="{ 'background-image': `url(/img/icons/${icon})` }" />
+    <div class="product-info">
       <p class="title">{{ title }}</p>
     </div>
-    <div class="item-cost">
-      ${{ cost / 100 }}
-    </div>
+    <div class="quantity">{{ quantity }}x</div>
   </div>
 </template>
 
 <script lang="ts">
-import Badge from './BaseBadge.vue'
-
 export default {
-  components: { Badge },
+  components: { },
   props: {
-    cost: Number,
     description: String,
     quantity: Number,
     sku: String,
     title: String,
-    imageURLs: Array
-  }
+    icon: String
+  },
 }
 </script>
 
@@ -50,22 +43,30 @@ export default {
   margin-right: .5rem;
 }
 
-.item-thumb {
-  width: 100px;
-  height: 100px;
-  background-size: cover;
-  border: 1px solid #ccc;
+.thumbnail {
+  min-width: 100px;
+  min-height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
   border-radius: 4px;
 }
 
-.meta {
+.product-info {
   margin: 0 .5rem;
   flex-grow: 1;
 }
 
 .title {
+  font-size: 17px;
+  margin: 0;
+  text-align: left;
+}
+
+.quantity {
+  max-width: 50px;
   font-weight: bold;
-  margin: .5rem 0 10px 0;
+  font-size: 1.5rem;
 }
 
 .description {
@@ -73,14 +74,5 @@ export default {
   font-size: .8em;
   line-height: 1em;
   margin: 0;
-}
-
-.item-cost {
-  width: 100px;
-  padding: .5rem;
-  font-weight: bold;
-  font-family: Oswald, sans-serif;
-  font-size: 40px;
-  text-align: right;
 }
 </style>
