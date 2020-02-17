@@ -3,6 +3,7 @@ import Vue from 'vue'
 // import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
 import Cart from './Cart.vue'
 import store from './store/store'
+
 import { setToken } from './utils/storage'
 
 Vue.config.productionTip = false
@@ -107,6 +108,13 @@ declare global {
     state: string;
     zip: string;
     country: string
+  }
+
+  interface StoredUser {
+    _id: string
+    username: string
+    billingAddress: Address
+    shippingAddress: Address
   }
 
   interface User {

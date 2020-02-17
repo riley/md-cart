@@ -4,18 +4,19 @@
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
       <form method="POST" @submit.prevent="onSubmit">
-        <TextInput v-model="email" type="email" />
+        <TextInput v-model="email" @input="setEmail" type="email" />
         <template v-if="loginEmailRequested">
           <p class="code-sent">
-            <Button inline @click="handleClick">Resend Email?</Button>
+            <Button inline type="button" @click="handleClick">Resend Email?</Button>
             <span>Code sent ✅</span>
           </p>
           <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
           <TextInput label="6-digit code" v-model="magicCode" />
           <Notification v-if="loginErrorMessage" type="error" :message="loginErrorMessage" />
-          <Button @click="handleLoginButtonClick">Login</Button>
+          <Button class="login-button" @click="handleLoginButtonClick" type="button">Login</Button>
         </template>
-        <Button @click="handleClick" v-if="!loginEmailRequested">Log In</Button>
+        <Button class="login-button" @click="handleClick" type="button" v-if="!loginEmailRequested">Log In</Button>
+        <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a></p>
       </form>
     </div>
     <span class="close-button" @click="emitClose">×</span>
@@ -37,25 +38,28 @@ const cart = namespace('cart')
 export default class LoginForm extends Vue {
   @Prop({ type: Boolean }) loginEmailRequested: boolean
   @Prop() loginErrorMessage: string
+  @cart.State email: string
   @cart.Action requestLoginEmail: any
   @cart.Action login: any
   @cart.Mutation clearLoginForm: any
+  @cart.Mutation setEmail: any
 
-  email = ''
   magicCode = ''
 
   onSubmit () {
-    console.log('onSubmit')
+    if (this.email !== '') {
+      this.requestLoginEmail(this.email.trim())
+    }
   }
 
   handleClick () {
     if (this.email !== '') {
-      this.requestLoginEmail(this.email)
+      this.requestLoginEmail(this.email.trim())
     }
   }
 
   handleLoginButtonClick () {
-    this.login({ username: this.email, magicCode: this.magicCode })
+    this.login({ username: this.email.trim(), magicCode: this.magicCode })
   }
 
   emitClose () {
@@ -106,5 +110,17 @@ export default class LoginForm extends Vue {
   right: 20px;
   font-size: 100px;
   cursor: pointer;
+}
+
+.login-button {
+  margin-bottom: .75rem;
+}
+
+.code-warning {
+  margin: 0;
+  padding: 0;
+  color: #aaa;
+  font-size: .75rem;
+  line-height: 1rem;
 }
 </style>

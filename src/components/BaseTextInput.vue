@@ -98,6 +98,7 @@ export default class TextInput extends Vue {
       this.googleAutocomplete = new window.google.maps.places.Autocomplete( this.$refs.input, { types: ['geocode'] } )
       this.googleAutocomplete.addListener('place_changed', () => {
         const place = this.googleAutocomplete.getPlace()
+        console.log('place', place)
         // I guess build an Address object?
         if (place && place.address_components) {
           place.address_components.forEach(({ short_name, types }: { short_name: string, types: string[] }) => {
@@ -105,7 +106,7 @@ export default class TextInput extends Vue {
               streetNumber = short_name
             } else if (arraysEqual(types, ['route'])) {
               route = short_name
-            } else if (arraysEqual(types, ['locality', 'political'])) {
+            } else if (arraysEqual(types, ['locality', 'political']) || arraysEqual(types, ['sublocality_level_1', 'sublocality', 'political'])) {
               city = short_name
             } else if (arraysEqual(types, ['administrative_area_level_1', 'political'])) {
               state = short_name
@@ -151,7 +152,7 @@ export default class TextInput extends Vue {
     this.invalid = this.required && val === ''
     this.focussed = false
     this.success = !this.invalid
-    this.$emit('blur', val)
+    this.$emit('blur', this.name, $event.target.value)
   }
 }
 </script>
@@ -268,6 +269,14 @@ input, input:invalid, input:required {
 
 input:focus + .border::before, input:focus + .border::after {
   width: 50%;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+select:-webkit-autofill  {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
 }
 
 </style>

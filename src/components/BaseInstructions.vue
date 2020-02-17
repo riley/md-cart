@@ -1,7 +1,5 @@
 <template>
-  <h3>
-    <span class="text">{{ step }}. {{ text }}</span>
-  </h3>
+  <h3 class="text">{{ step }}. {{ text }}</h3>
 </template>
 
 <script lang="ts">
@@ -16,9 +14,7 @@ export default class Instructions extends Vue {
 
 <style scoped>
 h3 {
-  position: relative;
-  display: flex;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  font: normal normal normal 1.25rem 'Helvetica Neue', Helvetica, Arial, Helvetica, sans-serif !important;
   text-transform: uppercase;
   color: #303030;
   -moz-box-align: center;
@@ -28,15 +24,5 @@ h3 {
   pointer-events: none;
   border-bottom: 1px solid #e5e5e5;
   padding-bottom: .5rem;
-}
-
-.text {
-  text-align: left;
-  font-family: 'Helvetica Neue', Helvetica, Arial, Helvetica, sans-serif;
-  font-size: 1.5rem;
-  line-height: 1.25;
-  display: block;
-  letter-spacing: 1px;
-  font-weight: normal;
 }
 </style>

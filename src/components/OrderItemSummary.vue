@@ -29,7 +29,7 @@
         </li>
         <li v-if="totalTax > 0">
           <span>Tax</span>
-          <span>${{ totalTax }}</span>
+          <span>${{ totalTax / 100 }}</span>
         </li>
         <li class="grandTotal">
           <span>Total</span>
@@ -117,28 +117,29 @@ export default class OrderItemSummary extends Vue {
     const threeDaysFromNow = new Date()
     threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
     const ed = new Date(this.estimatedDeliveryDate || threeDaysFromNow)
-    const fmtDeliveryDate = `${ed.getFullYear()}-${ed.getMonth().toString().padStart(2, '0')}-${ed.getDate().toString().padStart(2, '0')}`
+    const fmtDeliveryDate = `${ed.getFullYear()}-${(ed.getMonth() + 1).toString().padStart(2, '0')}-${ed.getDate().toString().padStart(2, '0')}`
 
     const orderSummary = this
 
-    window.renderOptIn = function () {
-      window.gapi.load('surveyoptin', function () {
-        window.gapi.surveyoptin.render({
-          'merchant_id': 111805534,
-          'order_id': orderSummary.id,
-          'email': orderSummary.email,
-          'delivery_country': orderSummary.shippingAddress.country,
-          'estimated_delivery_date': fmtDeliveryDate,
-          'products': orderSummary.bundles[0].skus.reduce((carry: any[], item: Item) => {
-            const product = orderSummary.stock.find((p: Product) => p.sku === item.sku)
-            if (product) {
-              carry.push({ gtin: product.gtin12 })
-            }
-            return carry
-          }, [])
-        })
-      })
-    }
+    // window.renderOptIn = function () {
+    window.gapi.load('surveyoptin', function () {
+      const payload = {
+        'merchant_id': 111805534,
+        'order_id': orderSummary.id,
+        'email': orderSummary.email,
+        'delivery_country': orderSummary.shippingAddress.country,
+        'estimated_delivery_date': fmtDeliveryDate,
+        'products': orderSummary.bundles[0].skus.reduce((carry: any[], item: Item) => {
+          const product = orderSummary.stock.find((p: Product) => p.sku === item.sku)
+          if (product) {
+            carry.push({ gtin: product.gtin12 })
+          }
+          return carry
+        }, [])
+      }
+      window.gapi.surveyoptin.render(payload)
+    })
+    // }
   }
 
   updated () {

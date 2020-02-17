@@ -1,15 +1,7 @@
 import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
+import { host } from '../utils/computed'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
-
-let host: string
-if (window.location.host === 'mrdavis.com') {
-  host = process.env.VUE_APP_PROD_HOST
-} else if (window.location.host === 'staging-mrdavis.kinsta.com') {
-  host = process.env.VUE_APP_STG_HOST
-} else {
-  host = process.env.VUE_APP_DEV_HOST
-}
 
 const refId = getRefId()
 
@@ -98,7 +90,6 @@ export default {
     },
     stock: [],
     token: null,
-    totalDiscount: 0,
     totalTax: 0,
     useStoredBillingInfo: false,
     useStoredPaymentInfo: false,
@@ -106,17 +97,17 @@ export default {
     user: { ...userSettings },
   },
   getters: {
-    grandTotal: (state: any) => {
+    grandTotal: (state: any, getters: any) => {
       const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
-      return Math.max(itemCost + state.shipping.postage - state.credit, 0)
+      return Math.max(itemCost + state.shipping.postage + state.totalTax - state.credit - getters.referralCredit, 0)
     },
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
     userLoggedIn: (state: any) => state.user.username !== '',
-    totalDiscount: (state: any) => state.credit,
     referDiscountEligible: (state: any) => state.subtotal >= 4000 && state.refId !== '',
     subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
+    referralCredit: (state: any) => typeof state.refId === 'string' && state.refId.length === 8 ? 1000 : 0
   },
   mutations: {
     addItem (state: any, item: Item) {
@@ -220,9 +211,9 @@ export default {
     setShippingAddress (state: any, address: Address) {
       state.shipping.address = address
     },
-    setSelectedShippingService (state: any, shippingRate: any) {
+    setSelectedShippingService (state: any, shippingService: string) {
       state.shipping.modified = true
-      state.shipping.service = shippingRate.value
+      state.shipping.service = shippingService
     },
     setStock (state: any, stock: Product[]) {
       state.stock = stock
@@ -258,15 +249,15 @@ export default {
   },
 
   /**
-   *
-   * Actions
-   *
-   */
+  *
+  * Actions
+  *
+  */
 
   actions: {
     /**
-     * get the cart from the server initially
-     */
+    * get the cart from the server initially
+    */
     async fetchCart ({ commit, state }: Action) {
       commit('setFetching', true)
       try {
@@ -297,8 +288,8 @@ export default {
       }
     },
     /**
-     * update the cart upon user input
-     */
+    * update the cart upon user input
+    */
     async updateCart ({ commit, state }: Action) {
       commit('setFetching', true)
       try {
@@ -336,8 +327,8 @@ export default {
       }
     },
     /**
-     * get stock levels from the server
-     */
+    * get stock levels from the server
+    */
     async fetchStock ({ commit, state }: Action) {
       commit('setFetching', true)
 
@@ -353,12 +344,12 @@ export default {
       commit('setFetching', false)
     },
     /**
-     *
-     * @param Action
-     * @param email
-     *
-     * get various info about the user from the server
-     */
+    *
+    * @param Action
+    * @param email
+    *
+    * get various info about the user from the server
+    */
     async checkUsername ({ commit, state }: Action, email: string) {
       try {
         const info = await fetch(`${state.host}/check-username`, {
@@ -406,7 +397,7 @@ export default {
           if (res.status !== 200) throw new Error('Login request failed to send code.')
         })
       } catch (e) {
-        console.log(e)
+        console.error(e)
         commit('loginFailure', 'We\'re having trouble sending your login email. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
         return
       }

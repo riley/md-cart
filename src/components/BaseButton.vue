@@ -1,8 +1,12 @@
 <template>
-  <a v-if="href" :href="href" :style="{ float: position }" :class="{ inlineBlock: inline }" @click="handleClick">
+  <a v-if="href" :href="href" :style="{ float: position }" :class="{ inlineBlock: inline, [variant]: true }" @click="handleClick">
     <slot></slot>
   </a>
-  <button v-else :class="{ inlineBlock: inline, loading, disabled }" :style="{ float: position }" @click="handleClick">
+  <button v-else
+    :class="{ inlineBlock: inline, loading, disabled, [variant]: true }"
+    :style="{ float: position }"
+    :type="type"
+    @click="handleClick">
     <span v-if="loading" class="spinner"></span>
     <slot></slot>
   </button>
@@ -18,6 +22,8 @@ export default class BaseButton extends Vue {
   @Prop({ type: Boolean }) inline: boolean;
   @Prop({ default: 'none' }) position: string;
   @Prop({ type: Boolean, default: false }) loading!: boolean;
+  @Prop() variant: string
+  @Prop() type: string
 
   handleClick () {
     this.$emit('click')
@@ -58,7 +64,7 @@ a {
   margin: 0;
   display: inline-block;
   width: auto;
-  background: white;
+  background: transparent;
   color: rgba(210, 92, 74, .8);
   box-shadow: none;
   padding: 4px 8px;
@@ -116,6 +122,22 @@ button.loading {
   background: #ccc !important;
   color: #666 !important;
   border: 1px solid #aaa;
+}
+
+.primary {
+  background-color: #007bff;;
+}
+
+.primary:focus, .primary:hover, .primary:active {
+  background-color: #0069d9
+}
+
+.success {
+  background-color: #28a745;
+}
+
+.success:focus, .success:hover, .success:active {
+  background-color: #218838;
 }
 
 @keyframes spin {
@@ -183,4 +205,36 @@ a.inlineBlock:focus {
   box-shadow: none;
   background: rgba(210, 92, 74, .2);
 }
+
+.primary.inlineBlock {
+  color: rgb(0, 105, 217);
+}
+
+.primary.inlineBlock:focus,
+.primary.inlineBlock:hover,
+.primary.inlineBlock:active {
+  background-color: rgb(0, 105, 217, .2);
+}
+
+.brand.inlineBlock {
+  color: rgb(91, 121, 117);
+}
+
+.brand.inlineBlock:hover,
+.brand.inlineBlock:focus,
+a.brand.inlineBlock:hover,
+a.brand.inlineBlock:focus {
+  background-color: rgba(91, 121, 117, .2);
+}
+
+.success.inlineBlock {
+  color: rgb(40, 167, 69);
+}
+
+.success.inlineBlock:focus,
+.success.inlineBlock:hover,
+.success.inlineBlock:active {
+  background-color: rgba(40, 167, 69, .2);
+}
+
 </style>

@@ -1,4 +1,5 @@
 module.exports = {
+  publicPath: '/app/',
   outputDir: 'dist',
   pages: {
     cart: {

@@ -4,7 +4,6 @@
     <BillingInfo />
     <PaymentInfo />
     <div class="notification-container">
-      <Notification v-if="refId" global type="primary" :message="referralMessage" />
       <Notification v-if="isNonVIPCheckIn" global type="primary" message="Thanks for coming back! 🙌 your discount of $10 will be applied at checkout on orders more than $50." />
       <Notification v-if="globalErrorMessage" global type="error" :message="globalErrorMessage" @close="dismissNotification" />
     </div>
@@ -30,10 +29,6 @@ export default class CustomerInfoInputs extends Vue {
   @cart.State isNonVIPCheckIn: boolean
   @cart.State refId: string
   @cart.Mutation setGlobalError: any
-
-  get referralMessage () {
-    return `Referral discount of $10 applied upon checkout to orders $40 or more with a new account`
-  }
 
   dismissNotification () {
     this.setGlobalError(null)

@@ -1,18 +1,13 @@
 <template>
   <section id="shipping-info">
-    welcomeBackCardDismissed {{ welcomeBackCardDismissed }}<br>
-    isReturningCustomer {{ isReturningCustomer }}<br>
-    returningVipCustomer {{ returningVipCustomer }}<br>
-    userLoggedIn {{ userLoggedIn }}<br>
-    bundle isVip {{ isVip }}<br>
     <LoginForm v-if="loginFormActive" :loginErrorMessage="loginErrorMessage" :loginEmailRequested="loginEmailRequested" @close="clearLoginForm" />
+    <Instructions class="shipping-instructions" text="Your Shipping Address" step="1"/>
     <p class="login-prompt">
       <span v-if="!userLoggedIn">Ordered from us before?
         <Button class="login-button" inline @click="toggleLoginForm(true)">Login</Button>
       </span>
       <Button xlass="logout-button" v-else inline @click="logout">Logout</Button>
     </p>
-    <Instructions text="Your Shipping Address" step="1"/>
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
       <Card>
         <CardContent>
@@ -33,28 +28,31 @@
           type="email"
           name="email"
           label="Email Address" />
-        <Address @input="updateAddress" @replaceAddress="replaceShippingAddress" v-bind="address" />
+        <!-- for a non-vip returning customer -->
+        <Banner
+          v-if="isReturningCustomer && !userLoggedIn && !welcomeBackCardDismissed"
+          title="Welcome Back!"
+          variant="brand"
+          @main="toggleLoginForm(true)"
+          @secondary="welcomeBackCardDismissed = true"
+          class="welcome-back">
+          <template v-slot:copy>
+            Looks like you've ordered from us before! Log in to use your previous info, or continue as normal and we'll link to your account.
+          </template>
+          <template v-slot:main>
+            Log In
+          </template>
+          <template v-slot:secondary>
+            Close
+          </template>
+        </Banner>
+        <Address
+          @input="updateAddress"
+          @blur="attemptToChargeTax"
+          @replaceAddress="replaceShippingAddress"
+          v-bind="address" />
       </fieldset>
     </form>
-
-    <!-- for a non-vip returning customer -->
-    <Banner
-      v-if="isReturningCustomer && !returningVipCustomer && !userLoggedIn && !welcomeBackCardDismissed"
-      title="Welcome Back!"
-      @main="toggleLoginForm(true)"
-      @secondary="welcomeBackCardDismissed = true"
-      class="welcome-back">
-      <template v-slot:copy>
-        Looks like you've ordered from us before! Log in to use your previous info, or continue as normal and we'll link to your account.
-      </template>
-      <template v-slot:main>
-        Log In
-      </template>
-      <template v-slot:secondary>
-        Close
-      </template>
-    </Banner>
-
   </section>
 </template>
 
@@ -112,9 +110,17 @@ export default class ShippingInfo extends Vue {
     }
   }
 
-  handleBlurEmail (email: string) {
+  handleBlurEmail (name: string, email: string) {
     this.checkUsername(email)
     window.woopra && window.woopra.identify({ email })
+  }
+
+  attemptToChargeTax (name: string, value: string) {
+    console.log('attemptToChargeTax', name, value)
+    if (name === 'zip') {
+      // does this work?
+      this.updateCart()
+    }
   }
 }
 </script>
@@ -128,13 +134,18 @@ section {
   margin-bottom: 1.5rem;
 }
 
+.shipping-instructions {
+  margin-bottom: .5rem !important;
+}
+
 .welcome-back {
   margin-bottom: 1rem;
 }
 
 .login-prompt {
-  margin: 0 0 .5rem 0;
+  margin: 0;
   text-align: right;
+  padding: 0;
 }
 
 .loggedInShippingInfo {

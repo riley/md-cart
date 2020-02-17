@@ -1,13 +1,5 @@
 import { getToken, setToken, logoutToken } from '../utils/storage'
-
-let host: string
-if (window.location.host === 'mrdavis.com') {
-  host = process.env.VUE_APP_PROD_HOST
-} else if (window.location.host === 'staging-mrdavis.kinsta.com') {
-  host = process.env.VUE_APP_STG_HOST
-} else {
-  host = process.env.VUE_APP_DEV_HOST
-}
+import { host } from '../utils/computed'
 
 export default {
   namespaced: true,
@@ -65,7 +57,7 @@ export default {
     },
     discountBeforeReferralBonus (state: any) {
       const referDiscount = state.refId ? 1000 : 0
-      return Math.max(state.discount - referDiscount, 0)
+      return Math.max(state.totalDiscount - referDiscount, 0)
     }
   },
   mutations: {

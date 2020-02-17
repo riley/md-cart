@@ -18,11 +18,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import vSelect from 'vue-select'
-import 'vue-select/dist/vue-select.css'
 
 @Component({
-  components: { vSelect },
+  components: { },
 })
 export default class Dropdown extends Vue {
   @Prop() name!: string
@@ -36,8 +34,9 @@ export default class Dropdown extends Vue {
     this.focussed = true
   }
 
-  setBlur () {
+  setBlur (e: any) {
     this.focussed = false
+    this.$emit('blur', e.target.value, this.name)
   }
 
   setSelected (e: any) {

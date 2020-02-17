@@ -13,6 +13,11 @@
           order {{ id }}<br>
         </div>
         <h3>Thank you {{ billing.name.trim() }}!</h3>
+        <Card class="refer-prompt">
+          <CardContent>
+            <ReferPrompt :id="userRefId" />
+          </CardContent>
+        </Card>
         <Card class="status-card">
           <ShipStatus
             :createdAt="createdAt"
@@ -25,11 +30,6 @@
             <p class="update-copy">You'll get shipping and delivery updates via email</p>
           </CardContent>
         </Card>
-        <Card class="refer-prompt">
-          <CardContent>
-            <ReferPrompt :id="userRefId" />
-          </CardContent>
-        </Card>
         <Card class="customer-info">
           <CardContent>
             <CustomerInfo
@@ -40,10 +40,6 @@
               :billing="billing"/>
           </CardContent>
         </Card>
-        <p class="continue-shopping-prompt">
-          <Button @click="continueShopping" position="right">Continue Shopping</Button>
-          Need help? <a href="mailto:support@mrdavis.com">Contact us</a>
-        </p>
       </div>
     </div>
   </div>
@@ -79,10 +75,6 @@ export default class OrderDetails extends Vue {
   @order.State(state => state.shipping.service) shippingMethod: string
   @order.State(state => state.billing.address) billing: Address
   @order.State paymentMethod: string
-
-  continueShopping () {
-    location.href = 'https://mrdavis.com'
-  }
 }
 </script>
 
@@ -132,7 +124,4 @@ h2 {
   bottom: 0;
 }
 
-.continue-shopping-prompt a {
-  text-decoration: underline;
-}
 </style>

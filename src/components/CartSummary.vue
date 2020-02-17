@@ -8,7 +8,7 @@
         <div v-if="fetching" class="spinner-container">
           <Spinner />
         </div>
-        <ul v-else class="totals">
+        <ul v-else class="totals" ref="totals">
           <li>
             <span>Order Subtotal</span>
             <span>${{ subtotal / 100 }}</span>
@@ -17,17 +17,18 @@
             <span>Shipping</span>
             <span>${{ postage }}</span>
           </li>
-          <li v-if="discount > 0" class="discount">
+          <li v-if="credit > 0" class="discount">
             <span>Mr. Davis Rewards</span>
-            <span>-${{ discount / 100 }}</span>
+            <span>-${{ credit / 100 }}</span>
           </li>
-          <li v-if="referDiscountEligible" class="discount">
-            <span>Refer Discount</span>
+          <li v-if="refId" class="discount refer-discount">
+            <span>Discount</span>
             <span>-$10</span>
           </li>
+          <p v-if="refId" class="refer-discount-conditions">applied at checkout to orders $40 or more with a new account</p>
           <li v-if="tax > 0">
             <span>Tax</span>
-            <span>${{ tax / 100}}</span>
+            <span>${{ tax }}</span>
           </li>
           <li class="grandTotal">
             <span>Total</span>
@@ -47,6 +48,7 @@
       <!-- a separate banner for returning VIP customers -->
       <Banner
         v-if="returningVipCustomer && !welcomeBackVipDismissed && !isVip"
+        variant="brand"
         title="Welcome Back"
         @main="welcomeBackVipDismissed = true"
         class="welcome-back">
@@ -57,10 +59,6 @@
           Dismiss
         </template>
       </Banner>
-
-      <p class="continue-shopping">
-        <Button inline href="/best-undershirt">Continue Shopping</Button>
-      </p>
     </div>
   </div>
 </template>
@@ -107,13 +105,13 @@ export default class CartSummary extends Vue {
   }) rates: {[s: string]: string}
   @cart.State((state: any) => state.shipping.service) service: string
   @cart.State((state: any) => state.totalTax / 100) tax: number
+  @cart.State credit: number
   @cart.State fetching: boolean
   @cart.State isVip: boolean
+  @cart.State refId: string
   @cart.State returningVipCustomer: boolean
   @cart.State createRecurringVIP: boolean
 
-  @cart.Getter('totalDiscount') discount: number
-  @cart.Getter referDiscountEligible: number
   @cart.Getter grandTotal: number
   @cart.Getter subtotal: number
 
@@ -128,7 +126,12 @@ export default class CartSummary extends Vue {
 
   async mounted () {
     await this.fetchStock()
-    this.fetchCart()
+    await this.fetchCart()
+
+    if (window.innerWidth <= 850) {
+      const totals = this.$refs['totals'] as HTMLElement
+      totals.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 
   handleShippingServiceChange ($value: string) {
@@ -155,8 +158,13 @@ export default class CartSummary extends Vue {
 
 .cart-items, .totals {
   padding: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   margin-left: 0;
+}
+
+.totals {
+  padding-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .totals li {
@@ -168,7 +176,19 @@ export default class CartSummary extends Vue {
 }
 
 .totals li.discount {
-  color: #3f58fc;
+  color: #5B7975;
+}
+
+.totals li.refer-discount {
+  background-color: #dce8e7;
+  padding: .25rem .5rem;
+  margin: 0 -.5rem;
+}
+
+.totals .refer-discount + p {
+  font-size: .75rem;
+  margin: 0;
+  padding: 0;
 }
 
 .spinner-container {

@@ -23,7 +23,7 @@ export default {
   margin: 0 auto;
 }
 
-@media (min-width: 767px) {
+@media (min-width: 850px) {
   .cart-root {
     display: flex;
     justify-content: space-between;
