@@ -4,22 +4,22 @@
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
       <form method="POST" @submit.prevent="onSubmit">
-        <TextInput v-model="email" @input="setEmail" type="email" />
+        <TextInput v-model="email" @input="setEmail" type="email" autocomplete="email" />
         <template v-if="loginEmailRequested">
           <p class="code-sent">
             <Button inline type="button" @click="handleClick">Resend Email?</Button>
             <span>Code sent ✅</span>
           </p>
           <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
-          <TextInput label="6-digit code" v-model="magicCode" />
+          <TextInput numpad="true" label="6-digit code" type="tel" v-model="magicCode" />
           <Notification v-if="loginErrorMessage" type="error" :message="loginErrorMessage" />
           <Button class="login-button" @click="handleLoginButtonClick" type="button">Login</Button>
         </template>
-        <Button class="login-button" @click="handleClick" type="button" v-if="!loginEmailRequested">Log In</Button>
+        <Button class="login-button" @click="handleClick" type="button" v-if="!loginEmailRequested">Tap to Log In</Button>
         <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a></p>
       </form>
+      <span class="close-button" @click="emitClose">×</span>
     </div>
-    <span class="close-button" @click="emitClose">×</span>
   </div>
 </template>
 
@@ -79,12 +79,15 @@ export default class LoginForm extends Vue {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: #efefef;
   z-index: 100;
 }
 
 .login-content {
   max-width: 300px;
+  background-color: white;
+  padding: 1rem;
+  position: relative;
 }
 
 .welcome-back {
@@ -106,9 +109,9 @@ export default class LoginForm extends Vue {
 
 .close-button {
   position: absolute;
-  top: 100px;
-  right: 20px;
-  font-size: 100px;
+  top: -10px;
+  right: 10px;
+  font-size: 50px;
   cursor: pointer;
 }
 

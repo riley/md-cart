@@ -8,9 +8,9 @@
       </address>
     </div>
     <div v-else>
-      <TextInput :value="name" @input="handleName" @blur="handleBlur" required type="text" name="name" label="Name" />
+      <TextInput autocomplete="name" :value="name" @input="handleName" @blur="handleBlur" required type="text" name="name" label="Name" />
       <TextInput
-        autocomplete
+        placesEnabled
         required
         :value="address_1"
         @input="handleAddress1"
@@ -18,16 +18,24 @@
         @googlePlaceChange="handleGooglePlaceChange"
         type="text"
         name="address_1"
+        autocomplete="address-line1"
         label="Street Address" />
-      <TextInput :value="address_2" @input="handleAddress2" @blur="handleBlur" type="text" name="address_2" label="Apt / Building No." />
-      <TextInput :value="city" @input="handleCity" @blur="handleBlur" type="text" name="city" label="City" />
+      <TextInput
+        :value="address_2"
+        @input="handleAddress2"
+        @blur="handleBlur"
+        type="text"
+        name="address_2"
+        autocomplete="address-line2"
+        label="Apt / Building No." />
+      <TextInput :value="city" @input="handleCity" @blur="handleBlur" type="text" name="city" autocomplete="address-level2" label="City" />
       <div class="state-zip-holder">
-        <Dropdown v-if="country === 'US'" :value="state" @input="handleState" @blur="handleBlur" required label="State" :options="states" name="state" />
-        <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" @blur="handleBlur" label="Province" :options="provinces" name="state" />
-        <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" @blur="handleBlur" required label="Province" name="state" />
-        <TextInput :value="zip" @input="handleZip" @blur="handleBlur" label="Zip code" :type="country === 'US' ? 'tel' : 'text'" name="zip" />
+        <Dropdown v-if="country === 'US'" :value="state" @input="handleState" @blur="handleBlur" required label="State" :options="states" name="state" autocomplete="address-level1" />
+        <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" @blur="handleBlur" label="Province" :options="provinces" name="state" autocomplete="address-level1" />
+        <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" @blur="handleBlur" required label="Province" name="state" autocomplete="address-level1" />
+        <TextInput :value="zip" @input="handleZip" @blur="handleBlur" label="Zip code" name="zip" type="country === 'US' ? 'tel' : 'text'" autocomplete="postal-code" />
       </div>
-      <Dropdown :value="country" @input="handleCountry" @blur="handleBlur" required label="Country" :options="countries" name="country" />
+      <Dropdown :value="country" @input="handleCountry" @blur="handleBlur" required label="Country" :options="countries" name="country" autocomplete="country" />
     </div>
   </div>
 </template>

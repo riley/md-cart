@@ -13,6 +13,8 @@ if (url.searchParams.get('token')) {
   setToken(url.searchParams.get('token') + '')
 }
 
+window._learnq = window._learnq || []
+
 // set up google maps
 const script = document.createElement('script')
 script.async = true
@@ -36,6 +38,7 @@ declare global {
     location: Location
     gapi: any
     renderOptIn: () => void
+    _learnq: any
   }
 
   interface Item {
@@ -53,6 +56,7 @@ declare global {
   }
 
   interface Order {
+    _id: string
     id: string
     bundles: Bundle[],
     createdAt: Date
@@ -114,6 +118,13 @@ declare global {
     _id: string
     username: string
     billingAddress: Address
+    credit: number
+    cardMeta: {
+      lastFour: string
+      expMonth: string
+      expYear: string
+    }
+    refId: string
     shippingAddress: Address
   }
 
@@ -164,5 +175,6 @@ declare global {
     commit: any
     state?: any
     getters?: any
+    dispatch?: any
   }
 }

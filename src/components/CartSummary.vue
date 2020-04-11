@@ -21,11 +21,16 @@
             <span>Mr. Davis Rewards</span>
             <span>-${{ credit / 100 }}</span>
           </li>
-          <li v-if="refId" class="discount refer-discount">
+          <li v-if="referDiscountEligible" class="discount refer-discount">
             <span>Discount</span>
-            <span>-$10</span>
+            <span>-${{ referralCredit / 100 }}</span>
           </li>
-          <p v-if="refId" class="refer-discount-conditions">applied at checkout to orders $40 or more with a new account</p>
+          <p v-if="refId" class="discount-conditions">$10 discount applies for new customers on orders of $40 or more</p>
+          <li v-if="nonVipDiscountEligible" class="discount">
+            <span>Secret Savings</span>
+            <span>-${{ nonVIPCheckInCredit / 100 }}</span>
+          </li>
+          <p v-if="isNonVIPCheckIn" class="discount-conditions">$10 secret savings discount applies for orders of $50 or more</p>
           <li v-if="tax > 0">
             <span>Tax</span>
             <span>${{ tax }}</span>
@@ -43,7 +48,7 @@
       </div>
 
       <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setCreateRecurringVIP" :makeRecurring="createRecurringVIP" class="confirm-recurring" />
-      <VipToggle v-if="!returningVipCustomer" :isVip="isVip" @toggleVip="toggleVip" />
+      <!-- <VipToggle v-if="!returningVipCustomer" :isVip="isVip" @toggleVip="toggleVip" /> -->
 
       <!-- a separate banner for returning VIP customers -->
       <Banner
@@ -108,12 +113,17 @@ export default class CartSummary extends Vue {
   @cart.State credit: number
   @cart.State fetching: boolean
   @cart.State isVip: boolean
+  @cart.State isNonVIPCheckIn: boolean
   @cart.State refId: string
   @cart.State returningVipCustomer: boolean
   @cart.State createRecurringVIP: boolean
 
   @cart.Getter grandTotal: number
   @cart.Getter subtotal: number
+  @cart.Getter referralCredit: number
+  @cart.Getter nonVIPCheckInCredit: number
+  @cart.Getter referDiscountEligible: boolean
+  @cart.Getter nonVipDiscountEligible: boolean
 
   @cart.Mutation setIsVip: any
   @cart.Mutation setSelectedShippingService: any
@@ -182,13 +192,14 @@ export default class CartSummary extends Vue {
 .totals li.refer-discount {
   background-color: #dce8e7;
   padding: .25rem .5rem;
-  margin: 0 -.5rem;
+  margin: .5rem -.5rem 0;
 }
 
-.totals .refer-discount + p {
+.discount-conditions {
+  background-color: rgba(220, 232, 231, .5);
   font-size: .75rem;
-  margin: 0;
-  padding: 0;
+  margin: 0 -.5rem .5rem;
+  padding: .5rem .75rem;
 }
 
 .spinner-container {

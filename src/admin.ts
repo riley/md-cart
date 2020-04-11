@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import ActionChooser from './ActionChooser.vue'
-import UpcomingOrders from './UpcomingOrders.vue'
-import OneTimeOrder from './OneTimeOrder.vue'
-import AccountSettings from './AccountSettings.vue'
-import OrderHistory from './OrderHistory.vue'
-import VipSettings from './VipSettings.vue'
+import ActionChooser from './components/ActionChooser.vue'
+import UpcomingOrders from './components/UpcomingOrders.vue'
+import OneTimeOrder from './components/OneTimeOrder.vue'
+import AccountSettings from './components/AccountSettings.vue'
+import OrderHistory from './components/OrderHistory.vue'
+import VipSettings from './components/VipSettings.vue'
 import store from './store/admin'
 
 // the actions you can choose at the top
@@ -23,7 +23,7 @@ new Vue({
 new Vue({
   store,
   render: h => h(OneTimeOrder)
-}).$mount('#one-time-order')
+}).$mount('#send-now')
 
 // update address, billing info
 new Vue({
@@ -35,7 +35,7 @@ new Vue({
 new Vue({
   store,
   render: h => h(OrderHistory)
-}).$mount('#order-history')
+}).$mount('#past-orders')
 
 // edit settings for vips associated with this user
 new Vue({

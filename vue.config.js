@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/app/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/app/' : undefined,
   outputDir: 'dist',
   pages: {
     cart: {
@@ -13,6 +13,12 @@ module.exports = {
       template: 'public/thankyou.html',
       filename: 'thankyou.html',
       title: 'Thank You - Mr. Davis'
+    },
+    admin: {
+      entry: 'src/admin.ts',
+      template: 'public/admin.html',
+      filename: 'admin.html',
+      title: 'Admin - Mr. Davis'
     }
   }
 }

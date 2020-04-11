@@ -13,7 +13,7 @@ if (urlParams.get('token') != null) {
 
 if (window.location.pathname.includes('cart')) {
   // if this is the cart page, hide the url params
-  history.replaceState(null, document.title, `https://${location.host}/cart/`)
+  history.replaceState(null, document.title, `${location.protocol}//${location.host}/cart/`)
 }
 
 type ResponseHandler = (response: Response) => Promise<any>
@@ -99,15 +99,19 @@ export default {
   getters: {
     grandTotal: (state: any, getters: any) => {
       const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
-      return Math.max(itemCost + state.shipping.postage + state.totalTax - state.credit - getters.referralCredit, 0)
+      const calculatedReferralCredit = getters.referDiscountEligible ? getters.referralCredit : 0
+      const calculatedNonVIPCheckInCredit = getters.nonVipDiscountEligible ? getters.nonVIPCheckInCredit : 0
+      return Math.max(itemCost + state.shipping.postage + state.totalTax - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0)
     },
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
     userLoggedIn: (state: any) => state.user.username !== '',
-    referDiscountEligible: (state: any) => state.subtotal >= 4000 && state.refId !== '',
+    referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0,
+    nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
     subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
-    referralCredit: (state: any) => typeof state.refId === 'string' && state.refId.length === 8 ? 1000 : 0
+    referralCredit: (state: any) => typeof state.refId === 'string' && [8, 9, 24].includes(state.refId.length) ? 1000 : 0,
+    nonVIPCheckInCredit: (state: any) => state.isNonVIPCheckIn ? 1000 : 0
   },
   mutations: {
     addItem (state: any, item: Item) {
@@ -193,6 +197,9 @@ export default {
     setProcessingError (state: any, error: string) {
       state.processingError = error
     },
+    setNonVipCheckIn (state: any, isNonVIPCheckIn: boolean) {
+      state.isNonVIPCheckIn = isNonVIPCheckIn
+    },
     setReturningCustomer (state: any, returning: boolean) {
       state.isReturningCustomer = returning
     },
@@ -258,7 +265,7 @@ export default {
     /**
     * get the cart from the server initially
     */
-    async fetchCart ({ commit, state }: Action) {
+    async fetchCart ({ commit, state, dispatch }: Action) {
       commit('setFetching', true)
       try {
         const cart = await fetch(`${state.host}/v2/cart`, {
@@ -275,6 +282,7 @@ export default {
         commit('setShippingAddress', cart.shippingAddress)
         commit('setBillingAddress', cart.billingAddress)
         commit('setRefId', cart.refId)
+        commit('setNonVipCheckIn', cart.isNonVIPCheckIn)
         commit('setIsVip', cart.bundles[0].isVip)
         commit('setItems', cart.bundles[0].skus)
         commit('setShipping', cart.shipping)
@@ -282,6 +290,11 @@ export default {
         commit('setTax', cart.totalTax)
         commit('setUser', cart.user)
         commit('setReturningVipCustomer', cart.user && cart.user.isVipCustomer)
+
+        if (cart.email) {
+          dispatch('identifyTrack', { email: cart.email, name: cart.shippingAddress.name })
+        }
+        dispatch('sendCheckoutStartEvent')
       } catch (e) {
         commit('setGlobalError', `Oh no! something went wrong while fetching your cart. Please contact us at ${supportEmail}.`)
         console.error(e)
@@ -307,6 +320,7 @@ export default {
               modified: state.shipping.modified,
               service: state.shipping.service,
             },
+            refId: state.refId,
             createNewVip: state.createRecurringVIP,
             bundles: [{
               isVip: state.isVip,
@@ -404,7 +418,7 @@ export default {
 
       commit('loginEmailRequested', true)
     },
-    async login ({ commit, state }: Action, { username, magicCode }: {username: string, magicCode: string}) {
+    async login ({ commit, state, dispatch }: Action, { username, magicCode }: {username: string, magicCode: string}) {
       window.woopra && window.woopra.track('login-attempt', { username, code: magicCode })
       let info
 
@@ -417,7 +431,7 @@ export default {
             'Authorization': `Bearer ${getToken()}`
           },
           body: JSON.stringify({ username, magicCode })
-        }).then(handleJSONResponse({ errorString: 'code failed to login user' }))
+        }).then(response => response.json())
       } catch (e) {
         commit('loginFailure', 'Something went wrong with our login service. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
         return
@@ -430,6 +444,8 @@ export default {
         commit('setEmail', info.cart.email)
         commit('setCredit', info.user.credit)
         commit('clearLoginForm')
+
+        dispatch('identifyTrack', { email: info.cart.email, name: info.cart.shippingAddress.name })
         setToken(info.token)
       } else {
         commit('loginFailure', info.error)
@@ -454,8 +470,9 @@ export default {
     async attemptPurchase ({ commit, state, getters }: Action, stripeToken: any) {
       commit('setProcessing', true)
       let result
+      let responseText
       try {
-        result = await fetch(`${state.host}/buy`, {
+        const response = await fetch(`${state.host}/buy`, {
           mode: 'cors',
           method: 'POST',
           headers: {
@@ -471,17 +488,14 @@ export default {
             billingAddress: state.billing.address,
             token: stripeToken,
           })
-        }).then(response => {
-          if (response.status <= 400) {
-            return response.json()
-          } else {
-            // something has gone wrong with the service, not bad user input.
-            // probably improve this process at some point.
-            throw new Error('Something has gone wrong with our credit card processor. Please notify support@mrdavis.com.')
-          }
         })
+
+        responseText = await response.body
+        result = await response.json()
       } catch (e) {
-        commit('setProcessingError', e.message)
+        console.log(e)
+        commit('setProcessingError', 'Something has gone wrong with our credit card processor. Please notify support@mrdavis.com.')
+        window.woopra && window.woopra.track('cart-js-errors', { message: `[isSendMore: ${state.isSendMore}] [isNonVIPCheckIn: ${state.isNonVIPCheckIn}] [cart: ${state.cartId}] ${responseText}` })
         return
       }
 
@@ -491,10 +505,49 @@ export default {
         unsetRefId()
         location.href = `/thankyou`
       } else {
-        const errorMessage = result.errors.map((err: PaymentError) => err.msg).join('\n')
+        const errorMessage = result.errors.map((err: PaymentError) => err.msg).join('<br>')
         commit('setProcessingError', errorMessage)
+        window.woopra && window.woopra.track('cart-js-errors', { message: `[isSendMore: ${state.isSendMore}] [isNonVIPCheckIn: ${state.isNonVIPCheckIn}] ${errorMessage}` })
         commit('setProcessing', false)
       }
+    },
+    async identifyTrack ({ state }: Action, { email, name }: { email?: string, name?: string }) {
+      const payload: any = { $email: email || state.email, $first_name: name || state.billing.address.name }
+
+      console.log('identifyTrack', payload)
+
+      if (!payload.email) return // must send email in the first identify call
+
+      window._learnq.push(['identify', payload])
+    },
+    async sendCheckoutStartEvent ({ state, getters }: Action) {
+      if (!state.email || state.stock.length === 0 || state.items.length === 0) return
+
+      const event = {
+        '$event_id': state.cartId,
+        '$value': getters.subtotal / 100,
+        'Item Names': state.items.map((item: Item) => {
+          const product = state.stock.find((product: Product) => product.sku === item.sku)
+          return product.title
+        }),
+        'CheckoutURL': `https://mrdavis.com/cart?token=${getToken()}`,
+        'Items': state.items.map((item: Item) => {
+          const product = state.stock.find((product: Product) => product.sku === item.sku)
+          return {
+            'SKU': item.sku,
+            'ProductName': product.title,
+            'Quantity': item.quantity,
+            'ItemPrice': item.cost / 100,
+            'RowTotal': item.cost / 100,
+            'ProductURL': product.url,
+            'ImageURL': `https://account.mrdavis.com/img/${product.swatch}`,
+            'ProductCategories': [item.clothingType, product.gender]
+          }
+        })
+      }
+      console.log('start checkout', event)
+
+      window._learnq.push(['track', 'Start Checkout', event])
     }
   }
 }

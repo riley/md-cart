@@ -4,7 +4,7 @@
     <div class="product-info">
       <p class="title">{{ title }}</p>
     </div>
-    <Incrementer class="incrementer" @input="incrementItemQuantity" :value="quantity" />
+    <Incrementer class="incrementer" :class="{ fetching: fetching }" @input="incrementItemQuantity" :value="quantity" />
   </li>
 </template>
 
@@ -30,11 +30,10 @@ export default class CartItem extends Vue {
   @Prop() color!: string
 
   @cart.State host: string
+  @cart.State fetching: boolean
   @cart.Mutation addItem: any
   @cart.Mutation removeItem: any
   @cart.Action updateCart: () => Promise<void>
-
-  fetching = false
 
   async incrementItemQuantity (amount: number) {
     if (this.fetching) return
@@ -44,9 +43,7 @@ export default class CartItem extends Vue {
     } else {
       this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
     }
-    this.fetching = true
     await this.updateCart()
-    this.fetching = false
   }
 }
 </script>
@@ -59,6 +56,11 @@ export default class CartItem extends Vue {
   background-color: white;
   font-weight: 300;
   padding: 1rem 0;
+}
+
+.incrementer.fetching {
+  opacity: .3;
+  pointer-events: none;
 }
 
 .thumbnail {

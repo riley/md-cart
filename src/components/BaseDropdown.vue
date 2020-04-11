@@ -5,6 +5,7 @@
       <select
         :value="value"
         class="md__select"
+        :autocomplete="autocomplete"
         @input="setSelected"
         @focus="setFocus"
         @blur="setBlur">
@@ -27,6 +28,7 @@ export default class Dropdown extends Vue {
   @Prop({ default: 'no label' }) label!: string
   @Prop() options!: DropdownOption[]
   @Prop() value: string
+  @Prop() autocomplete: string
 
   focussed: boolean = false
 

@@ -1,7 +1,7 @@
 <template>
   <div class="fieldWrapper" :class="{invalid, success}">
     <label>
-      <span class="labelText" :style="{display: autocomplete && gmapsLoaded ? 'none' : 'inline'}" :class="{focussedOrValid: focussed || value}">{{ label }}</span>
+      <span class="labelText" :style="{display: placesEnabled && gmapsLoaded ? 'none' : 'inline'}" :class="{focussedOrValid: focussed || value}">{{ label }}</span>
       <input
         ref="input"
         :type="type"
@@ -10,6 +10,7 @@
         :value="value"
         :autocomplete="auto"
         :placeholder="name === 'address_1' ? 'Street Address' : null"
+        :pattern="numpad ? '[0-9]' : null"
         @input="validate($event)"
         @change="validate($event)"
         @focus="setFocus"
@@ -36,12 +37,14 @@ function arraysEqual (a: any[], b: any[]) {
 
 @Component
 export default class TextInput extends Vue {
-  @Prop({ type: Boolean, default: false }) autocomplete: boolean // whether google places autocomplete is turned on for this field
+  @Prop({ type: Boolean, default: false }) placesEnabled: boolean // whether google places autocomplete is turned on for this field
   @Prop({ default: 'text' }) type!: string
   @Prop({ type: Boolean, default: false }) required: boolean
+  @Prop({ type: Boolean, default: false }) numpad: boolean
   @Prop() name!: string
   @Prop() label!: string
   @Prop() value: string
+  @Prop() autocomplete: string
 
   hint: string = 'init error hint'
   invalid: boolean = false
@@ -52,23 +55,17 @@ export default class TextInput extends Vue {
   gmapsLoaded: boolean = false
 
   get auto () {
-    if (this.name === 'name') return 'name'
-    if (this.name === 'email') return 'email'
+    if (!this.autocomplete) return null
     if (this.name === 'address_1' && !this.focussed) return 'address-line1'
-    if (this.name === 'address_2') return 'address-line2'
-    if (this.name === 'city') return 'address-level2'
-    if (this.name === 'state') return 'address-level1'
-    if (this.name === 'zip') return 'postal-code'
-    if (this.name === 'country') return 'country'
-    // if the prop is autocomplete, we turn on google's places api
+    // if the prop is placesEnabled, we turn on google's places api
     // but if the field doesn't have focus, just turn it on (like if they enter their name first)
     if (this.name === 'address_1' && this.focussed) return 'off'
-    return 'on'
+    return this.autocomplete
   }
 
   mounted () {
     // set up poll for google maps to add autocomplete
-    if (this.autocomplete) {
+    if (this.placesEnabled) {
       this.googlePoll = setInterval(this.mapsCallback, 150)
     }
   }

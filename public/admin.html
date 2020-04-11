@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+    <title>md-cart</title>
+    <style>
+    #container {
+      width: 70rem;
+      margin: 0 auto;
+    }
+
+    * {font-family: 'Open Sans', sans-serif; }
+
+    body { background-color: #f3f3f3; }
+
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but md-cart doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- built files will be auto injected -->
+    <div id="container">
+      <div id="action-chooser"></div>
+      <div id="upcoming-orders"></div>
+      <div id="send-now"></div>
+      <div id="account-settings"></div>
+      <div id="past-orders"></div>
+      <div id="vip-settings"></div>
+    </div>
+  </body>
+</html>

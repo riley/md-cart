@@ -27,6 +27,7 @@
           @blur="handleBlurEmail"
           type="email"
           name="email"
+          autocomplete="email"
           label="Email Address" />
         <!-- for a non-vip returning customer -->
         <Banner
@@ -48,7 +49,7 @@
         </Banner>
         <Address
           @input="updateAddress"
-          @blur="attemptToChargeTax"
+          @blur="handleBlur"
           @replaceAddress="replaceShippingAddress"
           v-bind="address" />
       </fieldset>
@@ -95,6 +96,8 @@ export default class ShippingInfo extends Vue {
   @cart.Action logout: any
   @cart.Action checkUsername: (email: string) => Promise<void>
   @cart.Action updateCart: () => Promise<void>
+  @cart.Action identifyTrack: ({ name, email }: {name?: string, email?: string}) => Promise<void>
+  @cart.Action sendCheckoutStartEvent: () => Promise<void>
 
   welcomeBackCardDismissed: boolean = false
 
@@ -113,13 +116,16 @@ export default class ShippingInfo extends Vue {
   handleBlurEmail (name: string, email: string) {
     this.checkUsername(email)
     window.woopra && window.woopra.identify({ email })
+    this.identifyTrack({ email })
   }
 
-  attemptToChargeTax (name: string, value: string) {
-    console.log('attemptToChargeTax', name, value)
+  handleBlur (name: string, value: string) {
     if (name === 'zip') {
       // does this work?
       this.updateCart()
+    } else if (name === 'name') {
+      this.identifyTrack({ name: value })
+      this.sendCheckoutStartEvent()
     }
   }
 }

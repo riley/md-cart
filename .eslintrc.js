@@ -22,7 +22,8 @@ module.exports = {
           'transaction_id',
           'list_name',
           'list_position',
-          'short_name'
+          'short_name',
+          '$first_name'
         ]
       }
     ]
