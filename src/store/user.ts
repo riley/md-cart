@@ -32,7 +32,7 @@ export default {
   },
   actions: {
     async fetchUser ({ commit }: Action) {
-      const user = await fetch(`${host}/user`, {
+      const user = await fetch(`${host}/v2/user`, {
         mode: 'cors',
         headers: {
           Authorization: `Bearer ${getToken()}`

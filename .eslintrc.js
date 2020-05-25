@@ -16,6 +16,7 @@ module.exports = {
       'error',
       {
         allow: [
+          '_id',
           'est_delivery_days',
           'address_1',
           'address_2',

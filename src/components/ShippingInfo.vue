@@ -54,6 +54,9 @@
           v-bind="address" />
       </fieldset>
     </form>
+    <div class="shipping-delay-warning" v-if="address.country !== 'US' && address.country !== 'CA'">
+      Please be aware that we are seeing significant delays in some customs offices around the world processing our packages. This is out of our control and could add a bit of time until you receive your package. We are sorry for the inconvenience.
+    </div>
   </section>
 </template>
 
@@ -175,5 +178,12 @@ fieldset {
 legend {
   visibility: hidden;
   height: 0;
+}
+
+.shipping-delay-warning {
+  background-color: #fee;
+  color: #721c24;
+  padding: 1rem;
+  line-height: 1.6em;
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
-  <li class="cartItem_root">
-    <div class="thumbnail" :style="{'background-image': `url(/img/icons/${icon})`}" />
+  <ItemSkeleton v-if="fetching" />
+  <li v-else class="cartItem_root">
+    <Thumb :icon="icon" />
     <div class="product-info">
       <p class="title">{{ title }}</p>
     </div>
@@ -13,14 +14,15 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
 import { Action, Mutation, namespace } from 'vuex-class'
 import Incrementer from './BaseIncrementer.vue'
 import Badge from './BaseBadge.vue'
-import Spinner from './BaseSpinner.vue'
+import Thumb from './BaseSkuThumb.vue'
+import ItemSkeleton from './CartItemSkeleton.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { Incrementer, Spinner, Badge },
+  components: { Incrementer, Badge, Thumb },
 })
-export default class CartItem extends Vue {
+export default class ItemListItem extends Vue {
   @Prop() sku!: string
   @Prop() quantity!: number
   @Prop() title!: string
@@ -29,21 +31,23 @@ export default class CartItem extends Vue {
   @Prop() cost!: number
   @Prop() color!: string
 
-  @cart.State host: string
-  @cart.State fetching: boolean
-  @cart.Mutation addItem: any
-  @cart.Mutation removeItem: any
-  @cart.Action updateCart: () => Promise<void>
+  // @cart.State host: string
+  @Prop() fetching: boolean
+  // @cart.Mutation addItem: any
+  // @cart.Mutation removeItem: any
+  // @cart.Action updateCart: () => Promise<void>
 
   async incrementItemQuantity (amount: number) {
-    if (this.fetching) return
+    this.$emit('increment', { amount, sku: this.sku })
 
-    if (amount < this.quantity) {
-      this.removeItem(this.sku)
-    } else {
-      this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
-    }
-    await this.updateCart()
+    // if (this.fetching) return
+
+    // if (amount < this.quantity) {
+    //   this.removeItem(this.sku)
+    // } else {
+    //   this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
+    // }
+    // await this.updateCart()
   }
 }
 </script>
@@ -63,15 +67,6 @@ export default class CartItem extends Vue {
   pointer-events: none;
 }
 
-.thumbnail {
-  min-width: 4rem;
-  min-height: 4rem;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center center;
-  margin-right: 1rem;
-}
-
 .product-info {
   flex-grow: 1;
 }
@@ -85,9 +80,5 @@ export default class CartItem extends Vue {
 .cost {
   font-size: 2rem;
   color: grey;
-}
-
-.spinner-container {
-  display: inline-block;
 }
 </style>

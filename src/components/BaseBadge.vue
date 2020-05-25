@@ -25,7 +25,7 @@ export default class Badge extends Vue {
 .badge {
   top: 0;
   right: 0;
-  background-color: red;
+  background-color: #5b7975;
   color: white;
   transform: translate(50%, -50%);
   transform-origin: 100% 0%;

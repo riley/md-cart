@@ -27,12 +27,15 @@ export default class ActionChooser extends Vue {
   @user.Action fetchUser: () => Promise<void>
   @Mutation toggleLoginForm: any
   @Mutation clearLoginForm: any
+  @Action fetchStock: () => Promise<void>
   @Action fetchVips: () => Promise<void>
+  @Action fetchOrders: () => Promise<void>
 
   async mounted () {
-    console.log(this.panels)
-    await this.fetchUser()
-    await this.fetchVips()
+    this.fetchStock()
+    this.fetchUser()
+    this.fetchVips()
+    this.fetchOrders()
   }
 }
 </script>

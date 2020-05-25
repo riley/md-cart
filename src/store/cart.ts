@@ -114,7 +114,9 @@ export default {
     nonVIPCheckInCredit: (state: any) => state.isNonVIPCheckIn ? 1000 : 0
   },
   mutations: {
-    addItem (state: any, item: Item) {
+    addItem (state: any, sku: string) {
+      const product = state.stock.find((product: Product) => product.sku === sku)
+      const item = { sku, quantity: 1, clothingType: product.clothingType }
       state.items = [...state.items, item]
     },
     clearLoginForm (state: any) {
@@ -347,7 +349,7 @@ export default {
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${state.host}/v1/products`)
+        const stock = await fetch(`${host}/v1/products`)
           .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {

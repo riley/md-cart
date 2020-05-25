@@ -109,7 +109,7 @@ export default class LoginForm extends Vue {
 
 .close-button {
   position: absolute;
-  top: -10px;
+  top: 10px;
   right: 10px;
   font-size: 50px;
   cursor: pointer;

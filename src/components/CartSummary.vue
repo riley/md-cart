@@ -3,7 +3,7 @@
     <div class="box">
       <div v-if="items.length">
         <ul class="cart-items">
-          <CartItem v-for="item in items" :key="item.sku" v-bind="item" />
+          <Item v-for="item in items" :key="item.sku" v-bind="item" @increment="incrementItem" :fetching="fetching" />
         </ul>
         <div v-if="fetching" class="spinner-container">
           <Spinner />
@@ -74,7 +74,7 @@ import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import Banner from './BaseBanner.vue'
 import Button from './BaseButton.vue'
 import Dropdown from './BaseDropdown.vue'
-import CartItem from './CartItem.vue'
+import Item from './ItemListItem.vue'
 import CartItemSkeleton from './CartItemSkeleton.vue'
 import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
 import Spinner from './BaseSpinner.vue'
@@ -83,7 +83,7 @@ import VipToggle from './BaseVipToggle.vue'
 const cart = namespace('cart')
 
 @Component({
-  components: { Banner, CartItem, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP, VipToggle },
+  components: { Banner, Item, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP, VipToggle },
 })
 export default class CartSummary extends Vue {
   @Prop() stock!: Product[]
@@ -125,6 +125,8 @@ export default class CartSummary extends Vue {
   @cart.Getter referDiscountEligible: boolean
   @cart.Getter nonVipDiscountEligible: boolean
 
+  @cart.Mutation addItem: any
+  @cart.Mutation removeItem: any
   @cart.Mutation setIsVip: any
   @cart.Mutation setSelectedShippingService: any
   @cart.Mutation setCreateRecurringVIP: () => void
@@ -151,6 +153,19 @@ export default class CartSummary extends Vue {
 
   toggleVip (isVip: boolean) {
     this.setIsVip(isVip)
+    this.updateCart()
+  }
+
+  incrementItem (amount: number, sku: string) {
+    if (this.fetching) return
+
+    const skuCount = this.items.filter((item: Item) => item.sku === sku).length
+    if (amount < skuCount) {
+      this.removeItem(sku)
+    } else {
+      this.addItem(sku)
+    }
+
     this.updateCart()
   }
 }

@@ -55,6 +55,28 @@ declare global {
     recurringPrice: number
   }
 
+  interface PricingBundle {
+    skus: Item[]
+    isVip: boolean
+    pricingTier: number
+  }
+
+  interface Pricing {
+    nextItemPrice: {
+      [clothingType: string]: {
+        baseSingle: number
+        nonVip: number
+        nonVipItemPrice: number
+        vipItemPrice: number
+        vip: number
+      }
+    }
+    nonVip: number
+    pricingTier: number
+    vip: number
+    skus: Item[]
+  }
+
   interface Order {
     _id: string
     id: string
@@ -143,6 +165,15 @@ declare global {
     }
   }
 
+  interface VIP {
+    _id: string
+    createdAt: Date
+    nextDelivery: Date
+    vipPrice: number
+    items: Item[]
+    pricingTier: number
+  }
+
   interface ServerShipping {
     intlDiscount: number
     postage: number
@@ -176,5 +207,15 @@ declare global {
     state?: any
     getters?: any
     dispatch?: any
+  }
+
+  interface ProductMeta {
+    [clothingType: string]: {
+      prompt: string
+      props: {
+        [key: string]: (string|{label: string, value: string})[]
+      },
+      addMore: string[]
+    }
   }
 }

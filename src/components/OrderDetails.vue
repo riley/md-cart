@@ -1,3 +1,4 @@
+<!-- this file is for the Thank You page -->
 <template>
   <div class="customer-info-root">
     <div v-if="orderError">{{ orderError }}</div>
@@ -13,6 +14,9 @@
           order {{ id }}<br>
         </div>
         <h3>Thank you {{ billing.name.trim() }}!</h3>
+        <div v-if="shipping.country !== 'US'" class="shipping-delay-warning">
+          We are currently experiencing higher than normal delays in customs due to the ongoing pandemic. Thank you for your patience and understanding.
+        </div>
         <Card class="refer-prompt">
           <CardContent>
             <ReferPrompt :id="userRefId" />
@@ -124,4 +128,10 @@ h2 {
   bottom: 0;
 }
 
+.shipping-delay-warning {
+  background-color: #fee;
+  color: #721c24;
+  padding: 1rem;
+  line-height: 1.6em;
+}
 </style>
