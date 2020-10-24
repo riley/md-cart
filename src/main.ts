@@ -1,7 +1,5 @@
 import Vue from 'vue'
-// import CartSummary from './components/CartSummary.vue'
-// import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
-import Cart from './Cart.vue'
+import Cart from './views/Cart.vue'
 import store from './store/store'
 
 import { setToken } from './utils/storage'
@@ -146,6 +144,10 @@ declare global {
       expMonth: string
       expYear: string
     }
+    orders: string[],
+    vips: string[],
+    paypalPayerId?: string
+    stripeId?: string
     refId: string
     shippingAddress: Address
   }
@@ -172,6 +174,7 @@ declare global {
     vipPrice: number
     items: Item[]
     pricingTier: number
+    cycleDays: number
   }
 
   interface ServerShipping {

@@ -15,12 +15,12 @@ import { Action, Mutation, namespace } from 'vuex-class'
 import Incrementer from './BaseIncrementer.vue'
 import Badge from './BaseBadge.vue'
 import Thumb from './BaseSkuThumb.vue'
-import ItemSkeleton from './CartItemSkeleton.vue'
+import ItemSkeleton from './cart/CartItemSkeleton.vue'
 
 const cart = namespace('cart')
 
 @Component({
-  components: { Incrementer, Badge, Thumb },
+  components: { Incrementer, ItemSkeleton, Badge, Thumb },
 })
 export default class ItemListItem extends Vue {
   @Prop() sku!: string
@@ -31,23 +31,10 @@ export default class ItemListItem extends Vue {
   @Prop() cost!: number
   @Prop() color!: string
 
-  // @cart.State host: string
   @Prop() fetching: boolean
-  // @cart.Mutation addItem: any
-  // @cart.Mutation removeItem: any
-  // @cart.Action updateCart: () => Promise<void>
 
   async incrementItemQuantity (amount: number) {
     this.$emit('increment', { amount, sku: this.sku })
-
-    // if (this.fetching) return
-
-    // if (amount < this.quantity) {
-    //   this.removeItem(this.sku)
-    // } else {
-    //   this.addItem({ sku: this.sku, quantity: 1, clothingType: this.clothingType })
-    // }
-    // await this.updateCart()
   }
 }
 </script>

@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div v-if="loggedIn">
     <Heading>Vip Settings</Heading>
     <div>
       <div class="vip-list" v-if="allVips.length > 1">
         <VipThumb v-for="vip of allVips" :key="vip._id" v-bind="vip" :stock="stock" @click.native="setActiveVip(vip)"/>
       </div>
     </div>
-    <Overlay :active="!!activeVip" @dismiss="activeVip = null">
+    <Overlay :active="!!activeVip" @dismiss="setActiveVip(null)">
       <Card class="item-modifier">
         <CardContent>
           <div class="panel">
@@ -17,12 +17,22 @@
                 <p>Next Delivery Date</p>
                 <input type="date" :value="formattedDate" @change="updateNextDelivery" />
                 <p>Delivery Frequency</p>
-                <input type="range" :value="activeVip.cycleDays" />
+                <input type="range" :value="activeVip.cycleDays" @change="updateFrequency" step="5" />
                 <p>Every {{ activeVip.cycleDays }} days</p>
               </div>
-              <ItemListItem v-for="item of Object.values(groupedItems)" :key="item.sku" v-bind="item" @increment="incrementItem" />
+              <ItemListItem v-for="item of groupedItems" :key="item.sku" v-bind="item" @increment="incrementItem" />
             </div>
             <Chooser :pricing="pricing" :stock="stock" @chosenProduct="chosenProduct" />
+          </div>
+          <div class="panel">
+            <Button
+              inline
+              variant="primary"
+              @click="pauseVIP">Pause VIP</Button>
+            <Button
+              inline
+              variant="danger"
+              @click="stopVip">Stop VIP</Button>
           </div>
         </CardContent>
       </Card>
@@ -32,25 +42,32 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import { State, Getter, Action, Mutation } from 'vuex-class'
-import Heading from './BaseHeading.vue'
-import ItemListItem from './ItemListItem.vue'
-import Chooser from './Chooser.vue'
-import VipThumb from './VipThumb.vue'
-import Overlay from './Overlay.vue'
-import Card from './BaseCard.vue'
-import CardContent from './BaseCardContent.vue'
+import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
+import Heading from '../components/BaseHeading.vue'
+import Button from '../components/BaseButton.vue'
+import ItemListItem from '../components/ItemListItem.vue'
+import Chooser from '../components/Chooser.vue'
+import VipThumb from '../components/admin/VipThumb.vue'
+import Overlay from '../components/Overlay.vue'
+import Card from '../components/BaseCard.vue'
+import CardContent from '../components/BaseCardContent.vue'
 
-@Component({ components: { Card, CardContent, Heading, ItemListItem, Chooser, VipThumb, Overlay } })
+const user = namespace('user')
+
+@Component({ components: { Button, Card, CardContent, Heading, ItemListItem, Chooser, VipThumb, Overlay } })
 export default class VipSettings extends Vue {
   @State stock: Product[]
   @Getter allVips: VIP[]
+  @user.Getter loggedIn: boolean
   @Mutation setNextDelivery: any
+  @Mutation setCycleDays: any
   @Mutation addItem: any
   @Mutation removeItem: any
+  @Mutation setStatus: any
   @Action updateVip: (id: string) => Promise<void>
   @Action fetchPricing: (bundle: PricingBundle) => Promise<Pricing>
 
+  confirmingPause = false
   activeVip: VIP | null = null
   pricing: Pricing | null = null
 
@@ -62,14 +79,19 @@ export default class VipSettings extends Vue {
     if (!this.activeVip) return {}
 
     return this.activeVip.items.reduce((carry: any, item: Item) => {
-      if (carry[item.sku]) {
-        carry[item.sku].quantity += 1
+      const index = carry.findIndex((p: {sku: string}) => p.sku === item.sku)
+      if (index !== -1) {
+        carry[index].quantity += 1
       } else {
         const product = this.stock.find((product: Product) => product.sku === item.sku)
-        carry[item.sku] = { ...product, quantity: 1 }
+        carry.push({ ...product, quantity: 1 })
       }
       return carry
-    }, {})
+    }, []).sort((a: {sku: string}, b: {sku: string}) => {
+      if (a.sku < b.sku) return -1
+      if (a.sku > b.sku) return 1
+      return 0
+    })
   }
 
   get formattedDate () {
@@ -93,10 +115,11 @@ export default class VipSettings extends Vue {
   async setActiveVip (vip: VIP) {
     this.activeVip = vip
 
-    const bundle = { isVip: true, skus: this.activeVip.items, pricingTier: this.activeVip.pricingTier }
-    this.pricing = await this.fetchPricing(bundle)
-
-    console.log('setActiveVip', vip, this.pricing)
+    if (this.activeVip) {
+      const bundle = { isVip: true, skus: this.activeVip.items, pricingTier: this.activeVip.pricingTier }
+      this.pricing = await this.fetchPricing(bundle)
+      console.log('setActiveVip', vip, this.pricing)
+    }
   }
 
   updateNextDelivery (e: Event) {
@@ -111,12 +134,23 @@ export default class VipSettings extends Vue {
     this.updateVip(this.activeVip._id)
   }
 
+  updateFrequency (e: Event) {
+    if (!this.activeVip) return
+
+    const target = e.target as HTMLInputElement
+    const frequency = +target.value
+    this.activeVip.cycleDays = frequency
+    this.setCycleDays({ cycleDays: frequency, id: this.activeVip._id })
+    this.updateVip(this.activeVip._id)
+  }
+
   incrementItem ({ amount, sku }: { amount: number, sku: string }) {
     if (!this.activeVip) return
 
     const skuCount = this.activeVip.items.filter((item: Item) => item.sku === sku).length
     if (amount < skuCount) {
       this.removeItem({ sku, id: this.activeVip._id })
+      console.log('sku', sku)
     } else {
       console.log('amount', amount, 'sku', sku)
       const product = this.stock.find((product: Product) => product.sku === sku)
@@ -127,9 +161,10 @@ export default class VipSettings extends Vue {
       const item = { quantity: 1, sku, clothingType: product.clothingType }
       console.log('adding item', item, this.activeVip)
       this.addItem({ item, id: this.activeVip._id })
+      console.log('item', item)
     }
 
-    // this.updateVip(this.activeVip._id)
+    this.updateVip(this.activeVip._id)
   }
 
   chosenProduct (product: Product) {
@@ -140,12 +175,32 @@ export default class VipSettings extends Vue {
       item: { quantity: 1, sku: product.sku, clothingType: product.clothingType }
     })
   }
+
+  pauseVIP () {
+    if (!this.activeVip) return
+
+    this.setStatus({ id: this.activeVip._id, status: 'paused' })
+  }
+
+  stopVip () {
+    if (!this.activeVip) return
+
+    this.setStatus({ id: this.activeVip._id, status: 'stopped' })
+  }
 }
 </script>
 
 <style scoped>
 .panel {
   display: flex;
+}
+
+.panel:last-child {
+  justify-content: flex-end;
+}
+
+.panel:last-child button {
+  margin-left: 1rem;
 }
 
 .panel > div:first-child {

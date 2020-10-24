@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import Thumb from './BaseSkuThumb.vue'
+import Thumb from '../BaseSkuThumb.vue'
 
 @Component({ components: { Thumb } })
 export default class VipThumb extends Vue {

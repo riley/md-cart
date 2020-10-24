@@ -6,6 +6,18 @@ import user from './user'
 
 Vue.use(Vuex)
 
+const urlParams = new URLSearchParams(location.search)
+let snoozing = false
+let snoozeHash = null
+if (urlParams.get('s_id')) {
+  snoozing = true
+  snoozeHash = urlParams.get('s_id')
+}
+if (urlParams.get('token') != null) { // might be signed in from a snooze email
+  // @ts-ignore
+  setToken(urlParams.get('token'))
+}
+
 type ResponseHandler = (response: Response) => Promise<any>
 // this either returns the JSON promise or throws
 const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHandler => {
@@ -23,8 +35,7 @@ export default new Vuex.Store({
   modules: { user },
   state: {
     fetching: false,
-    loginEmailRequested: false,
-    loginErrorMessage: '',
+    fetchingSnooze: false,
     loginFormActive: false,
     panels: [
       { title: 'See Upcoming Order(s)', element: '#upcoming-orders', icon: 'iconsmind-Truck' },
@@ -35,7 +46,10 @@ export default new Vuex.Store({
     ],
     orderMap: {},
     orders: [],
-
+    snoozeHash,
+    snoozing, // is the snooze area visible?
+    snoozeError: null,
+    snoozedVIP: null,
     stock: [],
     user: {
       _id: null,
@@ -71,19 +85,21 @@ export default new Vuex.Store({
       state.vipMap[id].items = [...state.vipMap[id].items, item]
     },
     clearLoginForm (state: any) {
-      state.loginEmailRequested = false
       state.loginFormActive = false
-    },
-    loginEmailRequested (state: any) {
-      state.loginEmailRequested = true
     },
     removeItem (state: any, { sku, id }: { sku: string, id: string }) {
       const index = state.vipMap[id].items.findIndex((item: Item) => item.sku === sku)
       state.vipMap[id].items.splice(index, 1)
       state.vipMap[id].items = [...state.vipMap[id].items]
     },
+    setCycleDays (state: any, { cycleDays, id }: { cycleDays: number, id: string }) {
+      state.vipMap[id].cycleDays = cycleDays
+    },
     setFetching (state: any, fetching: boolean) {
       state.fetching = fetching
+    },
+    setFetchingSnooze (state: any, fetching: boolean) {
+      state.fetchingSnooze = fetching
     },
     setNextDelivery (state: any, { nextDelivery, id }: { nextDelivery: Date, id: string }) {
       state.vipMap[id].nextDelivery = nextDelivery
@@ -96,6 +112,16 @@ export default new Vuex.Store({
 
       state.orders = orders.map(order => order._id)
     },
+    setSnoozing (state: any, snoozing: boolean) {
+      state.snoozing = snoozing
+    },
+    setSnoozedVIP (state: any, vip: VIP) {
+      vip.nextDelivery = new Date(vip.nextDelivery)
+      state.snoozedVIP = vip
+    },
+    setStatus (state: any, { status, id }: { status: string, id: string }) {
+      state.vipMap[id].status = status
+    },
     setStock (state: any, stock: Product[]) {
       state.stock = stock
     },
@@ -105,6 +131,10 @@ export default new Vuex.Store({
       state.billing.address = user.billingAddress
       state.shipping.address = user.shippingAddress
     },
+    setVip: (state: any, vip: VIP) => {
+      const index = state.vips.firstIndex((v: VIP) => v._id === vip._id)
+      state.vips = [...state.vips.slice(0, index), vip, ...state.vips.slice(index + 1)]
+    },
     setVips (state: any, vips: VIP[]) {
       for (const vip of vips) {
         vip.nextDelivery = new Date(vip.nextDelivery)
@@ -113,6 +143,9 @@ export default new Vuex.Store({
       }
 
       state.vips = vips.map(vip => vip._id)
+    },
+    snoozeError (state: any, message: string) {
+      state.snoozeError = message
     },
     toggleLoginForm (state: any, active: boolean) {
       state.loginFormActive = active
@@ -139,52 +172,65 @@ export default new Vuex.Store({
 
       commit('setFetching', false)
     },
-    async requestCode ({ commit, state }: Action, username: string) {
-      window.woopra && window.woopra.identify({ email: username })
-      window.woopra && window.woopra.track('request-login-code', { username })
-
+    async fetchOrders ({ commit, state }: Action) {
       try {
-        await fetch(`${host}/request-login-code`, {
-          method: 'POST',
+        const orders = await fetch(`${host}/orders`, {
           mode: 'cors',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
-          },
-          body: JSON.stringify({ username, brand: 'mrdavis' })
-        }).then(res => {
-          if (res.status !== 200) throw new Error('Login request failed to send code.')
-        })
+            Authorization: `Bearer ${getToken()}`
+          }
+        }).then(res => res.json())
+
+        commit('setOrders', orders)
       } catch (e) {
-        console.error(e)
-        commit('loginFailure', 'We\'re having trouble sending your login email. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
-        return
+        console.log('failed to fetch orders')
       }
-
-      commit('loginEmailRequested', true)
-    },
-    async login ({ commit, state }: Action) {
-
-    },
-    async fetchOrders ({ commit, state }: Action) {
-      const orders = await fetch(`${host}/orders`, {
-        mode: 'cors',
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
-      }).then(res => res.json())
-
-      commit('setOrders', orders)
     },
     async fetchVips ({ commit, state }: Action) {
-      const vips = await fetch(`${host}/vips`, {
+      try {
+        const vips = await fetch(`${host}/vips`, {
+          mode: 'cors',
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }).then(res => res.json())
+
+        commit('setVips', vips)
+      } catch (e) {
+        console.log('failed to fetch vips')
+      }
+    },
+    async snoozeVip ({ commit, state }: Action, id: string) {
+      // const vip = await fetch(`${host}/v1/snooze/${id}`, {
+      //   mode: 'cors',
+      //   method: 'PUT',
+      //   headers: {
+      //     Authorization: `Bearer ${getToken()}`,
+      //     'Content-Type': 'application/json'
+      //   }
+      // }).then(res => res.json())
+
+      // commit('setSnoozedVIP', vip)
+    },
+    // user has come from an email and is snoozing from the hash
+    async snoozeByHash ({ commit, state }: Action, hash: string) {
+      commit('setFetchingSnooze', true)
+
+      const info = await fetch(`${host}/v1/snooze/${hash}`, {
         mode: 'cors',
+        method: 'PUT',
         headers: {
           Authorization: `Bearer ${getToken()}`
         }
       }).then(res => res.json())
 
-      commit('setVips', vips)
+      commit('setFetchingSnooze', false)
+
+      if (typeof info.message === 'string') {
+        return commit('snoozeError', info.message)
+      }
+
+      commit('setSnoozedVIP', info)
     },
     // this does not update all vips, just one at a time
     async updateVip ({ commit, state }: Action, id: string) {
@@ -200,6 +246,7 @@ export default new Vuex.Store({
       }).then(res => res.json())
 
       console.log('updated vip', vip)
+      commit('setVip', vip)
     }
   }
 })

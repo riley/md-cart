@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
-    <div v-if="active" class="holder" @click.self="$emit('dismiss')">
-      <div class="background"></div>
+    <div v-if="active" class="holder">
+      <div class="background" @click.self="$emit('dismiss')"></div>
       <div class="content">
         <slot></slot>
       </div>
@@ -28,6 +28,7 @@ export default Vue.extend({
   align-items: center;
   flex-direction: column;
   opacity: 1;
+  z-index: 1000;
 }
 
 .background {

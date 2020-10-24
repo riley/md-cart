@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-import CartSummary from './components/CartSummary.vue'
-import CustomerInfoInputs from './components/CustomerInfoInputs.vue'
+import CartSummary from '../components/cart/CartSummary.vue'
+import CustomerInfoInputs from '../components/cart/CustomerInfoInputs.vue'
 
 // this class exists because we put it back into one div, but I didn't want to
 // put all the code back together just yet

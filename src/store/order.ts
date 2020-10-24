@@ -28,6 +28,7 @@ export default {
     orderError: null,
     orderLoadedOnce: false,
     paymentMethod: '',
+    paypalOrderId: null,
     shipping: {
       address: {
         name: '',
@@ -86,7 +87,18 @@ export default {
       state.id = order.id
       state._id = order._id
       state.orderLoadedOnce = true
-      state.paymentMethod = order.stripeCharge ? order.stripeCharge.source.brand.toLowerCase() : 'Free'
+      state.paypalOrderId = order.paypalOrderId
+
+      let paymentMethod
+      if (order.stripeCharge) {
+        paymentMethod = order.stripeCharge.source.brand.toLowerCase()
+      } else if (order.paypalOrderId) {
+        paymentMethod = 'paypal'
+      } else {
+        paymentMethod = 'free'
+      }
+
+      state.paymentMethod = paymentMethod
       state.shipping.address = order.shippingAddress
       state.shipping.postage = order.shipping.postage
       state.shipping.service = order.shipping.service

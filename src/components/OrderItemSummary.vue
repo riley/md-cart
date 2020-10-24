@@ -53,7 +53,7 @@ const cart = namespace('cart')
 })
 export default class OrderItemSummary extends Vue {
   @cart.Action fetchStock: () => Promise<void>
-  @order.Action fetchOrder: () => Promise<void>
+  @order.Action fetchOrder: () => Promise<any>
   @order.Action fetchUserMeta: () => Promise<void>
   @order.Mutation missingIdError: any
 
@@ -71,8 +71,8 @@ export default class OrderItemSummary extends Vue {
   @order.Getter discountBeforeReferralBonus: number
   @order.State totalTax: number
 
-  paymentMethod = 'visa'
-  googleCheckoutTracked = false
+  paymentMethod: string = 'visa'
+  checkoutTracked: boolean = false
 
   get items () {
     return this.getItems(false)
@@ -120,8 +120,10 @@ export default class OrderItemSummary extends Vue {
     const fmtDeliveryDate = `${ed.getFullYear()}-${(ed.getMonth() + 1).toString().padStart(2, '0')}-${ed.getDate().toString().padStart(2, '0')}`
 
     const orderSummary = this
+    const onlyMasks = this.bundles[0].skus.every((item: Item) => item.clothingType === 'covid-mask')
 
-    // window.renderOptIn = function () {
+    if (onlyMasks) return
+
     window.gapi.load('surveyoptin', function () {
       const payload = {
         'merchant_id': 111805534,
@@ -139,11 +141,10 @@ export default class OrderItemSummary extends Vue {
       }
       window.gapi.surveyoptin.render(payload)
     })
-    // }
   }
 
   updated () {
-    if (this.orderLoadedOnce && this.stock.length) {
+    if (this.orderLoadedOnce && this.stock.length && !this.checkoutTracked) {
       window.woopra && window.woopra.track('checkout', {
         id: this.id,
         amount: (this.grandTotal / 100).toFixed(2),
@@ -180,7 +181,28 @@ export default class OrderItemSummary extends Vue {
         }, [])
       })
 
-      window.fbq && window.fbq('track', 'Purchase', { value: (this.grandTotal / 100).toFixed(2), currency: 'USD' })
+      const contents: Item[] = []
+      const groupedBySku = this.bundles[0].skus.reduce((carry, item) => {
+        const index = carry.findIndex(p => p.sku === item.sku)
+        if (index === -1) {
+          carry.push({ ...item })
+        } else {
+          carry[index].quantity += item.quantity
+        }
+        return carry
+      }, contents)
+
+      window.fbq && window.fbq('track', 'Purchase', {
+        value: (this.grandTotal / 100).toFixed(2),
+        content_ids: this.bundles[0].skus.map(item => item.sku).join(),
+        num_items: this.bundles[0].skus.length,
+        content_type: 'product',
+        contents: groupedBySku.map(item => ({ id: item.sku, quantity: item.quantity })),
+        product_catalog_id: 465548217719062,
+        currency: 'USD',
+      })
+
+      this.checkoutTracked = true
     }
   }
 }

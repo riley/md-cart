@@ -10,7 +10,7 @@
     </div>
     <p class="meta">
       <span class="medium">Order {{ id }} - {{ status }}</span><br>
-      Placed {{ createdAt.toLocaleString() }}<br>
+      Placed {{ formattedDate(createdAt) }}<br>
       {{ bundles[0].skus.length }} items
     </p>
     <p class="detail" @click="showOrderDetail">›</p>
@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import Thumb from './BaseSkuThumb.vue'
+import Thumb from '../BaseSkuThumb.vue'
 
 @Component({ components: { Thumb } })
 export default class OrderThumb extends Vue {
@@ -28,6 +28,8 @@ export default class OrderThumb extends Vue {
   @Prop() bundles: Bundle[]
   @Prop() createdAt: Date
   @Prop() stock: Product[]
+
+  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
   get groupedProducts () {
     return this.bundles[0].skus.reduce((carry: any, item: Item) => {
@@ -39,6 +41,10 @@ export default class OrderThumb extends Vue {
       }
       return carry
     }, {})
+  }
+
+  formattedDate (d: Date) {
+    return `${this.months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
   }
 
   showOrderDetail () {

@@ -14,7 +14,7 @@
         <h4>Shipping Address</h4>
         <Address displayOnly v-bind="shipping" />
       </div>
-      <div class="billing-address">
+      <div v-if="paymentMethod !== 'paypal'" class="billing-address">
         <h4>Billing Address</h4>
         <Address displayOnly v-bind="billing" />
       </div>

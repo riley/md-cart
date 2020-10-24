@@ -15,9 +15,9 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import Thumb from './BaseSkuThumb.vue'
-import Badge from './BaseBadge.vue'
-import Button from './BaseButton.vue'
+import Thumb from '../BaseSkuThumb.vue'
+import Badge from '../BaseBadge.vue'
+import Button from '../BaseButton.vue'
 
 @Component({ components: { Button, Thumb, Badge } })
 export default class VipDetail extends Vue {

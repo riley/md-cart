@@ -1,5 +1,6 @@
 import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
 import { host } from '../utils/computed'
+import { identifyTrack } from '../utils/tracking'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
 
@@ -26,13 +27,6 @@ const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHan
 
     return response.json()
   }
-}
-
-const userSettings: User = {
-  username: '',
-  shipping: { address: null },
-  billing: { address: null },
-  cardMeta: null,
 }
 
 export default {
@@ -64,14 +58,11 @@ export default {
     isSendMore: false,
     isVip: false,
     items: [],
-    loginEmailRequested: false,
-    loginErrorMessage: '',
     loginFormActive: false,
     order: null,
     processing: false,
     processingError: null,
     refId: refId || '', // this is initialized above (might be null)
-    returningVipCustomer: null, // if set, it's an id
     shipping: {
       address: {
         name: '',
@@ -94,7 +85,6 @@ export default {
     useStoredBillingInfo: false,
     useStoredPaymentInfo: false,
     useStoredShippingInfo: false,
-    user: { ...userSettings },
   },
   getters: {
     grandTotal: (state: any, getters: any) => {
@@ -106,7 +96,6 @@ export default {
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
-    userLoggedIn: (state: any) => state.user.username !== '',
     referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0,
     nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
     subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
@@ -120,7 +109,6 @@ export default {
       state.items = [...state.items, item]
     },
     clearLoginForm (state: any) {
-      state.loginEmailRequested = false
       state.loginFormActive = false
     },
     editStoredBillingAddress (state: any) {
@@ -135,20 +123,23 @@ export default {
       state.useStoredBillingInfo = false
       state.useStoredPaymentInfo = false
     },
-    loginEmailRequested (state: any, requested: boolean) {
-      state.loginEmailRequested = requested
+    loginCart (state: any, user: StoredUser) {
+      state.billing.address = user.billingAddress
+      state.shipping.address = user.shippingAddress
+      state.email = user.username
+      state.credit = user.credit
+      state.useStoredBillingInfo = !!user.stripeId
+      state.useStoredPaymentInfo = !!user.stripeId
+      state.useStoredShippingInfo = true
+      state.isReturningCustomer = true
+      state.loginFormActive = false
     },
-    loginFailure (state: any, message: string) {
-      state.loginErrorMessage = message
-    },
-    logout (state: any) {
-      state.user = { ...userSettings }
+    logoutCart (state: any) {
       state.credit = 0
       state.useStoredShippingInfo = false
       state.useStoredBillingInfo = false
       state.useStoredPaymentInfo = false
       state.isReturningCustomer = false
-      state.returningVipCustomer = false
     },
     removeItem (state: any, sku: string) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
@@ -202,12 +193,6 @@ export default {
     setNonVipCheckIn (state: any, isNonVIPCheckIn: boolean) {
       state.isNonVIPCheckIn = isNonVIPCheckIn
     },
-    setReturningCustomer (state: any, returning: boolean) {
-      state.isReturningCustomer = returning
-    },
-    setReturningVipCustomer (state: any, returning: boolean) {
-      state.returningVipCustomer = returning
-    },
     setRefId (state: any, refId: string) {
       state.refId = refId
     },
@@ -229,28 +214,6 @@ export default {
     },
     setTax (state: any, tax: number) {
       state.totalTax = tax
-    },
-    setUser (state: any, user: any) {
-      if (user == null) {
-        state.user = { ...userSettings }
-      } else {
-        state.user = {
-          username: user.username,
-          shipping: { address: user.shippingAddress },
-          billing: { address: user.billingAddress },
-          cardMeta: user.cardMeta,
-        }
-        state.useStoredBillingInfo = true
-        state.useStoredShippingInfo = true
-        state.useStoredPaymentInfo = true
-        state.isReturningCustomer = true
-
-        window.woopra && window.woopra.identify({
-          email: user.username,
-          name: user.shippingAddress.name
-        })
-        window.woopra && window.woopra.track()
-      }
     },
     toggleLoginForm (state: any, active: boolean) {
       state.loginFormActive = active
@@ -290,11 +253,10 @@ export default {
         commit('setShipping', cart.shipping)
         commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
         commit('setTax', cart.totalTax)
-        commit('setUser', cart.user)
-        commit('setReturningVipCustomer', cart.user && cart.user.isVipCustomer)
+        commit('user/setReturningVipCustomer', cart.user && cart.user.isVipCustomer, { root: true })
 
         if (cart.email) {
-          dispatch('identifyTrack', { email: cart.email, name: cart.shippingAddress.name })
+          identifyTrack({ email: cart.email, name: cart.shippingAddress.name })
         }
         dispatch('sendCheckoutStartEvent')
       } catch (e) {
@@ -381,7 +343,7 @@ export default {
           .then(handleJSONResponse({ errorString: 'Could not get username info' }))
 
         if (info.cart) {
-          commit('setReturningVipCustomer', !!info.cart.returningVipCustomer)
+          commit('user/setReturningVipCustomer', !!info.cart.returningVipCustomer, { root: true })
           commit('setItems', info.cart.bundles[0].skus) // cart pricing might have updated
           commit('setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount)
           commit('setShipping', info.cart.shipping)
@@ -389,85 +351,12 @@ export default {
         }
 
         if (info.available === false) {
-          commit('setReturningCustomer', true)
+          commit('user/setReturningCustomer', true, { root: true })
         }
       } catch (e) {
         commit('setGlobalError', `Uh oh! We weren't able to update the cart. Please contact us at ${supportEmail}`)
         console.error(e)
       }
-    },
-    async requestLoginEmail ({ commit, state }: Action, username: string) {
-      window.woopra && window.woopra.identify({ email: username })
-      window.woopra && window.woopra.track('request-login-code', { username })
-
-      try {
-        await fetch(`${state.host}/cart-request-login-code`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
-          },
-          body: JSON.stringify({ username, brand: 'mrdavis' })
-        }).then(res => {
-          if (res.status !== 200) throw new Error('Login request failed to send code.')
-        })
-      } catch (e) {
-        console.error(e)
-        commit('loginFailure', 'We\'re having trouble sending your login email. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
-        return
-      }
-
-      commit('loginEmailRequested', true)
-    },
-    async login ({ commit, state, dispatch }: Action, { username, magicCode }: {username: string, magicCode: string}) {
-      window.woopra && window.woopra.track('login-attempt', { username, code: magicCode })
-      let info
-
-      try {
-        info = await fetch(`${state.host}/login-existing`, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
-          },
-          body: JSON.stringify({ username, magicCode })
-        }).then(response => response.json())
-      } catch (e) {
-        commit('loginFailure', 'Something went wrong with our login service. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
-        return
-      }
-
-      if (info.token) {
-        commit('setUser', info.user)
-        commit('setBillingAddress', info.cart.billingAddress)
-        commit('setShippingAddress', info.cart.shippingAddress)
-        commit('setEmail', info.cart.email)
-        commit('setCredit', info.user.credit)
-        commit('clearLoginForm')
-
-        dispatch('identifyTrack', { email: info.cart.email, name: info.cart.shippingAddress.name })
-        setToken(info.token)
-      } else {
-        commit('loginFailure', info.error)
-        window.woopra && window.woopra.track('login-failure', { username, message: info.error })
-      }
-    },
-    async logout ({ commit, state }: Action) {
-      commit('logout')
-
-      const response = await fetch(`${state.host}/logout-cart`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`
-        }
-      })
-
-      const token = await response.text()
-
-      setToken(token)
     },
     async attemptPurchase ({ commit, state, getters }: Action, stripeToken: any) {
       commit('setProcessing', true)
@@ -512,15 +401,6 @@ export default {
         window.woopra && window.woopra.track('cart-js-errors', { message: `[isSendMore: ${state.isSendMore}] [isNonVIPCheckIn: ${state.isNonVIPCheckIn}] ${errorMessage}` })
         commit('setProcessing', false)
       }
-    },
-    async identifyTrack ({ state }: Action, { email, name }: { email?: string, name?: string }) {
-      const payload: any = { $email: email || state.email, $first_name: name || state.billing.address.name }
-
-      console.log('identifyTrack', payload)
-
-      if (!payload.email) return // must send email in the first identify call
-
-      window._learnq.push(['identify', payload])
     },
     async sendCheckoutStartEvent ({ state, getters }: Action) {
       if (!state.email || state.stock.length === 0 || state.items.length === 0) return

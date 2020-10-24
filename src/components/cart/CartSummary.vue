@@ -71,16 +71,17 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
-import Banner from './BaseBanner.vue'
-import Button from './BaseButton.vue'
-import Dropdown from './BaseDropdown.vue'
-import Item from './ItemListItem.vue'
+import Banner from '../BaseBanner.vue'
+import Button from '../BaseButton.vue'
+import Dropdown from '../BaseDropdown.vue'
+import Item from '../ItemListItem.vue'
 import CartItemSkeleton from './CartItemSkeleton.vue'
 import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
-import Spinner from './BaseSpinner.vue'
+import Spinner from '../BaseSpinner.vue'
 import VipToggle from './BaseVipToggle.vue'
 
 const cart = namespace('cart')
+const user = namespace('user')
 
 @Component({
   components: { Banner, Item, CartItemSkeleton, Button, Dropdown, Spinner, ConfirmRecurringVIP, VipToggle },
@@ -115,7 +116,7 @@ export default class CartSummary extends Vue {
   @cart.State isVip: boolean
   @cart.State isNonVIPCheckIn: boolean
   @cart.State refId: string
-  @cart.State returningVipCustomer: boolean
+  @user.State returningVipCustomer: boolean
   @cart.State createRecurringVIP: boolean
 
   @cart.Getter grandTotal: number
@@ -133,12 +134,14 @@ export default class CartSummary extends Vue {
   @cart.Action updateCart: () => Promise<void>
   @cart.Action fetchCart: () => Promise<void>
   @cart.Action fetchStock: () => Promise<void>
+  @user.Action fetchUser: () => Promise<void>
 
   welcomeBackVipDismissed: boolean = false
 
   async mounted () {
     await this.fetchStock()
     await this.fetchCart()
+    await this.fetchUser()
 
     if (window.innerWidth <= 850) {
       const totals = this.$refs['totals'] as HTMLElement
@@ -156,11 +159,14 @@ export default class CartSummary extends Vue {
     this.updateCart()
   }
 
-  incrementItem (amount: number, sku: string) {
+  incrementItem ({ amount, sku }: { amount: number, sku: string }) {
     if (this.fetching) return
 
-    const skuCount = this.items.filter((item: Item) => item.sku === sku).length
-    if (amount < skuCount) {
+    const item = this.items.find((item: Item) => item.sku === sku)
+
+    if (!item) return // this should probably never happen
+
+    if (amount < item.quantity) {
       this.removeItem(sku)
     } else {
       this.addItem(sku)

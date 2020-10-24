@@ -17,6 +17,9 @@ module.exports = {
       {
         allow: [
           '_id',
+          'content_ids',
+          'num_items',
+          'content_type',
           'est_delivery_days',
           'address_1',
           'address_2',

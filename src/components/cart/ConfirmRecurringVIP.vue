@@ -8,9 +8,9 @@
 </template>
 
 <script lang="ts">
-import Card from './BaseCard.vue'
-import CardContent from './BaseCardContent.vue'
-import Checkbox from './BaseCheckbox.vue'
+import Card from '../BaseCard.vue'
+import CardContent from '../BaseCardContent.vue'
+import Checkbox from '../BaseCheckbox.vue'
 
 export default {
   components: { Card, CardContent, Checkbox },

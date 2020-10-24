@@ -4,18 +4,21 @@
       <p class="welcome-back">Welcome back</p>
       <p class="subhead">Enter your email address for an instant, secure, one-time code.</p>
       <form method="POST" @submit.prevent="onSubmit">
-        <TextInput v-model="email" @input="setEmail" type="email" autocomplete="email" />
+        <TextInput :value="email" @input="handleEmail" type="email" autocomplete="email" @change="handleEmail" />
         <template v-if="loginEmailRequested">
           <p class="code-sent">
-            <Button inline type="button" @click="handleClick">Resend Email?</Button>
+            <!-- this button sends the magic code email again -->
+            <Button inline type="button" @click="requestCode">Resend Email?</Button>
             <span>Code sent ✅</span>
           </p>
           <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
-          <TextInput numpad="true" label="6-digit code" type="tel" v-model="magicCode" />
+          <TextInput :numpad="true" label="6-digit code" type="tel" :onEnterKey="attemptLogin" v-model="magicCode" />
           <Notification v-if="loginErrorMessage" type="error" :message="loginErrorMessage" />
-          <Button class="login-button" @click="handleLoginButtonClick" type="button">Login</Button>
+          <!-- this button attmpts the login -->
+          <Button class="login-button" @click="attemptLogin" type="button">Login</Button>
         </template>
-        <Button class="login-button" @click="handleClick" type="button" v-if="!loginEmailRequested">Tap to Log In</Button>
+        <!-- this button triggers the magic code request -->
+        <Button class="login-button" @click="requestCode" type="button" v-if="!loginEmailRequested">Tap to Log In</Button>
         <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a></p>
       </form>
       <span class="close-button" @click="emitClose">×</span>
@@ -30,7 +33,7 @@ import TextInput from './BaseTextInput.vue'
 import Notification from './BaseNotification.vue'
 import Button from './BaseButton.vue'
 
-const cart = namespace('cart')
+const user = namespace('user')
 
 @Component({
   components: { TextInput, Button, Notification },
@@ -38,11 +41,11 @@ const cart = namespace('cart')
 export default class LoginForm extends Vue {
   @Prop({ type: Boolean }) loginEmailRequested: boolean
   @Prop() loginErrorMessage: string
-  @cart.State email: string
-  @cart.Action requestLoginEmail: any
-  @cart.Action login: any
-  @cart.Mutation clearLoginForm: any
-  @cart.Mutation setEmail: any
+  @Prop() email: string
+  @Prop() clearLoginForm: Function
+  @Prop() setEmail: Function
+  @user.Action requestLoginEmail: Function
+  @user.Action login: Function
 
   magicCode = ''
 
@@ -52,14 +55,20 @@ export default class LoginForm extends Vue {
     }
   }
 
-  handleClick () {
+  requestCode () {
+    console.log('requestCode to log in')
     if (this.email !== '') {
       this.requestLoginEmail(this.email.trim())
     }
   }
 
-  handleLoginButtonClick () {
+  attemptLogin () {
+    console.log('attemptLogin')
     this.login({ username: this.email.trim(), magicCode: this.magicCode })
+  }
+
+  handleEmail (username: string) {
+    this.setEmail(username)
   }
 
   emitClose () {

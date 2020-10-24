@@ -1,9 +1,9 @@
 <template>
-  <a v-if="href" :href="href" :style="{ float: position }" :class="{ inlineBlock: inline, [variant]: true }" @click="handleClick">
+  <a v-if="href" :href="href" :style="{ float: position }" :class="{ inlineBlock: inline, small, [variant]: true }" @click="handleClick">
     <slot></slot>
   </a>
   <button v-else
-    :class="{ inlineBlock: inline, loading, disabled, [variant]: true }"
+    :class="{ inlineBlock: inline, small, loading, disabled, [variant]: true }"
     :style="{ float: position }"
     :type="type"
     @click="handleClick">
@@ -20,6 +20,7 @@ export default class BaseButton extends Vue {
   @Prop() href: string
   @Prop({ type: Boolean, default: false }) disabled: boolean
   @Prop({ type: Boolean }) inline: boolean;
+  @Prop({ type: Boolean, default: false }) small: boolean
   @Prop({ default: 'none' }) position: string;
   @Prop({ type: Boolean, default: false }) loading!: boolean;
   @Prop() variant: string
@@ -60,6 +61,12 @@ a {
   width: auto;
 }
 
+a.small, button.small {
+  font-size: .7rem;
+  text-transform: none;
+  border-radius: 2px;
+}
+
 .inlineBlock {
   margin: 0;
   display: inline-block;
@@ -67,7 +74,7 @@ a {
   background: transparent;
   color: rgba(210, 92, 74, .8);
   box-shadow: none;
-  padding: 4px 8px;
+  padding: .5rem 1rem;
   text-transform: uppercase;
   font-size: 1rem;
   letter-spacing: .02rem;
@@ -126,6 +133,7 @@ button.loading {
 
 .primary {
   background-color: #007bff;;
+  color: white;
 }
 
 .primary:focus, .primary:hover, .primary:active {
@@ -138,6 +146,25 @@ button.loading {
 
 .success:focus, .success:hover, .success:active {
   background-color: #218838;
+}
+
+.warning {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.warning:focus, .warning:hover, .warning:active {
+  background-color: #ed9c28;
+}
+
+.danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+.danger:focus, .danger:hover, .danger:active {
+  background-color: #d2322d;
+  color: #d9534f;
 }
 
 @keyframes spin {
@@ -206,14 +233,11 @@ a.inlineBlock:focus {
   background: rgba(210, 92, 74, .2);
 }
 
-.primary.inlineBlock {
-  color: rgb(0, 105, 217);
-}
-
 .primary.inlineBlock:focus,
 .primary.inlineBlock:hover,
 .primary.inlineBlock:active {
   background-color: rgb(0, 105, 217, .2);
+  color: rgb(0, 105, 217);
 }
 
 .brand.inlineBlock {

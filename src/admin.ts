@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import ActionChooser from './components/ActionChooser.vue'
-import UpcomingOrders from './components/UpcomingOrders.vue'
-import OneTimeOrder from './components/OneTimeOrder.vue'
-import AccountSettings from './components/AccountSettings.vue'
-import OrderHistory from './components/OrderHistory.vue'
-import VipSettings from './components/VipSettings.vue'
+import AccountSettings from './views/AccountSettings.vue'
+import ActionChooser from './views/ActionChooser.vue'
+import OneTimeOrder from './views/OneTimeOrder.vue'
+import OrderHistory from './views/OrderHistory.vue'
+import UpcomingOrders from './views/UpcomingOrders.vue'
+import VipSettings from './views/VipSettings.vue'
 import store from './store/admin'
 
 // the actions you can choose at the top

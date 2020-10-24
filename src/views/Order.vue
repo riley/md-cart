@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-import OrderDetails from './components/OrderDetails.vue'
-import OrderItemSummary from './components/OrderItemSummary.vue'
+import OrderDetails from '../components/OrderDetails.vue'
+import OrderItemSummary from '../components/OrderItemSummary.vue'
 
 export default {
   components: { OrderDetails, OrderItemSummary }

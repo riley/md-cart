@@ -1,19 +1,26 @@
 <template>
   <section id="shipping-info">
-    <LoginForm v-if="loginFormActive" :loginErrorMessage="loginErrorMessage" :loginEmailRequested="loginEmailRequested" @close="clearLoginForm" />
+    <LoginForm
+      v-if="loginFormActive"
+      :email="email"
+      :loginErrorMessage="loginErrorMessage"
+      :loginEmailRequested="loginEmailRequested"
+      :clearLoginForm="clearLoginForm"
+      :setEmail="setEmail"
+      @close="clearLoginForm" />
     <Instructions class="shipping-instructions" text="Your Shipping Address" step="1"/>
     <p class="login-prompt">
-      <span v-if="!userLoggedIn">Ordered from us before?
+      <span v-if="!loggedIn">Ordered from us before?
         <Button class="login-button" inline @click="toggleLoginForm(true)">Login</Button>
       </span>
-      <Button xlass="logout-button" v-else inline @click="logout">Logout</Button>
+      <Button class="logout-button" v-else inline @click="logout">Logout</Button>
     </p>
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
       <Card>
         <CardContent>
-          <p class="loggedInAs">Logged in as <Chip>{{ user.username }}</Chip></p>
+          <p class="loggedInAs">Logged in as <Chip>{{ username }}</Chip></p>
           <Button position="right" inline @click="editStoredShippingAddress">Edit</Button>
-          <Address displayOnly v-bind="user.shipping.address" />
+          <Address displayOnly v-bind="userShipping" />
         </CardContent>
       </Card>
     </div>
@@ -31,7 +38,7 @@
           label="Email Address" />
         <!-- for a non-vip returning customer -->
         <Banner
-          v-if="isReturningCustomer && !userLoggedIn && !welcomeBackCardDismissed"
+          v-if="isReturningCustomer && !loggedIn && !welcomeBackCardDismissed"
           title="Welcome Back!"
           variant="brand"
           @main="toggleLoginForm(true)"
@@ -54,26 +61,27 @@
           v-bind="address" />
       </fieldset>
     </form>
-    <div class="shipping-delay-warning" v-if="address.country !== 'US' && address.country !== 'CA'">
-      Please be aware that we are seeing significant delays in some customs offices around the world processing our packages. This is out of our control and could add a bit of time until you receive your package. We are sorry for the inconvenience.
+    <div class="shipping-delay-warning" v-if="!['US', 'CA'].includes(currentCountry)">
+      Due to pandemic we are seeing significant international delays. We are limiting international shipping to Canada only for the time being. We apologize for any inconvenience.
     </div>
   </section>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
-import TextInput from './BaseTextInput.vue'
-import Address from './BaseAddress.vue'
-import Banner from './BaseBanner.vue'
-import Button from './BaseButton.vue'
-import Card from './BaseCard.vue'
-import CardContent from './BaseCardContent.vue'
-import Chip from './BaseChip.vue'
-import Instructions from './BaseInstructions.vue'
-import LoginForm from './LoginForm.vue'
+import TextInput from '../BaseTextInput.vue'
+import Address from '../BaseAddress.vue'
+import Banner from '../BaseBanner.vue'
+import Button from '../BaseButton.vue'
+import Card from '../BaseCard.vue'
+import CardContent from '../BaseCardContent.vue'
+import Chip from '../BaseChip.vue'
+import Instructions from '../BaseInstructions.vue'
+import LoginForm from '../LoginForm.vue'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 
 const cart = namespace('cart')
+const user = namespace('user')
 
 @Component({
   components: { TextInput, Address, Banner, Button, Card, CardContent, Chip, Instructions, LoginForm },
@@ -81,22 +89,26 @@ const cart = namespace('cart')
 export default class ShippingInfo extends Vue {
   @cart.State((state: any) => state.shipping.address) address: Address
   @cart.State email: string
-  @cart.State isReturningCustomer: boolean
+  @user.State isReturningCustomer: boolean
   @cart.State isVip: boolean
   @cart.State returningVipCustomer: boolean
-  @cart.State loginEmailRequested: boolean
+  @user.State loginEmailRequested: boolean
+  @user.State username: string
+  @user.State((state: any) => state.shipping.address) userShipping: Address
   @cart.State loginFormActive: boolean
-  @cart.State loginErrorMessage: string
-  @cart.State user: boolean
+  @user.State loginErrorMessage: string
   @cart.State useStoredShippingInfo: boolean
-  @cart.Getter userLoggedIn: string
+
+  @user.Getter loggedIn: string
+
   @cart.Mutation setEmail: any
   @cart.Mutation setAddress: any
   @cart.Mutation replaceShippingAddress: any
   @cart.Mutation toggleLoginForm: any
   @cart.Mutation clearLoginForm: any
   @cart.Mutation editStoredShippingAddress: any
-  @cart.Action logout: any
+
+  @user.Action logout: any
   @cart.Action checkUsername: (email: string) => Promise<void>
   @cart.Action updateCart: () => Promise<void>
   @cart.Action identifyTrack: ({ name, email }: {name?: string, email?: string}) => Promise<void>
@@ -130,6 +142,14 @@ export default class ShippingInfo extends Vue {
       this.identifyTrack({ name: value })
       this.sendCheckoutStartEvent()
     }
+  }
+
+  get currentCountry () {
+    if (this.useStoredShippingInfo && this.username && this.userShipping) {
+      return this.userShipping.country
+    }
+
+    return this.address.country
   }
 }
 </script>

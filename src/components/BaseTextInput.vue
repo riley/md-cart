@@ -10,10 +10,11 @@
         :value="value"
         :autocomplete="auto"
         :placeholder="name === 'address_1' ? 'Street Address' : null"
-        :pattern="numpad ? '[0-9]' : null"
+        :pattern="numpad ? '[0-9]*' : null"
         @input="validate($event)"
         @change="validate($event)"
         @focus="setFocus"
+        @keyup.enter="onEnterKey"
         @blur="setBlur($event)" />
       <span class="border"></span>
     </label>
@@ -41,6 +42,7 @@ export default class TextInput extends Vue {
   @Prop({ default: 'text' }) type!: string
   @Prop({ type: Boolean, default: false }) required: boolean
   @Prop({ type: Boolean, default: false }) numpad: boolean
+  @Prop({ type: Function, default: () => {} }) onEnterKey: Function
   @Prop() name!: string
   @Prop() label!: string
   @Prop() value: string
@@ -59,7 +61,7 @@ export default class TextInput extends Vue {
     if (this.name === 'address_1' && !this.focussed) return 'address-line1'
     // if the prop is placesEnabled, we turn on google's places api
     // but if the field doesn't have focus, just turn it on (like if they enter their name first)
-    if (this.name === 'address_1' && this.focussed) return 'off'
+    if (this.name === 'address_1' && this.focussed) return 'disabled'
     return this.autocomplete
   }
 

@@ -8,8 +8,8 @@
       <CardContent>
         <Button inline position="right" @click="editStoredPaymentInfo">Edit</Button>
         <div class="stored-payment-info">
-          •••• •••• •••• {{ user.cardMeta.lastFour }}<br>
-          {{ user.cardMeta.expMonth }} / {{ user.cardMeta.expYear }}
+          •••• •••• •••• {{ cardMeta.lastFour }}<br>
+          {{ cardMeta.expMonth }} / {{ cardMeta.expYear }}
         </div>
       </CardContent>
     </Card>
@@ -24,13 +24,14 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { State, Getter, Mutation, namespace } from 'vuex-class'
-import Card from './BaseCard.vue'
-import CardContent from './BaseCardContent.vue'
-import Instructions from './BaseInstructions.vue'
-import Notification from './BaseNotification.vue'
-import Button from './BaseButton.vue'
+import Card from '../BaseCard.vue'
+import CardContent from '../BaseCardContent.vue'
+import Instructions from '../BaseInstructions.vue'
+import Notification from '../BaseNotification.vue'
+import Button from '../BaseButton.vue'
 
 const cart = namespace('cart')
+const user = namespace('user')
 const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
 const elements = stripe.elements()
 let card: any
@@ -42,7 +43,7 @@ export default class PaymentInfo extends Vue {
   @cart.State processingError: string
   @cart.State processing: boolean
   @cart.State useStoredPaymentInfo: boolean
-  @cart.State user: User
+  @user.State cardMeta: any
   @cart.Getter isStoredInfo: boolean
   @cart.Mutation editStoredPaymentInfo: boolean
   @cart.Mutation setProcessing: any

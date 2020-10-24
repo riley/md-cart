@@ -13,11 +13,11 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { State, Getter, Mutation, namespace } from 'vuex-class'
-import Button from './BaseButton.vue'
+import Button from '../BaseButton.vue'
 import ShippingInfo from './ShippingInfo.vue'
 import BillingInfo from './BillingInfo.vue'
 import PaymentInfo from './PaymentInfo.vue'
-import Notification from './BaseNotification.vue'
+import Notification from '../BaseNotification.vue'
 
 const cart = namespace('cart')
 
