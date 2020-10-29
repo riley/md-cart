@@ -235,6 +235,7 @@ export default {
       try {
         const cart = await fetch(`${state.host}/v2/cart`, {
           mode: 'cors',
+          credentials: 'omit',
           headers: new Headers({
             'Authorization': `Bearer ${getToken()}`
           })
@@ -273,6 +274,7 @@ export default {
         const { cart, token } = await fetch(`${state.host}/v2/cart`, {
           method: 'PATCH',
           mode: 'cors',
+          credentials: 'omit',
           headers: new Headers({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getToken()}`
@@ -311,7 +313,7 @@ export default {
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${host}/v1/products`)
+        const stock = await fetch(`${host}/v1/products`, { credentials: 'omit' })
           .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {
@@ -333,6 +335,7 @@ export default {
         const info = await fetch(`${state.host}/check-username`, {
           method: 'POST',
           mode: 'cors',
+          credentials: 'omit',
           headers: {
             // going to leave this as form input because of the validation plugin on the backend
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -347,6 +350,7 @@ export default {
           commit('setItems', info.cart.bundles[0].skus) // cart pricing might have updated
           commit('setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount)
           commit('setShipping', info.cart.shipping)
+          commit('setRefId', info.cart.refId)
           // we don't set the shipping and billing here, that would be leaking PII
         }
 
@@ -365,6 +369,7 @@ export default {
       try {
         const response = await fetch(`${state.host}/buy`, {
           mode: 'cors',
+          credentials: 'omit',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

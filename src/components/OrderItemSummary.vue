@@ -153,6 +153,8 @@ export default class OrderItemSummary extends Vue {
         type: this.bundles.some((bundle: Bundle) => bundle.isVip) ? 'vip' : 'standard'
       })
 
+      window.gtag('config', process.env.VUE_APP_GA_ID)
+
       window.gtag('event', 'purchase', {
         currency: 'USD',
         value: (this.grandTotal / 100).toFixed(2),

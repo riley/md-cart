@@ -87,6 +87,7 @@ export default {
       try {
         const response = await fetch(`${host}/api/user`, {
           mode: 'cors',
+          credentials: 'omit',
           headers: {
             Authorization: `Bearer ${getToken()}`
           }
@@ -111,6 +112,7 @@ export default {
       try {
         await fetch(`${host}/request-login-code`, {
           method: 'POST',
+          credentials: 'omit',
           mode: 'cors',
           headers: {
             'Content-Type': 'application/json',
@@ -136,6 +138,7 @@ export default {
         info = await fetch(`${host}/login-existing`, {
           method: 'POST',
           mode: 'cors',
+          credentials: 'omit',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getToken()}`
@@ -167,6 +170,7 @@ export default {
       const response = await fetch(`${host}/logout-cart`, {
         method: 'POST',
         mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Authorization': `Bearer ${getToken()}`
         }
@@ -180,6 +184,7 @@ export default {
       const { user, token } = await fetch(`${host}/user`, {
         method: 'PATCH',
         mode: 'cors',
+        credentials: 'omit',
         headers: { 'Authorization': `Bearer ${getToken()}` },
         body: JSON.stringify({
           username: state.username,

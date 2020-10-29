@@ -175,6 +175,7 @@ declare global {
     items: Item[]
     pricingTier: number
     cycleDays: number
+    status: string
   }
 
   interface ServerShipping {

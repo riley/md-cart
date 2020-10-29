@@ -4,7 +4,7 @@
     <Heading>UpcomingOrders</Heading>
     <Card>
       <CardContent>
-        Have this always be showing with active vips
+        Have this always be showing with active vips {{ upcomingRebills.length }}
         <VipDetail v-for="vip of upcomingRebills" :key="vip._id" v-bind="vip" :stock="stock" />
       </CardContent>
     </Card>

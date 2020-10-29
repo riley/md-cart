@@ -121,6 +121,7 @@ export default {
       commit('fetchingOrder', true)
       const response = await fetch(`${host}/order-thankyou`, {
         mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Authorization': `Bearer ${getToken()}`
         }
@@ -138,6 +139,7 @@ export default {
       commit('fetchingUser', true)
       const userMeta = await fetch(`${host}/user/meta`, {
         mode: 'cors',
+        credentials: 'omit',
         headers: { 'Authorization': `Bearer ${getToken()}` }
       }).then(res => res.json())
       commit('fetchingUser', false)

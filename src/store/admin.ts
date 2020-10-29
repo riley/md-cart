@@ -67,10 +67,7 @@ export default new Vuex.Store({
   getters: {
     // return VIPs that will be billed soon
     upcomingRebills: (state: any) => {
-      const soon = new Date()
-      soon.setDate(soon.getDate() + 10)
-      return state.vips
-        .filter((vip: VIP) => vip.nextDelivery < soon)
+      return state.vips.filter((vip: VIP) => vip.status === 'active')
     },
     allOrders: (state: any) => {
       return state.orders.map((_id: string) => state.orderMap[_id])
@@ -153,7 +150,7 @@ export default new Vuex.Store({
   },
   actions: {
     async fetchPricing ({ commit, state }: Action, bundle: PricingBundle) {
-      const pricing = await fetch(`${host}/v2/price?bundle=${JSON.stringify(bundle)}`)
+      const pricing = await fetch(`${host}/v2/price?bundle=${JSON.stringify(bundle)}`, { credentials: 'omit' })
         .then(res => res.json())
 
       return pricing
@@ -162,7 +159,7 @@ export default new Vuex.Store({
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${host}/v1/products`)
+        const stock = await fetch(`${host}/v1/products`, { credentials: 'omit' })
           .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {
@@ -176,6 +173,7 @@ export default new Vuex.Store({
       try {
         const orders = await fetch(`${host}/orders`, {
           mode: 'cors',
+          credentials: 'omit',
           headers: {
             Authorization: `Bearer ${getToken()}`
           }
@@ -190,6 +188,7 @@ export default new Vuex.Store({
       try {
         const vips = await fetch(`${host}/vips`, {
           mode: 'cors',
+          credentials: 'omit',
           headers: {
             Authorization: `Bearer ${getToken()}`
           }
@@ -218,6 +217,7 @@ export default new Vuex.Store({
 
       const info = await fetch(`${host}/v1/snooze/${hash}`, {
         mode: 'cors',
+        credentials: 'omit',
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${getToken()}`
@@ -238,6 +238,7 @@ export default new Vuex.Store({
       const vip = await fetch(`${host}/vip/${id}`, {
         mode: 'cors',
         method: 'PATCH',
+        credentials: 'omit',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json'
