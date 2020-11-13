@@ -1,6 +1,6 @@
 import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
-import { host } from '../utils/computed'
 import { identifyTrack } from '../utils/tracking'
+import { makeFetch } from '../utils/network'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
 
@@ -52,7 +52,6 @@ export default {
     emailTaken: false, // is the entered email in our system?
     fetching: false,
     globalErrorMessage: null,
-    host,
     isNonVIPCheckIn: false,
     isReturningCustomer: false,
     isSendMore: false,
@@ -233,13 +232,7 @@ export default {
     async fetchCart ({ commit, state, dispatch }: Action) {
       commit('setFetching', true)
       try {
-        const cart = await fetch(`${state.host}/v2/cart`, {
-          mode: 'cors',
-          credentials: 'omit',
-          headers: new Headers({
-            'Authorization': `Bearer ${getToken()}`
-          })
-        }).then(handleJSONResponse({ errorString: 'failed to fetch cart' }))
+        const cart = await makeFetch('/api/cart').then(handleJSONResponse({ errorString: 'failed to fetch cart' }))
 
         setToken(cart.token)
         commit('setFetching', false)
@@ -271,14 +264,11 @@ export default {
     async updateCart ({ commit, state }: Action) {
       commit('setFetching', true)
       try {
-        const { cart, token } = await fetch(`${state.host}/v2/cart`, {
+        const { cart, token } = await makeFetch('/api/cart', {
           method: 'PATCH',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: new Headers({
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
-          }),
+          },
           body: JSON.stringify({
             billingAddress: state.billing.address,
             shippingAddress: state.shipping.address,
@@ -313,7 +303,7 @@ export default {
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${host}/v1/products`, { credentials: 'omit' })
+        const stock = await makeFetch('/api/products')
           .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {
@@ -332,14 +322,11 @@ export default {
     */
     async checkUsername ({ commit, state }: Action, email: string) {
       try {
-        const info = await fetch(`${state.host}/check-username`, {
+        const info = await makeFetch('/api/check-username', {
           method: 'POST',
-          mode: 'cors',
-          credentials: 'omit',
           headers: {
             // going to leave this as form input because of the validation plugin on the backend
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            'Authorization': `Bearer ${getToken()}`
           },
           body: `username=${encodeURIComponent(email)}`
         })
@@ -367,13 +354,10 @@ export default {
       let result
       let responseText
       try {
-        const response = await fetch(`${state.host}/buy`, {
-          mode: 'cors',
-          credentials: 'omit',
+        const response = await makeFetch('/api/buy', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
           },
           body: JSON.stringify({
             createRecurringVIP: state.createRecurringVIP,
@@ -407,6 +391,7 @@ export default {
         commit('setProcessing', false)
       }
     },
+    // send events to klaviyo
     async sendCheckoutStartEvent ({ state, getters }: Action) {
       if (!state.email || state.stock.length === 0 || state.items.length === 0) return
 

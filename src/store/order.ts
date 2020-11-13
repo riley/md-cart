@@ -1,5 +1,5 @@
-import { getToken, setToken, logoutToken } from '../utils/storage'
-import { host } from '../utils/computed'
+import { setToken } from '../utils/storage'
+import { makeFetch } from '../utils/network'
 
 export default {
   namespaced: true,
@@ -119,13 +119,7 @@ export default {
   actions: {
     async fetchOrder ({ commit, state }: Action) {
       commit('fetchingOrder', true)
-      const response = await fetch(`${host}/order-thankyou`, {
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`
-        }
-      }).then(res => res.json())
+      const response = await makeFetch('/api/order-thankyou').then(res => res.json())
       commit('fetchingOrder', false)
       if (!response.order) {
         commit('errorLoadingOrder', `Couldn't find order: ${state.id}`)
@@ -137,11 +131,7 @@ export default {
     },
     async fetchUserMeta ({ commit, state }: Action) {
       commit('fetchingUser', true)
-      const userMeta = await fetch(`${host}/user/meta`, {
-        mode: 'cors',
-        credentials: 'omit',
-        headers: { 'Authorization': `Bearer ${getToken()}` }
-      }).then(res => res.json())
+      const userMeta = await makeFetch('/api/user/meta').then(res => res.json())
       commit('fetchingUser', false)
 
       if (userMeta !== null && userMeta.meta) {

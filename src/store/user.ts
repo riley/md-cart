@@ -1,6 +1,6 @@
-import { getToken, setToken } from '../utils/storage'
+import { setToken } from '../utils/storage'
 import { identifyTrack } from '../utils/tracking'
-import { host } from '../utils/computed'
+import { makeFetch } from '../utils/network'
 
 export default {
   namespaced: true,
@@ -85,13 +85,7 @@ export default {
   actions: {
     async fetchUser ({ commit }: Action) {
       try {
-        const response = await fetch(`${host}/api/user`, {
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        })
+        const response = await makeFetch('/api/user')
 
         if (response.status !== 200) return
 
@@ -110,13 +104,10 @@ export default {
       window.woopra && window.woopra.track('request-login-code', { username })
 
       try {
-        await fetch(`${host}/request-login-code`, {
+        await makeFetch('/api/request-login-code', {
           method: 'POST',
-          credentials: 'omit',
-          mode: 'cors',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
           },
           body: JSON.stringify({ username, brand: 'mrdavis' })
         }).then(res => {
@@ -135,13 +126,10 @@ export default {
       let info
 
       try {
-        info = await fetch(`${host}/login-existing`, {
+        info = await makeFetch('/api/login-existing', {
           method: 'POST',
-          mode: 'cors',
-          credentials: 'omit',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}`
           },
           body: JSON.stringify({ username, magicCode })
         }).then(response => response.json())
@@ -167,25 +155,14 @@ export default {
 
       commit('cart/logoutCart', null, { root: true })
 
-      const response = await fetch(`${host}/logout-cart`, {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`
-        }
-      })
-
+      const response = await makeFetch('/api/logout-cart', { method: 'POST', })
       const token = await response.text()
 
       setToken(token)
     },
     async update ({ commit, state }: Action) {
-      const { user, token } = await fetch(`${host}/user`, {
+      const { user, token } = await makeFetch('/api/user', {
         method: 'PATCH',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: { 'Authorization': `Bearer ${getToken()}` },
         body: JSON.stringify({
           username: state.username,
           billingAddress: state.billing.address,

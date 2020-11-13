@@ -1,5 +1,5 @@
-import { getToken, setToken, logoutToken } from '../utils/storage'
-import { host } from '../utils/computed'
+import { setToken, logoutToken } from '../utils/storage'
+import { makeFetch } from '../utils/network'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import user from './user'
@@ -150,8 +150,13 @@ export default new Vuex.Store({
   },
   actions: {
     async fetchPricing ({ commit, state }: Action, bundle: PricingBundle) {
-      const pricing = await fetch(`${host}/v2/price?bundle=${JSON.stringify(bundle)}`, { credentials: 'omit' })
-        .then(res => res.json())
+      const pricing = await makeFetch('/api/pricing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bundle })
+      }).then(res => res.json())
 
       return pricing
     },
@@ -159,7 +164,7 @@ export default new Vuex.Store({
       commit('setFetching', true)
 
       try {
-        const stock = await fetch(`${host}/v1/products`, { credentials: 'omit' })
+        const stock = await makeFetch('/api/products')
           .then(handleJSONResponse({ errorString: 'failed to fetch stock' }))
         commit('setStock', stock)
       } catch (e) {
@@ -171,13 +176,7 @@ export default new Vuex.Store({
     },
     async fetchOrders ({ commit, state }: Action) {
       try {
-        const orders = await fetch(`${host}/orders`, {
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        }).then(res => res.json())
+        const orders = await makeFetch('/api/orders').then(res => res.json())
 
         commit('setOrders', orders)
       } catch (e) {
@@ -186,13 +185,7 @@ export default new Vuex.Store({
     },
     async fetchVips ({ commit, state }: Action) {
       try {
-        const vips = await fetch(`${host}/vips`, {
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        }).then(res => res.json())
+        const vips = await makeFetch('/api/vips').then(res => res.json())
 
         commit('setVips', vips)
       } catch (e) {
@@ -200,8 +193,7 @@ export default new Vuex.Store({
       }
     },
     async snoozeVip ({ commit, state }: Action, id: string) {
-      // const vip = await fetch(`${host}/v1/snooze/${id}`, {
-      //   mode: 'cors',
+      // const vip = await makeFetch(`/v1/snooze/${id}`, {
       //   method: 'PUT',
       //   headers: {
       //     Authorization: `Bearer ${getToken()}`,
@@ -215,13 +207,8 @@ export default new Vuex.Store({
     async snoozeByHash ({ commit, state }: Action, hash: string) {
       commit('setFetchingSnooze', true)
 
-      const info = await fetch(`${host}/v1/snooze/${hash}`, {
-        mode: 'cors',
-        credentials: 'omit',
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
+      const info = await makeFetch(`/v1/snooze/${hash}`, {
+        method: 'PUT'
       }).then(res => res.json())
 
       commit('setFetchingSnooze', false)
@@ -235,12 +222,9 @@ export default new Vuex.Store({
     // this does not update all vips, just one at a time
     async updateVip ({ commit, state }: Action, id: string) {
       console.log('updating vip', state.vipMap, id, state.vipMap[id])
-      const vip = await fetch(`${host}/vip/${id}`, {
-        mode: 'cors',
+      const vip = await makeFetch(`/vip/${id}`, {
         method: 'PATCH',
-        credentials: 'omit',
         headers: {
-          Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(state.vipMap[id])

@@ -62,7 +62,7 @@
       </fieldset>
     </form>
     <div class="shipping-delay-warning" v-if="!['US', 'CA'].includes(currentCountry)">
-      Due to pandemic we are seeing significant international delays. We are limiting international shipping to Canada only for the time being. We apologize for any inconvenience.
+      Due to pandemic we are seeing significant international delays. We apologize for any inconvenience.
     </div>
   </section>
 </template>
