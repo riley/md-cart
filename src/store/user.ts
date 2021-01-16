@@ -141,7 +141,7 @@ export default {
       if (info.token) {
         commit('setUser', info.user)
         commit('cart/loginCart', info.user, { root: true })
-        commit('admin/toggleLoginForm', false, { root: true })
+        commit('toggleLoginForm', false, { root: true })
         identifyTrack({ email: info.user.username, name: info.user.shippingAddress.name })
         setToken(info.token)
         return info.user

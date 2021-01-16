@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loggedIn">
+  <div id="send-now" v-if="loggedIn">
     <Heading>Place an Order</Heading>
     <p>something happens here</p>
   </div>

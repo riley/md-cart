@@ -1,6 +1,6 @@
 <template>
   <!-- this component displays upcoming VIP orders -->
-  <div v-if="loggedIn">
+  <div id="upcoming-orders" v-if="loggedIn">
     <Heading>UpcomingOrders</Heading>
     <Card>
       <CardContent>

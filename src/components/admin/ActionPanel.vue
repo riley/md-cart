@@ -1,18 +1,33 @@
 <template>
-  <div class="root">
-    <i class="icon" :class="{ [icon]: true }"></i>
+  <div class="root" @click="scrollPage">
+    <component v-bind:is="iconComponent" role="img" class="icon"></component>
     <p>{{ title }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Prop, Component } from 'vue-property-decorator'
+import account from '../icons/account.vue'
+import add from '../icons/add.vue'
+import list from '../icons/list.vue'
+import parcel from '../icons/parcel.vue'
+import settings from '../icons/settings.vue'
 
-@Component
+@Component({ components: { account, add, list, parcel, settings } })
 export default class ActionPanel extends Vue {
   @Prop() title!: string
-  @Prop() element!: string
+  @Prop() path!: string
   @Prop() icon!: string
+
+  icons: any = { account, add, list, parcel, settings }
+
+  get iconComponent () {
+    return this.icons[this.icon]
+  }
+
+  scrollPage () {
+    this.$router.push({ path: this.path })
+  }
 }
 </script>
 
@@ -20,7 +35,7 @@ export default class ActionPanel extends Vue {
 .root {
   display: flex;
   flex-direction: column;
-  height: 320px;
+  height: 200px;
   justify-content: center;
   align-items: center;
   border: 1px solid rgba(133,178,188,0.39);
@@ -33,13 +48,15 @@ export default class ActionPanel extends Vue {
 }
 
 .icon {
-  font-size: 36px;
-  line-height: 54px;
-  height: 54px;
-  width: 54px;
-  background-color: rgba(0, 0, 0, .15);
-  border-radius: 27px;
+  height: 70px;
+  width: 70px;
+  fill: rgba(0, 0, 0, .5);
   margin-bottom: 1rem;
+  transition: transform .4s ease-out;
+}
+
+.root:hover .icon {
+  transform: scale(1.3)
 }
 
 p {

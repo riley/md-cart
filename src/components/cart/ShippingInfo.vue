@@ -1,5 +1,11 @@
 <template>
   <section id="shipping-info">
+    <p class="login-prompt">
+      <span v-if="!loggedIn" @click="toggleLoginForm(true)">Ordered from us before?
+        <a class="login-button">Login</a>
+      </span>
+      <a class="logout-a" v-else inline @click="handleLogoutClicked">Logout</a>
+    </p>
     <LoginForm
       v-if="loginFormActive"
       :email="email"
@@ -9,12 +15,6 @@
       :setEmail="setEmail"
       @close="clearLoginForm" />
     <Instructions class="shipping-instructions" text="Your Shipping Address" step="1"/>
-    <p class="login-prompt">
-      <span v-if="!loggedIn">Ordered from us before?
-        <Button class="login-button" inline @click="toggleLoginForm(true)">Login</Button>
-      </span>
-      <Button class="logout-button" v-else inline @click="logout">Logout</Button>
-    </p>
     <div v-if="useStoredShippingInfo" class="loggedInShippingInfo">
       <Card>
         <CardContent>
@@ -39,19 +39,12 @@
         <!-- for a non-vip returning customer -->
         <Banner
           v-if="isReturningCustomer && !loggedIn && !welcomeBackCardDismissed"
-          title="Welcome Back!"
           variant="brand"
           @main="toggleLoginForm(true)"
           @secondary="welcomeBackCardDismissed = true"
           class="welcome-back">
           <template v-slot:copy>
-            Looks like you've ordered from us before! Log in to use your previous info, or continue as normal and we'll link to your account.
-          </template>
-          <template v-slot:main>
-            Log In
-          </template>
-          <template v-slot:secondary>
-            Close
+            Looks like you’ve ordered from us before. Log in to use your saved checkout info, or continue below and we’ll link to your account.
           </template>
         </Banner>
         <Address
@@ -128,6 +121,11 @@ export default class ShippingInfo extends Vue {
     }
   }
 
+  handleLogoutClicked (e: MouseEvent) {
+    e.preventDefault()
+    this.logout()
+  }
+
   handleBlurEmail (name: string, email: string) {
     this.checkUsername(email)
     window.woopra && window.woopra.identify({ email })
@@ -163,10 +161,6 @@ section {
   margin-bottom: 1.5rem;
 }
 
-.shipping-instructions {
-  margin-bottom: .5rem !important;
-}
-
 .welcome-back {
   margin-bottom: 1rem;
 }
@@ -175,6 +169,16 @@ section {
   margin: 0;
   text-align: right;
   padding: 0;
+  font-size: .8em;
+  cursor: pointer;
+}
+
+.login-prompt a {
+  text-decoration: underline;
+}
+
+.login-prompt:hover a {
+  text-decoration: none;
 }
 
 .loggedInShippingInfo {

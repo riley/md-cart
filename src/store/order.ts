@@ -24,11 +24,12 @@ export default {
     fetchingUser: false,
     grandTotal: 0,
     id: null, // fetched off query param on load
-    refId: '',
     orderError: null,
     orderLoadedOnce: false,
     paymentMethod: '',
     paypalOrderId: null,
+    refId: '',
+    referralError: '',
     shipping: {
       address: {
         name: '',
@@ -57,6 +58,7 @@ export default {
       return !!state.refId
     },
     discountBeforeReferralBonus (state: any) {
+      // an order SHOULD only have a refId if there was a referral
       const referDiscount = state.refId ? 1000 : 0
       return Math.max(state.totalDiscount - referDiscount, 0)
     }
@@ -99,10 +101,11 @@ export default {
       }
 
       state.paymentMethod = paymentMethod
+      state.refId = order.refId
+      state.referralError = order.referralError
       state.shipping.address = order.shippingAddress
       state.shipping.postage = order.shipping.postage
       state.shipping.service = order.shipping.service
-      state.refId = order.refId
       state.status = order.status
       state.subtotal = order.subtotal
       state.totalDiscount = order.totalDiscount

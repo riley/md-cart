@@ -1,44 +1,38 @@
 import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Admin from './views/Admin.vue'
+import Home from './views/Home.vue'
 import AccountSettings from './views/AccountSettings.vue'
-import ActionChooser from './views/ActionChooser.vue'
+import UpcomingOrders from './views/UpcomingOrders.vue'
 import OneTimeOrder from './views/OneTimeOrder.vue'
 import OrderHistory from './views/OrderHistory.vue'
-import UpcomingOrders from './views/UpcomingOrders.vue'
 import VipSettings from './views/VipSettings.vue'
+import OrderDetail from './views/OrderDetail.vue'
+import VipDetail from './views/VipDetail.vue'
 import store from './store/admin'
 
-// the actions you can choose at the top
-new Vue({
-  store,
-  render: h => h(ActionChooser)
-}).$mount('#action-chooser')
+const routes = [
+  { path: '/', name: 'home', component: Home },
+  { path: '/account-settings', component: AccountSettings },
+  { path: '/upcoming-orders', component: UpcomingOrders },
+  { path: '/send-now', component: OneTimeOrder },
+  { path: '/past-orders', component: OrderHistory },
+  { path: '/vip-settings', component: VipSettings },
+  { path: '/order/:id', name: 'orderDetail', component: OrderDetail },
+  { path: '/vip/:id', name: 'vipDetail', component: VipDetail },
+  { path: '*', redirect: '/' }
+]
 
-// status of recently placed orders
-new Vue({
-  store,
-  render: h => h(UpcomingOrders)
-}).$mount('#upcoming-orders')
+const router = new VueRouter({
+  mode: 'history',
+  base: '/admin.html',
+  routes,
+})
 
-// Send Now
-new Vue({
-  store,
-  render: h => h(OneTimeOrder)
-}).$mount('#send-now')
+Vue.use(VueRouter)
 
-// update address, billing info
 new Vue({
   store,
-  render: h => h(AccountSettings)
-}).$mount('#account-settings')
-
-// see a list of user orders
-new Vue({
-  store,
-  render: h => h(OrderHistory)
-}).$mount('#past-orders')
-
-// edit settings for vips associated with this user
-new Vue({
-  store,
-  render: h => h(VipSettings)
-}).$mount('#vip-settings')
+  router,
+  render: h => h(Admin)
+}).$mount('#app')

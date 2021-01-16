@@ -1,5 +1,5 @@
 <template>
-  <div class="order">
+  <div class="order" @click="showOrderDetail">
     <div class="thumbs">
       <Thumb
         v-for="(product, index) of Object.values(groupedProducts)"
@@ -13,7 +13,7 @@
       Placed {{ formattedDate(createdAt) }}<br>
       {{ bundles[0].skus.length }} items
     </p>
-    <p class="detail" @click="showOrderDetail">›</p>
+    <p class="detail">›</p>
   </div>
 </template>
 
@@ -24,6 +24,7 @@ import Thumb from '../BaseSkuThumb.vue'
 @Component({ components: { Thumb } })
 export default class OrderThumb extends Vue {
   @Prop() id: string
+  @Prop() _id: string
   @Prop() status: string
   @Prop() bundles: Bundle[]
   @Prop() createdAt: Date
@@ -48,7 +49,7 @@ export default class OrderThumb extends Vue {
   }
 
   showOrderDetail () {
-    console.log('showOrderDetail')
+    this.$router.push({ name: 'orderDetail', params: { id: this._id } })
   }
 }
 </script>

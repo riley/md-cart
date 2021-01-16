@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loggedIn">
+  <div id="account-settings" v-if="loggedIn">
     <Heading>Account Settings</Heading>
     <Card class="personal-info">
       <div class="username">

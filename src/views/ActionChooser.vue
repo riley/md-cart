@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="action-chooser">
     <p class="login-prompt">
       <span v-if="!loggedIn">Returning?
         <Button inline @click="toggleLoginForm(true)">Login</Button>
@@ -84,7 +84,7 @@ export default class ActionChooser extends Vue {
 <style scoped>
 .choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   grid-gap: 1rem;
 }
 </style>

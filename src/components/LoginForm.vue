@@ -11,7 +11,7 @@
             <Button inline type="button" @click="requestCode">Resend Email?</Button>
             <span>Code sent ✅</span>
           </p>
-          <p>We’ve sent a one time code to your email. Enter it below to log in. For security each code you request expires after three hours.</p>
+          <p>If we have a user with that email address we sent the code there. Enter it below to log in. For security each code you request expires after three hours.</p>
           <TextInput :numpad="true" label="6-digit code" type="tel" :onEnterKey="attemptLogin" v-model="magicCode" />
           <Notification v-if="loginErrorMessage" type="error" :message="loginErrorMessage" />
           <!-- this button attmpts the login -->
@@ -19,7 +19,7 @@
         </template>
         <!-- this button triggers the magic code request -->
         <Button class="login-button" @click="requestCode" type="button" v-if="!loginEmailRequested">Tap to Log In</Button>
-        <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a></p>
+        <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a> or just check out using your email address and we’ll link the order to your account.</p>
       </form>
       <span class="close-button" @click="emitClose">×</span>
     </div>

@@ -27,6 +27,9 @@
           <span>Refer Discount</span>
           <span>-$10</span>
         </li>
+        <li v-if="referralError" class="referralError">
+          <span>{{ referralError }}</span>
+        </li>
         <li v-if="totalTax > 0">
           <span>Tax</span>
           <span>${{ totalTax / 100 }}</span>
@@ -65,6 +68,7 @@ export default class OrderItemSummary extends Vue {
   @order.State grandTotal: number
   @order.State id: string
   @order.State orderLoadedOnce: boolean
+  @order.State referralError: string
   @order.State(state => state.shipping.address) shippingAddress: Address
   @order.State subtotal: number
   @order.State(state => state.shipping.postage) postage: number
@@ -204,6 +208,12 @@ export default class OrderItemSummary extends Vue {
         currency: 'USD',
       })
 
+      window.obApi && window.obApi('track', 'Purchase', {
+        orderValue: (this.grandTotal / 100).toFixed(2),
+        currency: 'USD',
+        orderId: this.id
+      })
+
       this.checkoutTracked = true
     }
   }
@@ -250,5 +260,14 @@ export default class OrderItemSummary extends Vue {
 
 .totals li.discount {
   color: #3f58fc;
+}
+
+.referralError {
+  background-color: #fbd9a6;
+  color: white;
+  font-weight: 500;
+  padding: .5rem 1rem;
+  margin: .5rem -.25rem;
+  list-style: none;
 }
 </style>

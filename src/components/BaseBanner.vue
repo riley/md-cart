@@ -4,11 +4,11 @@
       <p v-if="title" class="title">{{ title }}</p>
       <slot name="copy"></slot>
     </div>
-    <div class="options">
-      <BaseButton inline :variant="variant" @click="$emit('secondary')">
+    <div class="options" v-if="!!$slots.secondary || !!$slots.main">
+      <BaseButton v-if="$slots.secondary" inline :variant="variant" @click="$emit('secondary')">
         <slot name="secondary"></slot>
       </BaseButton>
-      <BaseButton inline :variant="variant" @click="$emit('main')">
+      <BaseButton v-if="!!$slots.main" inline :variant="variant" @click="$emit('main')">
         <slot name="main"></slot>
       </BaseButton>
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="vip">
+  <div class="vip" @click="showVipDetail">
     <div class="thumbs">
       <Thumb
         v-for="(product, index) of Object.values(groupedProducts)"
@@ -38,6 +38,10 @@ export default class VipThumb extends Vue {
       }
       return carry
     }, {})
+  }
+
+  showVipDetail () {
+    this.$router.push({ name: 'vipDetail', params: { id: this._id } })
   }
 }
 </script>

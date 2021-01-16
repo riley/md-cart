@@ -1,7 +1,7 @@
-import { setToken, logoutToken } from '../utils/storage'
-import { makeFetch } from '../utils/network'
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { setToken, logoutToken } from '../utils/storage'
+import { makeFetch } from '../utils/network'
 import user from './user'
 
 Vue.use(Vuex)
@@ -38,11 +38,11 @@ export default new Vuex.Store({
     fetchingSnooze: false,
     loginFormActive: false,
     panels: [
-      { title: 'See Upcoming Order(s)', element: '#upcoming-orders', icon: 'iconsmind-Truck' },
-      { title: 'Make a New Order', element: '#send-now', icon: 'iconsmind-Full-Cart' },
-      { title: 'Change Account Settings', element: '#account-settings', icon: 'iconsmind-Gear' },
-      { title: 'See Past Order(s)', element: '#past-orders', icon: 'iconsmind-Bulleted-List' },
-      { title: 'Change Vip Settings', element: '#vip-settings', icon: 'iconsmind-Astronaut' }
+      { title: 'See Upcoming Order(s)', path: '/upcoming-orders', icon: 'parcel' },
+      { title: 'Make a New Order', path: '/send-now', icon: 'add' },
+      { title: 'Change Account Settings', path: '/account-settings', icon: 'account' },
+      { title: 'See Past Order(s)', path: '/past-orders', icon: 'list' },
+      { title: 'Change Vip Settings', path: '/vip-settings', icon: 'settings' }
     ],
     orderMap: {},
     orders: [],

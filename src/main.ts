@@ -37,6 +37,7 @@ declare global {
     gapi: any
     renderOptIn: () => void
     _learnq: any
+    obApi: any
   }
 
   interface Item {
@@ -73,6 +74,14 @@ declare global {
     pricingTier: number
     vip: number
     skus: Item[]
+  }
+
+  interface OrderMap {
+    [key: string]: Order
+  }
+
+  interface VipMap {
+    [key: string]: VIP
   }
 
   interface Order {
