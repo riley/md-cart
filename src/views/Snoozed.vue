@@ -3,10 +3,10 @@
     <Alert v-if="snoozeError" variant="warning" closeButton>
       <p v-html="snoozeError" />
     </Alert>
-    <Card v-if="nextDelivery">
+    <Card v-if="snoozedVIP">
       <CardContent>
         <Heading>Snooze Confirmation ✔</Heading>
-        <p>You have successfully snoozed your VIP for {{ cycleDays }} days until {{ shortDate(nextDelivery) }}.</p>
+        <p>You have successfully snoozed your VIP for {{ snoozedVIP.cycleDays }} days until {{ shortDate(snoozedVIP.nextDelivery) }}.</p>
         <p>Check out some of our other products if you're not familiar with them yet</p>
         <div class="other-categories">
           <CategoryCard v-for="info of otherCategories" :key="info.category" :info="info" />
@@ -21,23 +21,23 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import Alert from '../BaseAlert.vue'
-import Button from '../BaseButton.vue'
-import Heading from '../BaseHeading.vue'
-import Card from '../BaseCard.vue'
-import CardContent from '../BaseCardContent.vue'
-import CategoryCard from '../BaseCategoryCard.vue'
-import Spinner from '../BaseSpinner.vue'
-import { shortDate } from '../../utils/dates'
+import { Vue, Component } from 'vue-property-decorator'
+import { State, Mutation, Action } from 'vuex-class'
+import Alert from '../components/BaseAlert.vue'
+import Button from '../components/BaseButton.vue'
+import Heading from '../components/BaseHeading.vue'
+import Card from '../components/BaseCard.vue'
+import CardContent from '../components/BaseCardContent.vue'
+import CategoryCard from '../components/BaseCategoryCard.vue'
+import Spinner from '../components/BaseSpinner.vue'
+import { shortDate } from '../utils/dates'
 
 @Component({ components: { Alert, Button, Heading, CategoryCard, Card, CardContent, Spinner } })
 export default class Snoozed extends Vue {
-  @Prop() fetchingSnooze: boolean
-  @Prop() snoozeError: string
-  @Prop() nextDelivery: Date
-  @Prop() cycleDays: number
-  @Prop() items: Item[]
+  @State snoozeError: string
+  @State fetchingSnooze: boolean
+  @State snoozedVIP: VIP
+  @Action snoozeByHash: (id: string) => Promise<void>
 
   shortDate = shortDate
 
@@ -55,11 +55,19 @@ export default class Snoozed extends Vue {
     'camisole': 'https://mrdavis.com/best-womens-camisole/',
   }
 
-  get otherCategories () {
-    if (!this.items) return
+  async mounted () {
+    if (typeof this.$route.query.s_id === 'string') {
+      this.snoozeByHash(this.$route.query.s_id)
+    } else {
+      // show an error about a malformed url?
+    }
+  }
 
-    console.log(this.nextDelivery, 'nextDelivery')
-    const vipCategories = this.items.map((item: Item) => item.clothingType)
+  get otherCategories () {
+    if (!this.snoozedVIP) return
+
+    console.log(this.snoozedVIP.nextDelivery, 'nextDelivery')
+    const vipCategories = this.snoozedVIP.items.map((item: Item) => item.clothingType)
     return Object.entries(this.clothingTypes)
       .filter((info: string[]) => !vipCategories.includes(info[0]))
       .map((info: string[]) => ({ type: info[0], link: info[1] }))

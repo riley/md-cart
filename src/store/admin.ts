@@ -7,12 +7,6 @@ import user from './user'
 Vue.use(Vuex)
 
 const urlParams = new URLSearchParams(location.search)
-let snoozing = false
-let snoozeHash = null
-if (urlParams.get('s_id')) {
-  snoozing = true
-  snoozeHash = urlParams.get('s_id')
-}
 if (urlParams.get('token') != null) { // might be signed in from a snooze email
   // @ts-ignore
   setToken(urlParams.get('token'))
@@ -37,17 +31,8 @@ export default new Vuex.Store({
     fetching: false,
     fetchingSnooze: false,
     loginFormActive: false,
-    panels: [
-      { title: 'See Upcoming Order(s)', path: '/upcoming-orders', icon: 'parcel' },
-      { title: 'Make a New Order', path: '/send-now', icon: 'add' },
-      { title: 'Change Account Settings', path: '/account-settings', icon: 'account' },
-      { title: 'See Past Order(s)', path: '/past-orders', icon: 'list' },
-      { title: 'Change Vip Settings', path: '/vip-settings', icon: 'settings' }
-    ],
     orderMap: {},
     orders: [],
-    snoozeHash,
-    snoozing, // is the snooze area visible?
     snoozeError: null,
     snoozedVIP: null,
     stock: [],
@@ -65,10 +50,6 @@ export default new Vuex.Store({
     vips: [], // vips and orders are stored as a list of ids. refer to vipMap and orderMap
   },
   getters: {
-    // return VIPs that will be billed soon
-    upcomingRebills: (state: any) => {
-      return state.vips.filter((vip: VIP) => vip.status === 'active')
-    },
     allOrders: (state: any) => {
       return state.orders.map((_id: string) => state.orderMap[_id])
     },
@@ -109,9 +90,6 @@ export default new Vuex.Store({
 
       state.orders = orders.map(order => order._id)
     },
-    setSnoozing (state: any, snoozing: boolean) {
-      state.snoozing = snoozing
-    },
     setSnoozedVIP (state: any, vip: VIP) {
       vip.nextDelivery = new Date(vip.nextDelivery)
       state.snoozedVIP = vip
@@ -133,11 +111,14 @@ export default new Vuex.Store({
       state.vips = [...state.vips.slice(0, index), vip, ...state.vips.slice(index + 1)]
     },
     setVips (state: any, vips: VIP[]) {
+      const map: VipMap = {}
       for (const vip of vips) {
         vip.nextDelivery = new Date(vip.nextDelivery)
         vip.createdAt = new Date(vip.createdAt)
-        state.vipMap[vip._id] = vip
+        map[vip._id] = vip
       }
+
+      state.vipMap = map
 
       state.vips = vips.map(vip => vip._id)
     },
@@ -192,22 +173,22 @@ export default new Vuex.Store({
         console.log('failed to fetch vips')
       }
     },
+    // snooze a vip by clicking in the admin
     async snoozeVip ({ commit, state }: Action, id: string) {
-      // const vip = await makeFetch(`/v1/snooze/${id}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     Authorization: `Bearer ${getToken()}`,
-      //     'Content-Type': 'application/json'
-      //   }
-      // }).then(res => res.json())
+      const vip = await makeFetch(`/api/snooze/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
 
-      // commit('setSnoozedVIP', vip)
+      commit('setSnoozedVIP', vip)
     },
     // user has come from an email and is snoozing from the hash
     async snoozeByHash ({ commit, state }: Action, hash: string) {
       commit('setFetchingSnooze', true)
 
-      const info = await makeFetch(`/v1/snooze/${hash}`, {
+      const info = await makeFetch(`/api/snooze/${hash}`, {
         method: 'PUT'
       }).then(res => res.json())
 
@@ -222,7 +203,7 @@ export default new Vuex.Store({
     // this does not update all vips, just one at a time
     async updateVip ({ commit, state }: Action, id: string) {
       console.log('updating vip', state.vipMap, id, state.vipMap[id])
-      const vip = await makeFetch(`/vip/${id}`, {
+      const vip = await makeFetch(`/api/vip/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'

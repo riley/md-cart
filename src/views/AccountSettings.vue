@@ -6,8 +6,16 @@
         <div class="email">
           <p class="medium">Personal Information</p>
           <p v-if="!editingUsername">{{ username }}</p>
-          <TextInput :value="username" v-else />
-          <Button inline @click="editingUsername">{{ editingUsername ? 'Save' : 'Edit' }}</Button>
+          <TextInput
+            v-else
+            :value="username"
+            @input="setUsername"
+            label="Email Address"
+            autocomplete="email"
+            name="email"
+            type="email" />
+          <Button v-if="!editingUsername" inline @click="toggleEditUsername">Edit</Button>
+          <Button v-else inline @click="handleSaveUsername">Save</Button>
         </div>
       </div>
       <div class="payment">
@@ -32,6 +40,7 @@
           <Button inline @click="toggleEditBilling">{{ editingBilling ? 'Save' : 'Edit' }}</Button>
         </div>
       </div>
+      <StripeTokenUpdate />
     </Card>
   </div>
 </template>
@@ -44,16 +53,19 @@ import Card from '../components/BaseCard.vue'
 import Button from '../components/BaseButton.vue'
 import Address from '../components/BaseAddress.vue'
 import TextInput from '../components/BaseTextInput.vue'
+import StripeTokenUpdate from '../components/admin/StripeTokenUpdate.vue'
 
 const user = namespace('user')
 
-@Component({ components: { Address, Button, Card, Heading } })
+@Component({ components: { Address, Button, Card, Heading, TextInput, StripeTokenUpdate } })
 export default class AccountSettings extends Vue {
   @user.State((state: any) => state.billing.address) billingAddress: Address
   @user.State((state: any) => state.shipping.address) shippingAddress: Address
   @user.State username: string
   @user.Getter loggedIn: boolean
   @user.Mutation setAddress: any
+  @user.Mutation setUsername: (username: string) => void
+  @user.Action update: () => Promise<void>
 
   editingShipping: boolean = false
   editingBilling: boolean = false
@@ -67,12 +79,21 @@ export default class AccountSettings extends Vue {
     })
   }
 
+  handleSaveUsername () {
+    this.editingUsername = false
+    this.update()
+  }
+
   toggleEditShipping () {
     this.editingShipping = !this.editingShipping
   }
 
   toggleEditBilling () {
     this.editingBilling = !this.editingBilling
+  }
+
+  toggleEditUsername () {
+    this.editingUsername = !this.editingUsername
   }
 }
 </script>

@@ -23,7 +23,7 @@ export default { }
   width: 30px;
   height: 30px;
   position: relative;
-  border: 4px solid #888;
+  border: 4px solid currentColor;
   animation: loader 2s infinite ease;
 }
 

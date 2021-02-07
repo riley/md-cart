@@ -3,8 +3,8 @@
     <Heading>Vip Detail</Heading>
     <Card class="item-modifier">
       <CardContent>
+        <p>${{ vip.vipPrice / 100 }}</p>
         <div class="panel">
-          <p>${{ vip.vipPrice / 100 }}</p>
           <div class="delivery-settings">
             <h4>Modify Your VIP Settings</h4>
             <p>Next Delivery Date</p>

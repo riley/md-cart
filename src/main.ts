@@ -33,6 +33,7 @@ declare global {
     gtag: any
     fbq: any
     mapsCallback: any
+    paypal: any
     location: Location
     gapi: any
     renderOptIn: () => void
@@ -94,6 +95,30 @@ declare global {
     shipping: {
       postage: number
     }
+  }
+
+  interface PayPalOrderInit {
+    id: string
+    processed: boolean
+  }
+
+  interface PayPalOrderComplete {
+    id: string
+    message?: string
+  }
+
+  interface PayPalActions {
+    resolve: () => Promise<void>
+    reject: () => Promise<void>
+  }
+
+  interface PayPalShippingAddress {
+    address_line_1: string
+    address_line_2: string
+    admin_area_2: string
+    admin_area_1: string
+    postal_code: string
+    country_code: string
   }
 
   interface Product {

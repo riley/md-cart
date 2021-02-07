@@ -1,6 +1,6 @@
 <template>
   <div id="past-orders" v-if="loggedIn">
-    <Heading>OrderHistory</Heading>
+    <Heading>Order History</Heading>
     <Card>
       <CardContent>
         <OrderThumb

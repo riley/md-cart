@@ -1,10 +1,9 @@
 <template>
   <!-- this component displays upcoming VIP orders -->
   <div id="upcoming-orders" v-if="loggedIn">
-    <Heading>UpcomingOrders</Heading>
+    <Heading>Upcoming Order</Heading>
     <Card>
       <CardContent>
-        Have this always be showing with active vips {{ upcomingRebills.length }}
         <VipDetail v-for="vip of upcomingRebills" :key="vip._id" v-bind="vip" :stock="stock" />
       </CardContent>
     </Card>
@@ -23,8 +22,13 @@ const user = namespace('user')
 
 @Component({ components: { Card, CardContent, Heading, VipDetail } })
 export default class UpcomingOrders extends Vue {
-  @Getter upcomingRebills: VIP[]
+  @State vipMap: VipMap
   @State stock: Product[]
   @user.Getter loggedIn: boolean
+
+  get upcomingRebills () {
+    return Object.values(this.vipMap)
+      .filter((vip: any) => vip.status === 'active')
+  }
 }
 </script>

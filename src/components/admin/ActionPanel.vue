@@ -35,12 +35,14 @@ export default class ActionPanel extends Vue {
 .root {
   display: flex;
   flex-direction: column;
-  height: 200px;
+  height: 130px;
   justify-content: center;
   align-items: center;
   border: 1px solid rgba(133,178,188,0.39);
   background: rgba(0, 0, 0, .03);
   cursor: pointer;
+  text-align: center;
+  padding: 1rem;
 }
 
 .root:hover, .root:focus, .root:active {
@@ -48,15 +50,15 @@ export default class ActionPanel extends Vue {
 }
 
 .icon {
-  height: 70px;
-  width: 70px;
+  height: 50px;
+  width: 50px;
   fill: rgba(0, 0, 0, .5);
   margin-bottom: 1rem;
   transition: transform .4s ease-out;
 }
 
 .root:hover .icon {
-  transform: scale(1.3)
+  transform: scale(1.2)
 }
 
 p {

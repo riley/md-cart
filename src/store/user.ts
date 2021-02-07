@@ -163,6 +163,7 @@ export default {
     async update ({ commit, state }: Action) {
       const { user, token } = await makeFetch('/api/user', {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           username: state.username,
           billingAddress: state.billing.address,

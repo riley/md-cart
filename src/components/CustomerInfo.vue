@@ -59,6 +59,6 @@ h2 { margin-top: 0; }
 
 .info-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 }
 </style>

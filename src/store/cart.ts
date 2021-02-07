@@ -59,7 +59,11 @@ export default {
     items: [],
     loginFormActive: false,
     order: null,
+    paypalCapturing: false,
+    paypalOrderInit: null,
+    paypalOrderComplete: null,
     processing: false,
+    processingPaypal: false,
     processingError: null,
     refId: refId || '', // this is initialized above (might be null)
     shipping: {
@@ -183,8 +187,20 @@ export default {
     setItems (state: any, items: Item[]) {
       state.items = items
     },
+    setPaypalCapturing (state: any, status: boolean) {
+      state.paypalCapturing = status
+    },
+    setPaypalOrderInit (state: any, data: PayPalOrderInit) {
+      state.paypalOrderInit = data
+    },
+    setPaypalOrderComplete (state: any, data: PayPalOrderComplete) {
+      state.paypalOrderComplete = data
+    },
     setProcessing (state: any, status: boolean) {
       state.processing = status
+    },
+    setProcessingPaypal (state: any, status: boolean) {
+      state.processingPaypal = status
     },
     setProcessingError (state: any, error: string) {
       state.processingError = error
@@ -420,6 +436,69 @@ export default {
       console.log('start checkout', event)
 
       window._learnq.push(['track', 'Start Checkout', event])
+    },
+    // start the paypal order process
+    async createPaypalOrder ({ commit, state }: Action) {
+      commit('setProcessing', true)
+      commit('setProcessingPaypal', true)
+
+      let result = await makeFetch('/api/orders/paypal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => res.json())
+
+      const { token, ...data } = result
+
+      setToken(token)
+      commit('setPaypalOrderInit', data)
+    },
+    // update shipping to Canado or whatever
+    async updatePaypalShipping ({ commit }: Action, shippingAddress: PayPalShippingAddress) {
+      let response = await makeFetch('/api/orders/paypal', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shippingAddress })
+      })
+
+      if (response.status !== 200) {
+        window.woopra?.track('cart-js-errors', 'something wrong with the paypal update shipping endpoint')
+      }
+
+      const { token, processed, order } = await response.json()
+
+      setToken(token)
+
+      if (processed) {
+        // this was a free order
+        location.href = '/thankyou'
+      }
+
+      return order
+    },
+    // complete the paypal checkout flow
+    async completePaypalOrder ({ commit, state }: Action, { data, details }: any) {
+      let result = await makeFetch('/api/orders/paypal', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data, details })
+      }).then(res => res.json())
+
+      const { order, token } = result
+
+      setToken(token)
+
+      if (order && order.message) {
+        // something has gone wrong
+        commit('setGlobalError', `Something went wrong while processing your PayPal order. ${order.message}`)
+        return
+      }
+
+      commit('setPaypalOrderComplete', order)
+
+      window.woopra?.track('paypal-order-complete')
+
+      unsetRefId()
+      location.href = '/thankyou'
     }
   }
 }

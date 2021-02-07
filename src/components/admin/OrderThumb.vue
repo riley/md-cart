@@ -58,6 +58,7 @@ export default class OrderThumb extends Vue {
 .order {
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .thumbs {

@@ -155,7 +155,6 @@ export default class ShippingInfo extends Vue {
 <style scoped>
 section {
   position: relative;
-  margin-bottom: 2rem;
   background: white;
   padding: 1.5rem;
   margin-bottom: 1.5rem;

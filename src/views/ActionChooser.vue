@@ -8,12 +8,6 @@
         <Button inline @click="logout">Logout</Button>
       </span>
     </p>
-    <Snoozed
-      v-if="snoozing"
-      :fetching="fetchingSnooze"
-      :snoozeError="snoozeError"
-      @dismiss="setSnoozing(false)"
-      v-bind="snoozedVIP" />
     <div class="choices">
       <LoginForm
         v-if="loginFormActive"
@@ -23,7 +17,11 @@
         :setEmail="setUsername"
         :clearLoginForm="clearLoginForm"
         @close="clearLoginForm" />
-      <ActionPanel v-for="panel of panels" :key="panel.icon" v-bind="panel" />
+      <ActionPanel v-if="upcomingRebills.length > 0" title="See Upcoming Order" path="/upcoming-orders" icon="parcel" />
+      <ActionPanel title="Make a New Order" path="/send-now" icon="add" />
+      <ActionPanel title="Change Account Settings" path="/account-settings" icon="account" />
+      <ActionPanel title="See Past Orders" path="/past-orders" icon="list" />
+      <ActionPanel title="Change Vip Settings" path="/vip-settings" icon="settings" />
     </div>
   </div>
 </template>
@@ -35,48 +33,30 @@ import ActionPanel from '../components/admin/ActionPanel.vue'
 import Button from '../components/BaseButton.vue'
 import LoginForm from '../components/LoginForm.vue'
 import Overlay from '../components/Overlay.vue'
-import Snoozed from '../components/admin/Snoozed.vue'
 
 const user = namespace('user')
 
-@Component({ components: { ActionPanel, LoginForm, Button, Overlay, Snoozed } })
+@Component({ components: { ActionPanel, LoginForm, Button, Overlay } })
 export default class ActionChooser extends Vue {
-  @State fetchingSnooze: boolean
   @State loginFormActive: boolean
-  @State snoozeHash: string
-  @State snoozing: boolean
-  @State snoozeError: string
   @user.State loginEmailRequested: boolean
   @user.State loginErrorMessage: string
-  @State panels: any[]
-  @State snoozedVIP: VIP
   @user.State username: string
   @user.State(state => state.billingAddress.name) name: string
   @user.State failedToFetchUser: boolean
 
   @user.Getter loggedIn: boolean
+  @State vipMap: VipMap
 
   @Mutation toggleLoginForm: any
   @Mutation clearLoginForm: any
-  @Mutation setSnoozing: (snoozing: boolean) => void
   @user.Mutation setUsername: any
 
   @user.Action logout: () => Promise<void>
-  @user.Action fetchUser: () => Promise<void>
-  @Action fetchStock: () => Promise<void>
-  @Action fetchVips: () => Promise<void>
-  @Action fetchOrders: () => Promise<void>
-  @Action snoozeByHash: (id: string) => Promise<void>
 
-  async mounted () {
-    this.fetchStock()
-    this.fetchUser()
-    this.fetchVips()
-    this.fetchOrders()
-
-    if (this.snoozing) {
-      this.snoozeByHash(this.snoozeHash)
-    }
+  get upcomingRebills () {
+    return Object.values(this.vipMap)
+      .filter((vip: any) => vip.status === 'active')
   }
 }
 </script>
@@ -84,7 +64,7 @@ export default class ActionChooser extends Vue {
 <style scoped>
 .choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   grid-gap: 1rem;
 }
 </style>

@@ -50,8 +50,8 @@ export default class VipThumb extends Vue {
 .vip {
   display: flex;
   min-height: 6rem;
-  border-bottom: 1px solid #ccc;
   padding: 1rem;
+  cursor: pointer;
 }
 
 .thumbs {

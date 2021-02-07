@@ -3,12 +3,14 @@ import VueRouter from 'vue-router'
 import Admin from './views/Admin.vue'
 import Home from './views/Home.vue'
 import AccountSettings from './views/AccountSettings.vue'
-import UpcomingOrders from './views/UpcomingOrders.vue'
 import OneTimeOrder from './views/OneTimeOrder.vue'
-import OrderHistory from './views/OrderHistory.vue'
-import VipSettings from './views/VipSettings.vue'
 import OrderDetail from './views/OrderDetail.vue'
+import OrderHistory from './views/OrderHistory.vue'
+import Snoozed from './views/Snoozed.vue'
+import UpcomingOrders from './views/UpcomingOrders.vue'
 import VipDetail from './views/VipDetail.vue'
+import VipSettings from './views/VipSettings.vue'
+
 import store from './store/admin'
 
 const routes = [
@@ -20,6 +22,7 @@ const routes = [
   { path: '/vip-settings', component: VipSettings },
   { path: '/order/:id', name: 'orderDetail', component: OrderDetail },
   { path: '/vip/:id', name: 'vipDetail', component: VipDetail },
+  { path: '/snooze', name: 'snooze', component: Snoozed },
   { path: '*', redirect: '/' }
 ]
 
