@@ -13,8 +13,8 @@ export default {
 
 <style scoped>
 blockquote {
-  margin: 24px 0;
-  padding: 4px 24px;
+  margin: 2rem 0;
+  padding: 1rem 2rem;
   position: relative;
 }
 

@@ -28,24 +28,17 @@ export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   modules: { user },
   state: {
+    applicationError: null,
     fetching: false,
     fetchingSnooze: false,
     loginFormActive: false,
     orderMap: {},
     orders: [],
+    paymentError: null,
+    shippingError: null,
     snoozeError: null,
     snoozedVIP: null,
     stock: [],
-    user: {
-      _id: null,
-      username: null,
-      billing: {
-        address: null,
-      },
-      shipping: {
-        address: null
-      }
-    },
     vipMap: {},
     vips: [], // vips and orders are stored as a list of ids. refer to vipMap and orderMap
   },
@@ -70,6 +63,9 @@ export default new Vuex.Store({
       state.vipMap[id].items.splice(index, 1)
       state.vipMap[id].items = [...state.vipMap[id].items]
     },
+    setApplicationError (state: any, message: string) {
+      state.applicationError = message
+    },
     setCycleDays (state: any, { cycleDays, id }: { cycleDays: number, id: string }) {
       state.vipMap[id].cycleDays = cycleDays
     },
@@ -90,6 +86,14 @@ export default new Vuex.Store({
 
       state.orders = orders.map(order => order._id)
     },
+    setPaymentError (state: any, error: string) {
+      state.paymentError = error
+      window.woopra?.track('cart-js-error', `failed to update admin payment info ${error}`)
+    },
+    setShippingUpdateError (state: any, error: string) {
+      state.shippingError = error
+      window.woopra?.track('cart-js-error', `failed to update shipping in admin ${error}`)
+    },
     setSnoozedVIP (state: any, vip: VIP) {
       vip.nextDelivery = new Date(vip.nextDelivery)
       state.snoozedVIP = vip
@@ -99,12 +103,6 @@ export default new Vuex.Store({
     },
     setStock (state: any, stock: Product[]) {
       state.stock = stock
-    },
-    setUser (state: any, user: StoredUser) {
-      state.user._id = user._id
-      state.user.email = user.username
-      state.billing.address = user.billingAddress
-      state.shipping.address = user.shippingAddress
     },
     setVip: (state: any, vip: VIP) => {
       const index = state.vips.firstIndex((v: VIP) => v._id === vip._id)
@@ -150,7 +148,7 @@ export default new Vuex.Store({
         commit('setStock', stock)
       } catch (e) {
         // show an error
-        commit('setGlobalError', 'Oh no! We\'re having trouble getting product informtion for this page. The site might be having trouble, try reloading the page.')
+        commit('setApplicationError', 'Oh no! We\'re having trouble getting product informtion for this page. The site might be having trouble, try reloading the page.')
       }
 
       commit('setFetching', false)

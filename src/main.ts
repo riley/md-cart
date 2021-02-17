@@ -256,4 +256,44 @@ declare global {
       addMore: string[]
     }
   }
+
+  enum ButtonVariant {
+    disabled = 'disabled',
+    primary = 'primary',
+    success = 'success',
+    warning = 'warning',
+    danger = 'danger'
+  }
+
+  interface StripeToken {
+    card: {
+      address_city: string
+      address_country: string
+      address_line1: string
+      address_line1_check: string
+      address_line2: string
+      address_state: string
+      address_zip: string
+      address_zip_check: string
+      brand: string
+      country: string
+      cvc_check: string
+      dynamic_last4: null
+      exp_month: number
+      exp_year: number
+      funding: string
+      id: string
+      last4: string
+      name: string
+      object: string
+      tokenization_method: string
+    }
+    client_ip: string
+    created: number
+    id: string
+    livemode: boolean
+    object: string
+    type: string
+    used: boolean
+  }
 }

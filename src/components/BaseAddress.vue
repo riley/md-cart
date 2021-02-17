@@ -2,12 +2,12 @@
 <template>
   <!-- this class will render input fields for an Address or just display one statically -->
   <div>
-    <div v-if="displayOnly">
+    <div v-if="!editMode">
       <address>
         {{ name }}<br>{{ address_1 }} {{ address_2 }}<br>{{ city }}, {{ state }} {{ zip }}<br>{{ country }}
       </address>
     </div>
-    <div v-else>
+    <div v-if="editMode">
       <TextInput autocomplete="name" :value="name" @input="handleName" @blur="handleBlur" required type="text" name="name" label="Name" />
       <TextInput
         placesEnabled
@@ -52,7 +52,7 @@ import countries from '../utils/countries'
   components: { TextInput, Dropdown },
 })
 export default class BaseAddress extends Vue {
-  @Prop({ type: Boolean, default: false }) displayOnly: boolean
+  @Prop({ type: Boolean, default: false }) editMode: boolean
   @Prop() name: string
   @Prop() address_1: string
   @Prop() address_2: string
@@ -69,6 +69,7 @@ export default class BaseAddress extends Vue {
   }, {})
 
   handleGooglePlaceChange (value: GooglePlace) {
+    console.log('google place', value)
     const address: Address = {
       name: this.name,
       address_1: (value.streetNumber && value.route) ? `${value.streetNumber} ${value.route}` : '',

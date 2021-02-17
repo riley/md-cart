@@ -20,7 +20,7 @@
         <CardContent>
           <p class="loggedInAs">Logged in as <Chip>{{ username }}</Chip></p>
           <Button position="right" inline @click="editStoredShippingAddress">Edit</Button>
-          <Address displayOnly v-bind="userShipping" />
+          <Address v-bind="userShipping" />
         </CardContent>
       </Card>
     </div>
@@ -48,6 +48,7 @@
           </template>
         </Banner>
         <Address
+          editMode
           @input="updateAddress"
           @blur="handleBlur"
           @replaceAddress="replaceShippingAddress"

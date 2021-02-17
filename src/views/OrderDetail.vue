@@ -24,11 +24,11 @@
           </div>
           <div class="info-row">
             <p>ship to</p>
-            <Address displayOnly v-bind="order.shippingAddress" />
+            <Address v-bind="order.shippingAddress" />
           </div>
           <div class="info-row">
             <p>bill to</p>
-            <Address displayOnly v-bind="order.billingAddress" />
+            <Address v-bind="order.billingAddress" />
           </div>
         </section>
         <section>

@@ -23,7 +23,7 @@ export default class BaseButton extends Vue {
   @Prop({ type: Boolean, default: false }) small: boolean
   @Prop({ default: 'none' }) position: string;
   @Prop({ type: Boolean, default: false }) loading!: boolean;
-  @Prop() variant: string
+  @Prop() variant: ButtonVariant
   @Prop() type: string
 
   handleClick () {

@@ -40,6 +40,9 @@ export default {
 
 .title {
   color: rgba(0, 0, 0, .5);
+  font-weight: 700;
+  font-size: 1.5em;
+  margin-top: 0;
 }
 
 .copy {

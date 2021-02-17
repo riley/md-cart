@@ -5,7 +5,7 @@
       <Card>
         <CardContent>
           <Button inline position="right" @click="editStoredShippingAddress">Edit</Button>
-          <Address displayOnly v-bind="userBilling" />
+          <Address v-bind="userBilling" />
         </CardContent>
       </Card>
     </div>
@@ -13,7 +13,7 @@
       <Checkbox @input="setBillingSameAsShipping" :checked="billingSameAsShipping" label="Billing address is same as shipping"/>
       <fieldset v-if="!billingSameAsShipping">
         <legend>Billing Info</legend>
-        <Address v-bind="address" @input="updateAddress" @replaceAddress="replaceBillingAddress" />
+        <Address editMode v-bind="address" @input="updateAddress" @replaceAddress="replaceBillingAddress" />
       </fieldset>
     </form>
   </section>

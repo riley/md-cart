@@ -12,11 +12,11 @@
       </div>
       <div class="shipping-address">
         <h4>Shipping Address</h4>
-        <Address displayOnly v-bind="shipping" />
+        <Address v-bind="shipping" />
       </div>
       <div v-if="paymentMethod !== 'paypal'" class="billing-address">
         <h4>Billing Address</h4>
-        <Address displayOnly v-bind="billing" />
+        <Address v-bind="billing" />
       </div>
       <div class="shipping-method">
         <h4>Shipping Method</h4>

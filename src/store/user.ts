@@ -9,7 +9,11 @@ export default {
     billing: {
       address: null
     },
-    cardMeta: null,
+    cardMeta: {
+      lastFour: '',
+      expMonth: '',
+      expYear: ''
+    },
     credit: 0,
     failedToFetchUser: true,
     isReturningCustomer: false,
@@ -22,6 +26,8 @@ export default {
       address: null,
     },
     stripeId: null,
+    stripeToken: null,
+    userLoginFailed: null,
     username: null
   },
   getters: {
@@ -46,11 +52,17 @@ export default {
       state.shipping = { address: null }
       state.username = null
     },
+    setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
+      state[location].address[field] = value
+    },
     setReturningCustomer (state: any, returning: boolean) {
       state.isReturningCustomer = returning
     },
     setReturningVipCustomer (state: any, returning: boolean) {
       state.returningVipCustomer = returning
+    },
+    setStripeToken (state: any, token: StripeToken) {
+      state.stripeToken = token
     },
     setUser (state: any, user: StoredUser) {
       state._id = user._id
@@ -71,21 +83,22 @@ export default {
       })
       window.woopra && window.woopra.track()
     },
+    setUserFailedToFetch (state: any, failure: boolean) {
+      state.failedToFetchUser = failure
+    },
+    setUserLoginFailed (state: any, status: boolean) {
+      state.userLoginFailed = status
+    },
     setUsername (state: any, username: string) {
       state.username = username
     },
-
-    setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
-      state[location].address[field] = value
-    },
-    setUserFailedToFetch (state: any, failure: boolean) {
-      state.failedToFetchUser = failure
-    }
   },
   actions: {
     async fetchUser ({ commit }: Action) {
       try {
         const response = await makeFetch('/api/user')
+
+        commit('userLoginFailed', response.status !== 200)
 
         if (response.status !== 200) return
 
@@ -161,15 +174,28 @@ export default {
       setToken(token)
     },
     async update ({ commit, state }: Action) {
-      const { user, token } = await makeFetch('/api/user', {
+      const response = await makeFetch('/api/user', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          stripeToken: state.stripeToken,
           username: state.username,
           billingAddress: state.billing.address,
           shippingAddress: state.shipping.address,
         }),
       }).then(res => res.json())
+
+      console.log('patched user', response)
+
+      if (response.message) {
+        throw new Error(response.message)
+      }
+
+      const { user, token } = response
+
+      // how do we handle errors?
+      // billing errors?
+      // invalid address?
 
       commit('setUser', user)
       setToken(token)

@@ -1,19 +1,25 @@
 <template>
-  <div>
-    <div ref="card" />
-    <button @click="update">Update</button>
+  <div class="stripe-token-update">
+    <div class="stripe-input" ref="card" />
+    <ButtonTray>
+      <Button inline @click="cancel">Cancel</Button>
+      <Button inline variant="primary" @click="update">Update</Button>
+    </ButtonTray>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
+import Button from '../BaseButton.vue'
+import ButtonTray from '../ButtonTray.vue'
 const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
 const elements = stripe.elements()
 let card: any
 
-@Component
+@Component({ components: { Button, ButtonTray } })
 export default class StripeTokenUpdate extends Vue {
   mounted () {
+    console.log('StripeTokenUpdate.mounted')
     card = card || elements.create('card', {
       hidePostalCode: true,
       style: {
@@ -36,9 +42,23 @@ export default class StripeTokenUpdate extends Vue {
 
     if (result.error) {
       // do some error stuff
+      this.$emit('error', result.error)
     }
 
     console.log(result.token)
+    this.$emit('token', result.token)
+  }
+
+  async cancel () {
+    this.$emit('cancel')
   }
 }
 </script>
+
+<style scoped>
+.stripe-input {
+  border-bottom: 1px solid rgb(30, 48, 10);
+  margin-bottom: 2rem;
+  padding: .25rem 0;
+}
+</style>
