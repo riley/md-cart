@@ -2,31 +2,40 @@
   <div id="vip-detail">
     <Heading>Vip Detail</Heading>
     <Card class="item-modifier">
-      <CardContent>
-        <p>${{ vip.vipPrice / 100 }}</p>
+      <div class="delivery-settings">
+        <h4>Modify Your VIP Settings</h4>
         <div class="panel">
-          <div class="delivery-settings">
-            <h4>Modify Your VIP Settings</h4>
+          <div>
             <p>Next Delivery Date</p>
             <input type="date" :value="formattedDate" @change="updateNextDelivery" />
+          </div>
+          <div>
             <p>Delivery Frequency</p>
             <input type="range" :value="vip.cycleDays" @change="updateFrequency" step="5" />
             <p>Every {{ vip.cycleDays }} days</p>
           </div>
-          <ItemListItem v-for="item of groupedItems" :key="item.sku" v-bind="item" @increment="incrementItem" />
+        </div>
+      </div>
+      <div class="items">
+        <h4>Customize Your Delivery</h4>
+        <p><strong>VIP Total</strong> → ${{ vip.vipPrice / 100 }}</p>
+        <div class="panel">
+          <ul class="vip-items">
+            <ItemListItem v-for="item of groupedItems" :key="item.sku" v-bind="item" @increment="incrementItem" />
+          </ul>
           <Chooser :pricing="pricing" :stock="stock" @chosenProduct="chosenProduct" />
         </div>
-        <div class="panel">
-          <Button
-            inline
-            variant="primary"
-            @click="pauseVIP">Pause VIP</Button>
-          <Button
-            inline
-            variant="danger"
-            @click="stopVip">Stop VIP</Button>
-        </div>
-      </CardContent>
+      </div>
+      <ButtonTray>
+        <Button
+          inline
+          variant="primary"
+          @click="pauseVIP">Pause VIP</Button>
+        <Button
+          inline
+          variant="danger"
+          @click="stopVip">Stop VIP</Button>
+      </ButtonTray>
     </Card>
   </div>
 </template>
@@ -40,8 +49,9 @@ import CardContent from '../components/BaseCardContent.vue'
 import Chooser from '../components/Chooser.vue'
 import ItemListItem from '../components/ItemListItem.vue'
 import Heading from '../components/BaseHeading.vue'
+import ButtonTray from '../components/ButtonTray.vue'
 
-@Component({ components: { Button, Card, CardContent, Chooser, ItemListItem, Heading } })
+@Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading } })
 export default class VipDetail extends Vue {
   @State vipMap: VipMap
   @State stock: Product[]
@@ -152,27 +162,27 @@ export default class VipDetail extends Vue {
 <style scoped>
 .panel {
   display: flex;
+  margin-bottom: 1rem;
 }
 
-.panel:last-child {
-  justify-content: flex-end;
+.panel > * {
+  flex-grow: 1;
 }
 
-.panel:last-child button {
-  margin-left: 1rem;
-}
-
-.panel > div:first-child {
+.panel > *:first-child {
   margin-right: 1rem;
-  max-width: 20rem;
-  flex-shrink: 1;
 }
 
 .item-modifier {
   max-width: 60rem;
 }
 
-.delivery-settings {
-  width: 15rem;
+.delivery-settings, .items {
+  padding: 1rem;
+  border-bottom: 24px solid rgba(0, 0, 0, .03);
+}
+
+.vip-items {
+  padding: 0;
 }
 </style>

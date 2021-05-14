@@ -8,7 +8,7 @@
         <Button inline @click="logout">Logout</Button>
       </span>
     </p>
-    <ActionChooser />
+    <ActionChooser v-if="loggedIn" />
     <Banner v-if="applicationError" title="Application Error" variant="warning">
       <template v-slot:copy>
         {{ applicationError }}
@@ -23,6 +23,7 @@
       :loginEmailRequested="loginEmailRequested"
       :setEmail="setUsername"
       :clearLoginForm="clearLoginForm"
+      @login="fetchEverything"
       @close="clearLoginForm" />
   </div>
 </template>
@@ -61,8 +62,14 @@ export default class Admin extends Vue {
   @Action fetchOrders: () => Promise<void>
 
   async mounted () {
+    this.fetchStock()
+    // when the user is already logged in on page load
+    this.fetchEverything()
+  }
+
+  async fetchEverything () {
+    console.log('fetchEverything')
     try {
-      this.fetchStock()
       this.fetchUser()
       this.fetchVips()
       this.fetchOrders()

@@ -49,6 +49,10 @@ export default class ItemListItem extends Vue {
   padding: 1rem 0;
 }
 
+.cartItem_root > div {
+  box-sizing: border-box;
+}
+
 .incrementer.fetching {
   opacity: .3;
   pointer-events: none;
@@ -56,6 +60,7 @@ export default class ItemListItem extends Vue {
 
 .product-info {
   flex-grow: 1;
+  margin: 0 1rem;
 }
 
 .title {

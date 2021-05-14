@@ -1,8 +1,8 @@
 <template>
-  <div class="root" @click="scrollPage">
+  <router-link :to="path" class="root">
     <component v-bind:is="iconComponent" role="img" class="icon"></component>
-    <p>{{ title }}</p>
-  </div>
+    <span>{{ title }}</span>
+  </router-link>
 </template>
 
 <script lang="ts">
@@ -24,10 +24,6 @@ export default class ActionPanel extends Vue {
   get iconComponent () {
     return this.icons[this.icon]
   }
-
-  scrollPage () {
-    this.$router.push({ path: this.path })
-  }
 }
 </script>
 
@@ -43,10 +39,18 @@ export default class ActionPanel extends Vue {
   cursor: pointer;
   text-align: center;
   padding: 1rem;
+  text-decoration: none;
+  color: black;
+  border-bottom: 5px solid #ddd;
+  transition: all .3s;
 }
 
-.root:hover, .root:focus, .root:active {
-  background: rgba(91, 121, 117, .2);
+.root.router-link-active {
+  border-bottom-color: hsla(8,100%,70%,.99);
+}
+
+.root:hover {
+  border-bottom-color: #666;
 }
 
 .icon {
@@ -59,10 +63,5 @@ export default class ActionPanel extends Vue {
 
 .root:hover .icon {
   transform: scale(1.2)
-}
-
-p {
-  margin: 0;
-  padding: 0;
 }
 </style>

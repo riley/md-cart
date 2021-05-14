@@ -21,11 +21,15 @@
             <span>Mr. Davis Rewards</span>
             <span>-${{ credit / 100 }}</span>
           </li>
-          <li v-if="referDiscountEligible" class="discount refer-discount">
-            <span>Discount</span>
-            <span>-${{ referralCredit / 100 }}</span>
+          <li v-if="refId" class="discount refer-discount">
+            <div>
+              <div v-if="referDiscountEligible" class="discount-amount">
+                <span>Discount</span>
+                <span>-${{ referralCredit / 100 }}</span>
+              </div>
+              <p class="discount-conditions">$10 discount applies for new customers on orders of $40 or more</p>
+            </div>
           </li>
-          <p v-if="refId" class="discount-conditions">$10 discount applies for new customers on orders of $40 or more</p>
           <li v-if="nonVipDiscountEligible" class="discount">
             <span>Secret Savings</span>
             <span>-${{ nonVIPCheckInCredit / 100 }}</span>
@@ -116,6 +120,7 @@ export default class CartSummary extends Vue {
   @cart.State isVip: boolean
   @cart.State isNonVIPCheckIn: boolean
   @cart.State refId: string
+  @cart.State isReturningCustomer: boolean
   @user.State returningVipCustomer: boolean
   @cart.State createRecurringVIP: boolean
 
@@ -208,19 +213,30 @@ export default class CartSummary extends Vue {
 
 .totals li.discount {
   color: #5B7975;
+  display: block;
 }
 
 .totals li.refer-discount {
-  background-color: #dce8e7;
+  padding: .125rem;
+  background: rgba(220,232,221,1);
+  margin: .5rem 0;
+  border-radius: 4px;
+}
+
+.totals li.refer-discount > div {
   padding: .25rem .5rem;
-  margin: .5rem -.5rem 0;
+  border-radius: 4px;
+}
+
+.discount-amount {
+  display: flex;
+  justify-content: space-between;
 }
 
 .discount-conditions {
-  background-color: rgba(220, 232, 231, .5);
   font-size: .75rem;
-  margin: 0 -.5rem .5rem;
-  padding: .5rem .75rem;
+  margin: 0;
+  padding: 0;
 }
 
 .spinner-container {

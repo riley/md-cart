@@ -2,8 +2,11 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { setToken, logoutToken } from '../utils/storage'
 import { makeFetch } from '../utils/network'
+import upsells from '../utils/upsells'
 import user from './user'
+import Pricing from '../plugins/Pricing'
 
+Vue.use(Pricing)
 Vue.use(Vuex)
 
 const urlParams = new URLSearchParams(location.search)
@@ -41,6 +44,8 @@ export default new Vuex.Store({
     stock: [],
     vipMap: {},
     vips: [], // vips and orders are stored as a list of ids. refer to vipMap and orderMap
+    upsells,
+    usernameError: null,
   },
   getters: {
     allOrders: (state: any) => {
@@ -48,7 +53,10 @@ export default new Vuex.Store({
     },
     allVips: (state: any) => {
       return state.vips.map((_id: string) => state.vipMap[_id])
-    }
+    },
+    categories: (state: any) => {
+      return new Set(state.stock.map((product: Product) => product.clothingType))
+    },
   },
   mutations: {
     addItem (state: any, { item, id }: { item: Item, id: string }) {
@@ -104,8 +112,8 @@ export default new Vuex.Store({
     setStock (state: any, stock: Product[]) {
       state.stock = stock
     },
-    setVip: (state: any, vip: VIP) => {
-      const index = state.vips.firstIndex((v: VIP) => v._id === vip._id)
+    setVip (state: any, vip: VIP) {
+      const index = state.vips.findIndex((v: VIP) => v._id === vip._id)
       state.vips = [...state.vips.slice(0, index), vip, ...state.vips.slice(index + 1)]
     },
     setVips (state: any, vips: VIP[]) {
@@ -120,6 +128,9 @@ export default new Vuex.Store({
 
       state.vips = vips.map(vip => vip._id)
     },
+    setUsernameError (state: any, message: string) {
+      state.usernameError = message
+    },
     snoozeError (state: any, message: string) {
       state.snoozeError = message
     },
@@ -128,17 +139,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    async fetchPricing ({ commit, state }: Action, bundle: PricingBundle) {
-      const pricing = await makeFetch('/api/pricing', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ bundle })
-      }).then(res => res.json())
-
-      return pricing
-    },
     async fetchStock ({ commit, state }: Action) {
       commit('setFetching', true)
 

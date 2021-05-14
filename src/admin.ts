@@ -26,9 +26,11 @@ const routes = [
   { path: '*', redirect: '/' }
 ]
 
+const base = window.location.hostname !== 'localhost' ? '/account-staging-area' : '/admin.html'
+
 const router = new VueRouter({
   mode: 'history',
-  base: '/admin.html',
+  base,
   routes,
 })
 

@@ -55,6 +55,15 @@ export const setToken = (token) => {
   }
 }
 
+export const unsetToken = () => {
+  try {
+    store.removeItem('auth_token')
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 export const getRefId = () => {
   return store.getItem('refId')
 }

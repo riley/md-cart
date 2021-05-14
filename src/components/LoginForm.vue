@@ -62,9 +62,11 @@ export default class LoginForm extends Vue {
     }
   }
 
-  attemptLogin () {
+  async attemptLogin () {
     console.log('attemptLogin')
-    this.login({ username: this.email.trim(), magicCode: this.magicCode })
+    const loggedIn = await this.login({ username: this.email.trim(), magicCode: this.magicCode })
+    console.log('logged in?', loggedIn)
+    if (loggedIn) this.$emit('login')
   }
 
   handleEmail (username: string) {

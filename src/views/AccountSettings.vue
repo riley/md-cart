@@ -2,7 +2,7 @@
   <div id="account-settings" v-if="loggedIn">
     <Heading>Account Settings</Heading>
     <Card class="personal-info">
-      <div class="username">
+      <div class="username" :class="{ processing: processingUsername }">
         <p class="medium">Personal Information</p>
         <div class="email">
           <p v-if="!editingUsername">{{ username }}</p>
@@ -17,6 +17,10 @@
           <a v-if="!editingUsername" href="#" class="edit" @click="toggleEditUsername">Edit</a>
           <Button v-if="editingUsername" inline @click="handleSaveUsername">Save</Button>
         </div>
+        <div v-if="processingUsername" class="roadblock">
+          <Spinner />
+        </div>
+        <Snackbar :active.sync="confirmedUsernameUpdate">Username updated!</Snackbar>
       </div>
       <div class="payment" :class="{ processing: processingPayment }">
         <p class="medium">Payment</p>
@@ -41,9 +45,7 @@
         <div v-if="processingPayment" class="roadblock">
           <Spinner />
         </div>
-        <transition name="boink">
-          <Snackbar v-if="true">updated!</Snackbar>
-        </transition>
+        <Snackbar :active.sync="confirmedPaymentUpdate">Payment preference updated!</Snackbar>
       </div>
       <div class="addresses" :class="{ processing: processingShipping }">
         <p class="medium">Shipping & Billing Address</p>
@@ -63,9 +65,7 @@
         <div v-if="processingShipping" class="roadblock">
           <Spinner />
         </div>
-        <transition name="boink">
-          <Snackbar v-if="confirmedShippingUpdate">updated!</Snackbar>
-        </transition>
+        <Snackbar :active.sync="confirmedShippingUpdate">Shipping preference updated!</Snackbar>
       </div>
     </Card>
   </div>
@@ -83,7 +83,7 @@ import StripeTokenUpdate from '../components/admin/StripeTokenUpdate.vue'
 import ButtonTray from '../components/ButtonTray.vue'
 import Spinner from '../components/BaseSpinner.vue'
 import Alert from '../components/BaseAlert.vue'
-import Snackbar from '../components/BaseSnackbar.vue'
+import Snackbar from '../components/snackbar/BaseSnackbar.vue'
 
 const user = namespace('user')
 
@@ -98,6 +98,7 @@ export default class AccountSettings extends Vue {
   @user.Getter loggedIn: boolean
   @Mutation setPaymentError: (error: string | null) => void
   @Mutation setShippingUpdateError: (error: string | null) => void
+  @Mutation setUsernameError: (error: string | null) => void
   @user.Mutation setAddress: any
   @user.Mutation setStripeToken: any
   @user.Mutation setUsername: (username: string) => void
@@ -106,12 +107,15 @@ export default class AccountSettings extends Vue {
   editingShipping: boolean = false
   editingUsername: boolean = false
   editingPayment: boolean = false
+  processingUsername: boolean = false
   processingPayment: boolean = false
   processingShipping: boolean = false
+  confirmedUsernameUpdate: boolean = false
   confirmedPaymentUpdate: boolean = false
   confirmedShippingUpdate: boolean = false
 
   mounted () {
+    this.confirmedUsernameUpdate = false
     this.confirmedPaymentUpdate = false
     this.confirmedShippingUpdate = false
   }
@@ -124,9 +128,21 @@ export default class AccountSettings extends Vue {
     })
   }
 
-  handleSaveUsername () {
+  async handleSaveUsername () {
+    this.setUsernameError(null)
     this.editingUsername = false
-    this.update()
+
+    try {
+      this.processingUsername = true
+      await this.update()
+      this.confirmedUsernameUpdate = true
+
+      setTimeout(() => { this.confirmedUsernameUpdate = false }, 2000)
+    } catch (e) {
+      this.setUsernameError(e.message)
+    }
+
+    this.processingUsername = false
   }
 
   handlePaymentError (error: string) {
@@ -136,12 +152,12 @@ export default class AccountSettings extends Vue {
   async handleSavePayment (token: string) {
     this.setPaymentError(null)
     this.setStripeToken(token)
+    this.editingPayment = false
 
     try {
       this.processingPayment = true
       await this.update()
       this.confirmedPaymentUpdate = true
-      this.toggleEditPayment()
 
       setTimeout(() => { this.confirmedPaymentUpdate = false }, 2000)
     } catch (e) {
@@ -152,11 +168,12 @@ export default class AccountSettings extends Vue {
 
   async handleSaveShipping () {
     this.setShippingUpdateError(null)
+    this.editingShipping = false
+
     try {
       this.processingShipping = true
       await this.update()
       this.confirmedShippingUpdate = true
-      this.toggleEditShipping()
 
       setTimeout(() => { this.confirmedShippingUpdate = false }, 2000)
     } catch (e) {
@@ -216,7 +233,7 @@ export default class AccountSettings extends Vue {
   width: 25%;
 }
 
-.payment, .addresses {
+.username, .payment, .addresses {
   position: relative;
 }
 
@@ -239,7 +256,10 @@ export default class AccountSettings extends Vue {
   margin-left: 25%;
 }
 
-.processing .cardMeta, .processing .stripeTokenUpdate, .processing .shipping {
+.processing .cardMeta,
+.processing .stripeTokenUpdate,
+.processing .shipping,
+.processing .email {
   filter: blur(4px);
 }
 
@@ -250,12 +270,5 @@ export default class AccountSettings extends Vue {
   right: 0;
   bottom: 0;
   left: 0;
-}
-
-.boink-enter-active, .boink-leave-active {
-  transition: opacity .5s;
-}
-.boink-enter, .boink-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
 }
 </style>

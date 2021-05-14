@@ -5,7 +5,7 @@
       <ActionPanel title="Make a New Order" path="/send-now" icon="add" />
       <ActionPanel title="Change Account Settings" path="/account-settings" icon="account" />
       <ActionPanel title="See Past Orders" path="/past-orders" icon="list" />
-      <ActionPanel title="Change Vip Settings" path="/vip-settings" icon="settings" />
+      <ActionPanel v-if="vips.length > 0" title="Change Vip Settings" path="/vip-settings" icon="settings" />
     </div>
   </div>
 </template>
@@ -17,8 +17,8 @@ import ActionPanel from '../components/admin/ActionPanel.vue'
 
 @Component({ components: { ActionPanel } })
 export default class ActionChooser extends Vue {
-
   @State vipMap: VipMap
+  @State vips: VIP[]
 
   get upcomingRebills () {
     return Object.values(this.vipMap)

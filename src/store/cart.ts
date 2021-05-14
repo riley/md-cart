@@ -59,6 +59,7 @@ export default {
     items: [],
     loginFormActive: false,
     order: null,
+    paypalAvailable: false,
     paypalCapturing: false,
     paypalOrderInit: null,
     paypalOrderComplete: null,
@@ -99,7 +100,7 @@ export default {
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
-    referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0,
+    referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0 && !state.isReturningCustomer,
     nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
     subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
     referralCredit: (state: any) => typeof state.refId === 'string' && [8, 9, 24].includes(state.refId.length) ? 1000 : 0,
@@ -181,11 +182,17 @@ export default {
     setFetching (state: any, status: boolean) {
       state.fetching = status
     },
+    setIsReturningCustomer (state: any, status: boolean) {
+      state.isReturningCustomer = status
+    },
     setIsVip (state: any, isVip: boolean) {
       state.isVip = isVip
     },
     setItems (state: any, items: Item[]) {
       state.items = items
+    },
+    setPaypalAvailable (state: any, status: boolean) {
+      state.paypalAvailable = status
     },
     setPaypalCapturing (state: any, status: boolean) {
       state.paypalCapturing = status
@@ -357,9 +364,8 @@ export default {
           // we don't set the shipping and billing here, that would be leaking PII
         }
 
-        if (info.available === false) {
-          commit('user/setReturningCustomer', true, { root: true })
-        }
+        commit('user/setReturningCustomer', info.available === false, { root: true })
+        commit('setIsReturningCustomer', info.available === false)
       } catch (e) {
         commit('setGlobalError', `Uh oh! We weren't able to update the cart. Please contact us at ${supportEmail}`)
         console.error(e)

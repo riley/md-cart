@@ -6,7 +6,7 @@
     <BillingInfo />
     <PaymentInfo />
     <div class="notification-container">
-      <Notification v-if="isNonVIPCheckIn" global type="primary" message="Thanks for coming back! 🙌 your discount of $10 will be applied at checkout on orders more than $50." />
+      <Notification v-if="isNonVIPCheckIn" global type="primary" message="Thanks for coming back! 🙌 your discount of $10 will be applied at checkout to orders more than $50." />
       <Notification v-if="globalErrorMessage" global type="error" :message="globalErrorMessage" @close="dismissNotification" />
     </div>
   </div>
@@ -28,6 +28,7 @@ const cart = namespace('cart')
   components: { Button, Notification, ShippingInfo, BillingInfo, PaymentInfo, PayPal },
 })
 export default class CustomerInfoInputs extends Vue {
+  @cart.State paypalAvailable: boolean
   @cart.State globalErrorMessage: string
   @cart.State isNonVIPCheckIn: boolean
   @cart.State isVip: boolean

@@ -1,4 +1,4 @@
-import { setToken } from '../utils/storage'
+import { setToken, unsetToken } from '../utils/storage'
 import { identifyTrack } from '../utils/tracking'
 import { makeFetch } from '../utils/network'
 
@@ -48,9 +48,12 @@ export default {
       state.billing = { address: null }
       state.cardMeta = null
       state.credit = 0
+      state.loginEmailRequested = false
+      state.loginErrorMessage = false
       state.refId = ''
       state.shipping = { address: null }
       state.username = null
+      unsetToken()
     },
     setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
       state[location].address[field] = value
@@ -157,10 +160,11 @@ export default {
         commit('toggleLoginForm', false, { root: true })
         identifyTrack({ email: info.user.username, name: info.user.shippingAddress.name })
         setToken(info.token)
-        return info.user
+        return true
       } else {
         commit('loginFailure', info.error)
         window.woopra && window.woopra.track('login-failure', { username, message: info.error })
+        return false
       }
     },
     async logout ({ commit, state }: Action) {

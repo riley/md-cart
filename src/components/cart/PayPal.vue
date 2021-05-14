@@ -26,6 +26,7 @@ export default class PayPal extends Vue {
   @cart.State processingPaypal: boolean
   @cart.State paypalCapturing: boolean
   @cart.State paypalOrderInit: PayPalOrderInit
+  @cart.Mutation setPaypalAvailable: (status: boolean) => void
   @cart.Mutation setProcessingPaypal: (status: boolean) => void
   @cart.Mutation setPaypalCapturing: (status: boolean) => void
   @cart.Mutation setGlobalError: (message: string) => void
@@ -41,6 +42,7 @@ export default class PayPal extends Vue {
 
   paypalCallback () {
     if (window.paypal && window.paypal.Buttons) {
+      this.setPaypalAvailable(true)
       window.clearInterval(this.paypalPoll)
 
       window.paypal.Buttons({

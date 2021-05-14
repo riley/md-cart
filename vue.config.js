@@ -1,6 +1,11 @@
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production' ? '/app/' : undefined,
   outputDir: 'dist',
+  chainWebpack: config => {
+    config.performance
+      .maxEntrypointSize(400000)
+      .maxAssetSize(400000)
+  },
   pages: {
     cart: {
       entry: 'src/main.ts',

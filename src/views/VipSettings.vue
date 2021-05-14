@@ -2,7 +2,7 @@
   <div id="vip-settings" v-if="loggedIn">
     <Heading>Vip Settings</Heading>
     <Card>
-      <CardContent class="vip-list" v-if="allVips.length > 1">
+      <CardContent class="vip-list" v-if="allVips.length > 0">
         <VipThumb class="vip" v-for="vip of allVips" :key="vip._id" v-bind="vip" :stock="stock"/>
       </CardContent>
     </Card>
