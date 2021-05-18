@@ -23,5 +23,9 @@ export default {
 
       return matrix[clothingType].nvip[1]
     }
+
+    Vue.prototype.$nextVip = (clothingType: string, wouldBeIndex: number = 1): number => {
+      return matrix[clothingType].vip[wouldBeIndex]
+    }
   }
 }

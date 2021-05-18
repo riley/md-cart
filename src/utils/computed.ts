@@ -8,3 +8,12 @@ if (window.location.host === 'mrdavis.com') {
 }
 
 export const host = apiHost
+
+let stripePublishable: string
+if (window.location.host === 'mrdavis.com') {
+  stripePublishable = process.env.VUE_APP_STRIPE_PROD_PUBLISHABLE
+} else {
+  stripePublishable = process.env.VUE_APP_STRIPE_DEV_PUBLISHABLE
+}
+
+export const stripePublishableKey = stripePublishable

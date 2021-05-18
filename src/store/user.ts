@@ -32,7 +32,7 @@ export default {
   },
   getters: {
     loggedIn: (state: any) => {
-      return !!state.username
+      return !!state._id
     }
   },
   mutations: {
@@ -46,7 +46,7 @@ export default {
       // used in the cart and admin. clear out user settings
       state._id = null
       state.billing = { address: null }
-      state.cardMeta = null
+      state.cardMeta = {}
       state.credit = 0
       state.loginEmailRequested = false
       state.loginErrorMessage = false

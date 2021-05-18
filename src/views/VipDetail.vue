@@ -11,8 +11,16 @@
           </div>
           <div>
             <p>Delivery Frequency</p>
-            <input type="range" :value="vip.cycleDays" @change="updateFrequency" step="5" />
-            <p>Every {{ vip.cycleDays }} days</p>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              :style="{ background: `linear-gradient(to right, #5b7975 0%, #5b7975 ${this.progress}%, white ${this.progress}%, white 100%` }"
+              :value="vip.cycleDays"
+              @change="updateFrequency"
+              @input="updateProgress"
+              step="5" />
+            <output style="display: inline-block">Every {{ progress }} days</output>
           </div>
         </div>
       </div>
@@ -21,9 +29,21 @@
         <p><strong>VIP Total</strong> → ${{ vip.vipPrice / 100 }}</p>
         <div class="panel">
           <ul class="vip-items">
-            <ItemListItem v-for="item of groupedItems" :key="item.sku" v-bind="item" @increment="incrementItem" />
+            <ItemListItem
+              v-for="item of groupedItems"
+              inverse
+              :key="item.sku"
+              v-bind="item"
+              @increment="incrementItem" />
           </ul>
-          <Chooser :pricing="pricing" :stock="stock" @chosenProduct="chosenProduct" />
+          <Chooser
+            class="chooser"
+            vipPricing
+            :items="vip.items"
+            :pricing="pricing"
+            :upsells="upsells"
+            :stock="stock"
+            @chosenProduct="chosenProduct" />
         </div>
       </div>
       <ButtonTray>
@@ -43,28 +63,35 @@
 <script lang="ts">
 import { Vue, Prop, Component } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation } from 'vuex-class'
-import Button from '../components/BaseButton.vue'
-import Card from '../components/BaseCard.vue'
-import CardContent from '../components/BaseCardContent.vue'
-import Chooser from '../components/Chooser.vue'
-import ItemListItem from '../components/ItemListItem.vue'
-import Heading from '../components/BaseHeading.vue'
-import ButtonTray from '../components/ButtonTray.vue'
+import Button from '@/components/BaseButton.vue'
+import Card from '@/components/BaseCard.vue'
+import CardContent from '@/components/BaseCardContent.vue'
+import Chooser from '@/components/Chooser.vue'
+import ItemListItem from '@/components/ItemListItem.vue'
+import Heading from '@/components/BaseHeading.vue'
+import ButtonTray from '@/components/ButtonTray.vue'
+import Upsell from '@/components/Upsell.vue'
 
 @Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading } })
 export default class VipDetail extends Vue {
   @State vipMap: VipMap
   @State stock: Product[]
+  @State upsells: any[]
   @Mutation setNextDelivery: any
   @Mutation setCycleDays: any
   @Mutation addItem: any
   @Mutation removeItem: any
   @Mutation setStatus: any
   @Action updateVip: (id: string) => Promise<void>
-  @Action fetchPricing: (bundle: PricingBundle) => Promise<Pricing>
+  // @Action fetchPricing: (bundle: PricingBundle) => Promise<Pricing>
 
   confirmingPause = false
+  progress: number
   pricing: Pricing | null = null
+
+  mounted () {
+    this.progress = this.vip.cycleDays
+  }
 
   get vip () {
     return this.vipMap[this.$route.params.id]
@@ -104,11 +131,11 @@ export default class VipDetail extends Vue {
   }
 
   updateNextDelivery (e: Event) {
-    const target = e.target as HTMLInputElement
-    const nextDelivery = new Date(target.value)
+    const { value } = e.target as HTMLInputElement
+    const nextDelivery = new Date(value)
     const offset = nextDelivery.getTimezoneOffset() // minutes
     nextDelivery.setMinutes(offset)
-    this.vip.nextDelivery = nextDelivery
+    // this.vip.nextDelivery = nextDelivery
     this.setNextDelivery({ nextDelivery, id: this.vip._id })
     this.updateVip(this.vip._id)
   }
@@ -116,9 +143,15 @@ export default class VipDetail extends Vue {
   updateFrequency (e: Event) {
     const target = e.target as HTMLInputElement
     const frequency = +target.value
-    this.vip.cycleDays = frequency
+    // this.vip.cycleDays = frequency
     this.setCycleDays({ cycleDays: frequency, id: this.vip._id })
     this.updateVip(this.vip._id)
+  }
+
+  updateProgress (e: InputEvent) {
+    const { value } = e.target as HTMLInputElement
+    console.log('input value', value)
+    this.progress = +value
   }
 
   incrementItem ({ amount, sku }: { amount: number, sku: string }) {
@@ -165,7 +198,7 @@ export default class VipDetail extends Vue {
   margin-bottom: 1rem;
 }
 
-.panel > * {
+.delivery-settings .panel > * {
   flex-grow: 1;
 }
 
@@ -174,15 +207,51 @@ export default class VipDetail extends Vue {
 }
 
 .item-modifier {
-  max-width: 60rem;
+  /* max-width: 60rem; */
+}
+
+input[type="date"] {
+  font-size: 1.25rem;
+}
+
+input[type="range"] {
+  width: 90%;
+  background: linear-gradient(to right, #82CFD0 0%, #82CFD0 50%, #fff 50%, #fff 100%);
+  border: solid 1px #82CFD0;
+  border-radius: 8px;
+  height: 7px;
+  width: 356px;
+  outline: none;
+  transition: background 450ms ease-in;
+  -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: goldenrod;
+  margin-top: -4px;
+}
+
+input[type=range]::-moz-range-thumb {
+  background: red;
 }
 
 .delivery-settings, .items {
   padding: 1rem;
-  border-bottom: 24px solid rgba(0, 0, 0, .03);
+  border-bottom: 24px solid rgba(0, 0, 0, .1);
 }
 
 .vip-items {
-  padding: 0;
+  margin: 0;
+  padding: 1rem;
+  width: 50%;
+}
+
+.chooser {
+  width: 50%;
 }
 </style>

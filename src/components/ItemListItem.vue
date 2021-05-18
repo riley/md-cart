@@ -1,6 +1,6 @@
 <template>
   <ItemSkeleton v-if="fetching" />
-  <li v-else class="cartItem_root">
+  <li v-else class="cartItem_root" :class="{ inverse }">
     <Thumb :icon="icon" />
     <div class="product-info">
       <p class="title">{{ title }}</p>
@@ -30,6 +30,7 @@ export default class ItemListItem extends Vue {
   @Prop() clothingType!: string
   @Prop() cost!: number
   @Prop() color!: string
+  @Prop({ type: Boolean, default: false }) inverse: boolean
 
   @Prop() fetching: boolean
 
@@ -44,7 +45,6 @@ export default class ItemListItem extends Vue {
   list-style: none;
   display: flex;
   border-bottom: 1px solid #ccc;
-  background-color: white;
   font-weight: 300;
   padding: 1rem 0;
 }
@@ -64,7 +64,7 @@ export default class ItemListItem extends Vue {
 }
 
 .title {
-  font-size: 17px;
+  font-size: 1rem;
   margin: 0;
   text-align: left;
 }

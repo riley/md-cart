@@ -23,13 +23,12 @@
       :loginEmailRequested="loginEmailRequested"
       :setEmail="setUsername"
       :clearLoginForm="clearLoginForm"
-      @login="fetchEverything"
       @close="clearLoginForm" />
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Vue, Watch, Component } from 'vue-property-decorator'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import ActionChooser from './ActionChooser.vue'
 import Banner from '../components/BaseBanner.vue'
@@ -60,6 +59,11 @@ export default class Admin extends Vue {
   @Action fetchStock: () => Promise<void>
   @Action fetchVips: () => Promise<void>
   @Action fetchOrders: () => Promise<void>
+
+  @Watch('loggedIn')
+  handleLogin () {
+    this.fetchEverything()
+  }
 
   async mounted () {
     this.fetchStock()

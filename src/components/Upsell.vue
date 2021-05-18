@@ -3,11 +3,11 @@
     <div class="layout">
       <div class="thumb" :style="{'background-image': `url(${upsell.thumb})`}"/>
       <div class="info">
-        <div><a class="title" :href="upsell.url" >{{ upsell.title }}</a></div>
+        <div><a class="title" :href="upsell.url">{{ upsell.title }}</a></div>
         <p class="tagline">{{ upsell.tagline }}</p>
         <div class="cta">
-          <span class="price">+ ${{ $baseSingle(upsell.clothingType) / 100 }}</span>
-          <a :href="upsell.url" class="add-button" title="add to cart" @click="addToCart">+ Add</a>
+          <span class="price">+ ${{ cost / 100 }}</span>
+          <button class="add-button" title="add" @click="$emit('select')">+ Add</button>
         </div>
       </div>
     </div>
@@ -21,9 +21,10 @@ import Card from './BaseCard.vue'
 @Component({ components: { Card } })
 export default class Upsell extends Vue {
   @Prop() upsell: any
+  @Prop() price: number
 
-  addToCart () {
-
+  get cost () {
+    return this.price || this.$baseSingle(this.upsell.clothingType)
   }
 }
 </script>

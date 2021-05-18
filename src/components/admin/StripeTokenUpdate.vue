@@ -12,7 +12,8 @@
 import { Vue, Component } from 'vue-property-decorator'
 import Button from '../BaseButton.vue'
 import ButtonTray from '../ButtonTray.vue'
-const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
+import { stripePublishableKey } from '../../utils/computed'
+const stripe = window.Stripe(stripePublishableKey)
 const elements = stripe.elements()
 let card: any
 

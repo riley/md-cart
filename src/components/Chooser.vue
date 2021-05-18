@@ -13,9 +13,16 @@
       </div>
     </div>
     <div v-if="!pickerOpen" class="add-more-prompt">
-      <p>Add clothing to your VIP</p>
+      <h4 class="add-clothing">Add clothing to your VIP</h4>
       <div class="add-more-buttons">
-        <button v-for="clothingType of buyables" class="add-more" :key="clothingType" @click="openPicker(clothingType)">{{ clothingType }} {{ pricing && pricing.nextItemPrice[clothingType].vipItemPrice / 100 }}</button>
+        <!-- <button v-for="clothingType of buyables" class="add-more" :key="clothingType" @click="openPicker(clothingType)">{{ clothingType }} {{ pricing && pricing.nextItemPrice[clothingType].vipItemPrice / 100 }}</button> -->
+        <Upsell
+          class="upsell"
+          v-for="upsell in upsells"
+          :key="upsell.clothingType"
+          :price="getCost(upsell.clothingType)"
+          :upsell="upsell"
+          @select="pickerOpen = true" />
       </div>
     </div>
   </div>
@@ -23,19 +30,24 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import Upsell from '@/components/Upsell.vue'
 import meta, { addMoreIcons, buyableCategories } from '../utils/product-meta'
 
-@Component
+@Component({ components: { Upsell } })
 export default class Chooser extends Vue {
   @Prop() stock: Product[]
   @Prop() pricing: Pricing
+  @Prop() upsells: any[]
+  @Prop({ type: Boolean, default: false }) vipPricing: boolean
+  @Prop({ default: [] }) items: Item[] // the currently selected items
 
   pickerOpen = false
   clothingType: string = 'undershirts'
   selectedProps: { [key: string]: string } = {}
 
   get selectedPropCount () {
-    return Object.keys(this.selectedProps).length
+    const { clothingType, ...propsWithoutType } = this.selectedProps
+    return Object.keys(propsWithoutType).length
   }
 
   get propsAsTuples () {
@@ -81,16 +93,25 @@ export default class Chooser extends Vue {
       this.selectedProps = {}
     }
   }
+
+  getCost (clothingType: string) {
+    return this.vipPricing ? this.$nextVip(clothingType, this.items.length + 1) : this.$baseSingle(clothingType)
+  }
 }
 </script>
 
 <style scoped>
 .chooser-root {
   display: flex;
+  background-color: rgba(91, 121, 117, .2);
+  padding: 1rem;
 }
 
-.chooser-root > div {
-  flex: 1;
+.add-clothing {
+  color: white;
+  background-color: #5b7975;
+  margin: 0 0 .5rem;
+  padding: 1rem;
 }
 
 .chooser-row {
@@ -123,10 +144,10 @@ export default class Chooser extends Vue {
 }
 
 .add-more-buttons {
-  display: grid;
+  /* display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  clear: both;
+  clear: both; */
 }
 
 .add-more:first-child {
@@ -143,5 +164,13 @@ export default class Chooser extends Vue {
   padding: 14px 34px 14px 10px;
   box-shadow: 0 0 10px 1px rgba(0,0,0,.2);
   transition: all .3s .5s;
+}
+
+.upsell {
+  margin-bottom: .5rem;
+}
+
+.picker {
+  width: 100%;
 }
 </style>

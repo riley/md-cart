@@ -29,10 +29,11 @@ import CardContent from '../BaseCardContent.vue'
 import Instructions from '../BaseInstructions.vue'
 import Notification from '../BaseNotification.vue'
 import Button from '../BaseButton.vue'
+import { stripePublishableKey } from '../../utils/computed'
 
 const cart = namespace('cart')
 const user = namespace('user')
-const stripe = window.Stripe(process.env.VUE_APP_STRIPE_PUBLISHABLE)
+const stripe = window.Stripe(stripePublishableKey)
 const elements = stripe.elements()
 let card: any
 
