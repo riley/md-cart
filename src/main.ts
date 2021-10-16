@@ -3,6 +3,7 @@ import Cart from './views/Cart.vue'
 import store from './store/store'
 
 import { setToken } from './utils/storage'
+import Pricing from './utils/Pricing'
 
 Vue.config.productionTip = false
 
@@ -24,6 +25,7 @@ new Vue({
   store,
   render: h => h(Cart)
 }).$mount('#app')
+
 declare global {
 
   interface Window {
@@ -39,6 +41,8 @@ declare global {
     renderOptIn: () => void
     _learnq: any
     obApi: any
+    // eslint-disable-next-line camelcase
+    enhanced_conversion_data: any
   }
 
   interface Item {
@@ -59,22 +63,6 @@ declare global {
     skus: Item[]
     isVip: boolean
     pricingTier: number
-  }
-
-  interface Pricing {
-    nextItemPrice: {
-      [clothingType: string]: {
-        baseSingle: number
-        nonVip: number
-        nonVipItemPrice: number
-        vipItemPrice: number
-        vip: number
-      }
-    }
-    nonVip: number
-    pricingTier: number
-    vip: number
-    skus: Item[]
   }
 
   interface OrderMap {
@@ -184,6 +172,7 @@ declare global {
     stripeId?: string
     refId: string
     shippingAddress: Address
+    isActiveVip: boolean
   }
 
   interface User {

@@ -6,7 +6,7 @@
         <div><a class="title" :href="upsell.url">{{ upsell.title }}</a></div>
         <p class="tagline">{{ upsell.tagline }}</p>
         <div class="cta">
-          <span class="price">+ ${{ cost / 100 }}</span>
+          <span class="price">+ ${{ price / 100 }}</span>
           <button class="add-button" title="add" @click="$emit('select')">+ Add</button>
         </div>
       </div>
@@ -16,16 +16,13 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
+import Pricing from '../utils/Pricing'
 import Card from './BaseCard.vue'
 
 @Component({ components: { Card } })
 export default class Upsell extends Vue {
   @Prop() upsell: any
   @Prop() price: number
-
-  get cost () {
-    return this.price || this.$baseSingle(this.upsell.clothingType)
-  }
 }
 </script>
 

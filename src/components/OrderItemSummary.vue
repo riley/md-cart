@@ -159,6 +159,20 @@ export default class OrderItemSummary extends Vue {
 
       window.gtag('config', process.env.VUE_APP_GA_ID)
 
+      /* eslint-disable camelcase */
+      window.enhanced_conversion_data = {
+        email: this.email,
+        first_name: this.shippingAddress.name,
+        home_address: {
+          street: `${this.shippingAddress.address_1} ${this.shippingAddress.address_2}`,
+          city: this.shippingAddress.city,
+          region: this.shippingAddress.state,
+          postal_code: this.shippingAddress.zip,
+          country: this.shippingAddress.country,
+        }
+      }
+      /* eslint-enable camelcase */
+
       window.gtag('event', 'purchase', {
         currency: 'USD',
         value: (this.grandTotal / 100).toFixed(2),
@@ -198,15 +212,21 @@ export default class OrderItemSummary extends Vue {
         return carry
       }, contents)
 
-      window.fbq && window.fbq('track', 'Purchase', {
-        value: (this.grandTotal / 100).toFixed(2),
-        content_ids: this.bundles[0].skus.map(item => item.sku).join(),
-        num_items: this.bundles[0].skus.length,
-        content_type: 'product',
-        contents: groupedBySku.map(item => ({ id: item.sku, quantity: item.quantity })),
-        product_catalog_id: 465548217719062,
-        currency: 'USD',
-      })
+      if (window.fbq) {
+        window.fbq && window.fbq('track', 'Purchase', {
+          value: (this.grandTotal / 100).toFixed(2),
+          content_ids: this.bundles[0].skus.map(item => item.sku).join(),
+          num_items: this.bundles[0].skus.length,
+          content_type: 'product',
+          contents: groupedBySku.map(item => ({ id: item.sku, quantity: item.quantity })),
+          product_catalog_id: 465548217719062,
+          currency: 'USD',
+        })
+
+        if (this.bundles[0].isVip) {
+          window.fbq('track', 'Subscribe')
+        }
+      }
 
       window.obApi && window.obApi('track', 'Purchase', {
         orderValue: (this.grandTotal / 100).toFixed(2),

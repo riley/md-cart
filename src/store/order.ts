@@ -18,6 +18,7 @@ export default {
     },
     bundles: [],
     createdAt: null,
+    discount: 0,
     email: '',
     estimatedDeliveryDate: null,
     fetching: false,
@@ -106,6 +107,7 @@ export default {
       state.shipping.address = order.shippingAddress
       state.shipping.postage = order.shipping.postage
       state.shipping.service = order.shipping.service
+      state.discount = order.bundles[0].discount
       state.status = order.status
       state.subtotal = order.subtotal
       state.totalDiscount = order.totalDiscount

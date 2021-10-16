@@ -17,7 +17,7 @@ export default {
     credit: 0,
     failedToFetchUser: true,
     isReturningCustomer: false,
-    returningVipCustomer: false,
+    isActiveVip: false,
     loginEmailRequested: false,
     loginErrorMessage: '',
     paypalPayerId: null,
@@ -61,8 +61,8 @@ export default {
     setReturningCustomer (state: any, returning: boolean) {
       state.isReturningCustomer = returning
     },
-    setReturningVipCustomer (state: any, returning: boolean) {
-      state.returningVipCustomer = returning
+    setIsActiveVip (state: any, returning: boolean) {
+      state.isActiveVip = returning
     },
     setStripeToken (state: any, token: StripeToken) {
       state.stripeToken = token
@@ -78,7 +78,7 @@ export default {
       state.refId = user.refId
       state.stripeId = user.stripeId
       state.isReturningCustomer = user.orders.length > 0
-      state.returningVipCustomer = user.vips.length > 0
+      state.isActiveVip = user.isActiveVip
 
       window.woopra && window.woopra.identify({
         email: user.username,
@@ -154,12 +154,24 @@ export default {
         return
       }
 
+      if (info.cart) {
+        commit('cart/setIsVip', info.cart.bundles[0].isVip, { root: true })
+        commit('cart/setItems', info.cart.bundles[0].skus, { root: true })
+        commit('cart/setShipping', info.cart.shipping, { root: true })
+        commit('cart/setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount, { root: true })
+        commit('cart/setPricingTier', info.cart.pricingTier, { root: true })
+        commit('cart/setCreateNewVip', info.cart.createNewVip, { root: true })
+        commit('cart/setSubtotal', info.cart.subtotal, { root: true })
+        commit('cart/setTax', info.cart.totalTax, { root: true })
+      }
+
       if (info.token) {
         commit('setUser', info.user)
-        commit('cart/loginCart', info.user, { root: true })
-        commit('toggleLoginForm', false, { root: true })
-        identifyTrack({ email: info.user.username, name: info.user.shippingAddress.name })
         setToken(info.token)
+        commit('cart/loginCart', info.user, { root: true })
+        commit('cart/toggleLoginForm', false, { root: true })
+        commit('admin/toggleLoginForm', false, { root: true })
+        identifyTrack({ email: info.user.username, name: info.user.shippingAddress.name })
         return true
       } else {
         commit('loginFailure', info.error)
@@ -173,7 +185,18 @@ export default {
       commit('cart/logoutCart', null, { root: true })
 
       const response = await makeFetch('/api/logout-cart', { method: 'POST', })
-      const token = await response.text()
+      const { token, cart } = await response.json()
+
+      if (cart) {
+        commit('cart/setIsVip', cart.bundles[0].isVip, { root: true })
+        commit('cart/setItems', cart.bundles[0].skus, { root: true })
+        commit('cart/setShipping', cart.shipping, { root: true })
+        commit('cart/setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount, { root: true })
+        commit('cart/setPricingTier', cart.pricingTier, { root: true })
+        commit('cart/setCreateNewVip', cart.createNewVip, { root: true })
+        commit('cart/setSubtotal', cart.subtotal, { root: true })
+        commit('cart/setTax', cart.totalTax, { root: true })
+      }
 
       setToken(token)
     },

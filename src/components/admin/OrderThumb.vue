@@ -12,16 +12,18 @@
       <span class="medium">Order {{ id }} - {{ status }}</span><br>
       Placed {{ formattedDate(createdAt) }}<br>
       {{ bundles[0].skus.length }} items
+      <Button @click="$emit('reorder', bundles[0].skus)" inline class="reorder">Order Again</Button>
     </p>
-    <p class="detail">›</p>
+    <div class="detail">›</div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import Thumb from '../BaseSkuThumb.vue'
+import Button from '@/components/BaseButton.vue'
 
-@Component({ components: { Thumb } })
+@Component({ components: { Button, Thumb } })
 export default class OrderThumb extends Vue {
   @Prop() id: string
   @Prop() _id: string
@@ -58,6 +60,7 @@ export default class OrderThumb extends Vue {
 .order {
   display: flex;
   justify-content: space-between;
+  align-items: stretch;
   cursor: pointer;
 }
 
@@ -74,7 +77,7 @@ export default class OrderThumb extends Vue {
 }
 
 .meta {
-  flex-grow: 1;
+  flex-grow: 2;
   width: 20rem;
 }
 
@@ -83,9 +86,16 @@ export default class OrderThumb extends Vue {
   font-weight: bold;
 }
 
+.reorder {
+
+}
+
 .detail {
   font-size: 3em;
-  margin: 0;
   color: #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 1rem;
 }
 </style>

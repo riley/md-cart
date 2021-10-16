@@ -15,12 +15,10 @@
               type="range"
               min="0"
               max="100"
-              :style="{ background: `linear-gradient(to right, #5b7975 0%, #5b7975 ${this.progress}%, white ${this.progress}%, white 100%` }"
               :value="vip.cycleDays"
               @change="updateFrequency"
-              @input="updateProgress"
               step="5" />
-            <output style="display: inline-block">Every {{ progress }} days</output>
+            <output style="display: inline-block">Every {{ vip.cycleDays }} days</output>
           </div>
         </div>
       </div>
@@ -39,11 +37,22 @@
           <Chooser
             class="chooser"
             vipPricing
-            :items="vip.items"
-            :pricing="pricing"
             :upsells="upsells"
             :stock="stock"
             @chosenProduct="chosenProduct" />
+          <div v-if="!pickerOpen" class="add-more-prompt">
+            <h4 class="add-clothing">Add clothing to your VIP</h4>
+            <div class="add-more-buttons">
+              <!-- <button v-for="clothingType of buyables" class="add-more" :key="clothingType" @click="openPicker(clothingType)">{{ clothingType }} {{ pricing && pricing.nextItemPrice[clothingType].vipItemPrice / 100 }}</button> -->
+              <Upsell
+                class="upsell"
+                v-for="upsell in upsells"
+                :key="upsell.clothingType"
+                :price="getCost(upsell)"
+                :upsell="upsell"
+                @select="pickerOpen = true" />
+            </div>
+          </div>
         </div>
       </div>
       <ButtonTray>
@@ -71,6 +80,7 @@ import ItemListItem from '@/components/ItemListItem.vue'
 import Heading from '@/components/BaseHeading.vue'
 import ButtonTray from '@/components/ButtonTray.vue'
 import Upsell from '@/components/Upsell.vue'
+import Pricing from '../utils/Pricing'
 
 @Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading } })
 export default class VipDetail extends Vue {
@@ -83,18 +93,22 @@ export default class VipDetail extends Vue {
   @Mutation removeItem: any
   @Mutation setStatus: any
   @Action updateVip: (id: string) => Promise<void>
-  // @Action fetchPricing: (bundle: PricingBundle) => Promise<Pricing>
 
   confirmingPause = false
-  progress: number
-  pricing: Pricing | null = null
 
-  mounted () {
-    this.progress = this.vip.cycleDays
+  pricing: Pricing
+
+  constructor () {
+    super()
+    this.pricing = new Pricing(true)
   }
 
   get vip () {
-    return this.vipMap[this.$route.params.id]
+    const vip = this.vipMap[this.$route.params.id]
+    // probably not necessary
+    this.pricing.selectedItems = vip.items
+    this.pricing.pricingTier = vip.pricingTier
+    return vip
   }
 
   get groupedItems () {
@@ -148,12 +162,6 @@ export default class VipDetail extends Vue {
     this.updateVip(this.vip._id)
   }
 
-  updateProgress (e: InputEvent) {
-    const { value } = e.target as HTMLInputElement
-    console.log('input value', value)
-    this.progress = +value
-  }
-
   incrementItem ({ amount, sku }: { amount: number, sku: string }) {
     const skuCount = this.vip.items.filter((item: Item) => item.sku === sku).length
     if (amount < skuCount) {
@@ -189,6 +197,12 @@ export default class VipDetail extends Vue {
   stopVip () {
     this.setStatus({ id: this.vip._id, status: 'stopped' })
   }
+
+  getCost (item: Item) {
+    this.pricing.selectedItems = this.vip.items
+    this.pricing.pricingTier = this.vip.pricingTier
+    return this.pricing.getNextPrice({ item, asVip: true })
+  }
 }
 </script>
 
@@ -210,34 +224,57 @@ export default class VipDetail extends Vue {
   /* max-width: 60rem; */
 }
 
-input[type="date"] {
+input[type=date] {
   font-size: 1.25rem;
 }
 
-input[type="range"] {
-  width: 90%;
-  background: linear-gradient(to right, #82CFD0 0%, #82CFD0 50%, #fff 50%, #fff 100%);
-  border: solid 1px #82CFD0;
-  border-radius: 8px;
-  height: 7px;
-  width: 356px;
-  outline: none;
-  transition: background 450ms ease-in;
+/* https://dev.to/_phzn/styling-range-sliders-with-css-4lgl */
+input[type=range] {
   -webkit-appearance: none;
+  width: 90%;
+  background: transparent;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(91, 121, 117, .5);
+  height: .125rem;
 }
 
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  border: none;
-  height: 16px;
-  width: 16px;
+  background: #5b7975;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
-  background: goldenrod;
-  margin-top: -4px;
+  margin: -.45rem;
+}
+
+input[type=range]::-moz-range-track {
+  background: rgba(91, 121, 117, .3);
+}
+
+input[type=range]::-moz-range-progress {
+  background: rgb(91, 121, 117);
 }
 
 input[type=range]::-moz-range-thumb {
-  background: red;
+  background: #5b7975;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: none;
+}
+
+output {
+  background-color: rgba(91, 121, 117, .8);
+  color: white;
+  padding: .5rem 1rem;
 }
 
 .delivery-settings, .items {

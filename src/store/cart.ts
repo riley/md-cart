@@ -1,6 +1,7 @@
 import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
 import { identifyTrack } from '../utils/tracking'
 import { makeFetch } from '../utils/network'
+import { env } from '@/utils/computed'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
 
@@ -32,6 +33,7 @@ const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHan
 export default {
   namespaced: true,
   state: {
+    basePrice: 0,
     billing: {
       address: {
         name: '',
@@ -45,8 +47,9 @@ export default {
     },
     billingSameAsShipping: true,
     cartId: null,
-    createRecurringVIP: false,
+    createNewVip: true,
     credit: 0, // mr davis rewards + ks discount
+    discount: 0,
     email: '',
     emailInvalid: false, // this is an invalid email
     emailTaken: false, // is the entered email in our system?
@@ -64,6 +67,7 @@ export default {
     paypalOrderInit: null,
     paypalOrderComplete: null,
     processing: false,
+    pricingTier: 2,
     processingPaypal: false,
     processingError: null,
     refId: refId || '', // this is initialized above (might be null)
@@ -84,6 +88,7 @@ export default {
       service: null,
     },
     stock: [],
+    subtotal: null,
     token: null,
     totalTax: 0,
     useStoredBillingInfo: false,
@@ -91,18 +96,17 @@ export default {
     useStoredShippingInfo: false,
   },
   getters: {
+    discountPercent: (state: any) => Math.round((1 - state.discount) * 100),
     grandTotal: (state: any, getters: any) => {
-      const itemCost = state.items.reduce((carry: number, item: Item) => carry + item.cost, 0)
       const calculatedReferralCredit = getters.referDiscountEligible ? getters.referralCredit : 0
       const calculatedNonVIPCheckInCredit = getters.nonVipDiscountEligible ? getters.nonVIPCheckInCredit : 0
-      return Math.max(itemCost + state.shipping.postage + state.totalTax - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0)
+      return Math.max(state.subtotal + state.shipping.postage + state.totalTax - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0)
     },
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
     referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0 && !state.isReturningCustomer,
     nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
-    subtotal: (state: any) => state.items.reduce((carry: number, item: Item) => carry + item.cost, 0),
     referralCredit: (state: any) => typeof state.refId === 'string' && [8, 9, 24].includes(state.refId.length) ? 1000 : 0,
     nonVIPCheckInCredit: (state: any) => state.isNonVIPCheckIn ? 1000 : 0
   },
@@ -158,6 +162,9 @@ export default {
     setAddress (state: any, { location, field, value }: {location: string, field: string, value: string}) {
       state[location].address[field] = value
     },
+    setBasePrice (state: any, basePrice: number) {
+      state.basePrice = basePrice
+    },
     setBillingAddress (state: any, address: Address) {
       state.billing.address = address
     },
@@ -167,11 +174,14 @@ export default {
     setCartId (state: any, id: string) {
       state.cartId = id
     },
-    setCreateRecurringVIP (state: any, recurring: boolean) {
-      state.createRecurringVIP = recurring
+    setCreateNewVip (state: any, createNewVip: boolean) {
+      state.createNewVip = createNewVip
     },
     setCredit (state: any, credit: number) {
       state.credit = credit
+    },
+    setDiscount (state: any, discount: number) {
+      state.discount = discount
     },
     setEmail (state: any, value: string) {
       state.email = value
@@ -215,8 +225,15 @@ export default {
     setNonVipCheckIn (state: any, isNonVIPCheckIn: boolean) {
       state.isNonVIPCheckIn = isNonVIPCheckIn
     },
+    setPricingTier (state: any, pricingTier: number) {
+      state.pricingTier = pricingTier
+    },
     setRefId (state: any, refId: string) {
       state.refId = refId
+    },
+    setSelectedShippingService (state: any, shippingService: string) {
+      state.shipping.modified = true
+      state.shipping.service = shippingService
     },
     setShipping (state: any, shipping: ServerShipping) {
       state.shipping.postage = shipping.postage
@@ -227,12 +244,11 @@ export default {
     setShippingAddress (state: any, address: Address) {
       state.shipping.address = address
     },
-    setSelectedShippingService (state: any, shippingService: string) {
-      state.shipping.modified = true
-      state.shipping.service = shippingService
-    },
     setStock (state: any, stock: Product[]) {
       state.stock = stock
+    },
+    setSubtotal (state: any, subtotal: number) {
+      state.subtotal = subtotal
     },
     setTax (state: any, tax: number) {
       state.totalTax = tax
@@ -260,6 +276,7 @@ export default {
         setToken(cart.token)
         commit('setFetching', false)
         commit('setCartId', cart._id)
+        commit('setBasePrice', cart.bundles[0].basePrice)
         commit('setEmail', cart.email)
         commit('setShippingAddress', cart.shippingAddress)
         commit('setBillingAddress', cart.billingAddress)
@@ -269,8 +286,11 @@ export default {
         commit('setItems', cart.bundles[0].skus)
         commit('setShipping', cart.shipping)
         commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
+        commit('setPricingTier', cart.pricingTier)
+        commit('setSubtotal', cart.subtotal)
+        commit('setDiscount', cart.bundles[0].discount)
         commit('setTax', cart.totalTax)
-        commit('user/setReturningVipCustomer', cart.user && cart.user.isVipCustomer, { root: true })
+        commit('user/setIsActiveVip', cart.user?.isActiveVip, { root: true })
 
         if (cart.email) {
           identifyTrack({ email: cart.email, name: cart.shippingAddress.name })
@@ -300,7 +320,7 @@ export default {
               service: state.shipping.service,
             },
             refId: state.refId,
-            createNewVip: state.createRecurringVIP,
+            createNewVip: state.createNewVip,
             bundles: [{
               isVip: state.isVip,
               skus: state.items
@@ -310,8 +330,11 @@ export default {
 
         commit('setFetching', false)
         commit('setItems', cart.bundles[0].skus)
+        commit('setSubtotal', cart.subtotal)
         commit('setTax', cart.totalTax)
         commit('setShipping', cart.shipping)
+        commit('setDiscount', cart.bundles[0].discount)
+        commit('setBasePrice', cart.bundles[0].basePrice)
         setToken(token)
       } catch (e) {
         // maybe there was a 401 or something?
@@ -356,11 +379,16 @@ export default {
           .then(handleJSONResponse({ errorString: 'Could not get username info' }))
 
         if (info.cart) {
-          commit('user/setReturningVipCustomer', !!info.cart.returningVipCustomer, { root: true })
           commit('setItems', info.cart.bundles[0].skus) // cart pricing might have updated
           commit('setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount)
           commit('setShipping', info.cart.shipping)
+          commit('setSubtotal', info.cart.subtotal)
+          commit('setIsVip', info.cart.bundles[0].isVip)
+          commit('setDiscount', info.cart.bundles[0].discount)
+          commit('setBasePrice', info.cart.bundles[0].basePrice)
+          commit('setCreateNewVip', info.cart.createNewVip)
           commit('setRefId', info.cart.refId)
+          commit('user/setIsActiveVip', info.isActiveVip, { root: true })
           // we don't set the shipping and billing here, that would be leaking PII
         }
 
@@ -382,7 +410,7 @@ export default {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            createRecurringVIP: state.createRecurringVIP,
+            createNewVip: state.createNewVip,
             isStoredInfo: getters.isStoredInfo,
             billingSameAsShipping: state.billingSameAsShipping,
             email: state.email,
@@ -505,6 +533,17 @@ export default {
 
       unsetRefId()
       location.href = '/thankyou'
+    },
+    async beginReorder ({ commit, state, dispatch }: Action, items: Item[]) {
+      // const cart = await makeFetch('/api/cart').then(handleJSONResponse({ errorString: 'failed to fetch cart' }))
+
+      dispatch('fetchCart')
+      for (const item of items) {
+        commit('addItem', item.sku)
+      }
+      dispatch('updateCart')
+      // redirect to cart page?
+      location.href = env === 'development' ? '/cart.html' : '/cart'
     }
   }
 }

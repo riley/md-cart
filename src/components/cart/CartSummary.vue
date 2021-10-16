@@ -10,12 +10,20 @@
         </div>
         <ul v-else class="totals" ref="totals">
           <li>
-            <span>Order Subtotal</span>
-            <span>${{ subtotal / 100 }}</span>
+            <span>Full Price</span>
+            <span>${{ basePrice / 100 }}</span>
           </li>
+          <li v-if="subtotal !== basePrice">
+            <span>Discount</span>
+            <span><span class="discount-percent">Saving {{ Math.floor(discount * 100) }}%</span> -${{ Math.abs(subtotal - basePrice) / 100 }}</span>
+          </li>
+          <!--<li>
+            <span>Subtotal</span>
+            <span>${{ subtotal / 100 }}</span>
+          </li>-->
           <li>
             <span>Shipping</span>
-            <span>${{ postage }}</span>
+            <span>{{ postage ? `$${postage}` : 'Free' }}</span>
           </li>
           <li v-if="credit > 0" class="discount">
             <span>Mr. Davis Rewards</span>
@@ -51,12 +59,12 @@
         <div v-else class="empty-cart">Your cart is empty</div>
       </div>
 
-      <ConfirmRecurringVIP v-if="returningVipCustomer && isVip" @updateRecurring="setCreateRecurringVIP" :makeRecurring="createRecurringVIP" class="confirm-recurring" />
-      <!-- <VipToggle v-if="!returningVipCustomer" :isVip="isVip" @toggleVip="toggleVip" /> -->
+      <ConfirmRecurringVIP v-if="isActiveVip && isVip" @updateRecurring="setRecurring" :makeRecurring="createNewVIP" class="confirm-recurring" />
+      <!-- <VipToggle v-if="!isActiveVip" :isVip="isVip" @toggleVip="toggleVip" /> -->
 
       <!-- a separate banner for returning VIP customers -->
       <Banner
-        v-if="returningVipCustomer && !welcomeBackVipDismissed && !isVip"
+        v-if="isActiveVip && !welcomeBackVipDismissed && !isVip"
         variant="brand"
         title="Welcome Back"
         @main="welcomeBackVipDismissed = true"
@@ -115,17 +123,19 @@ export default class CartSummary extends Vue {
   }) rates: {[s: string]: string}
   @cart.State((state: any) => state.shipping.service) service: string
   @cart.State((state: any) => state.totalTax / 100) tax: number
+  @cart.State basePrice: number
   @cart.State credit: number
+  @cart.State discount: number
   @cart.State fetching: boolean
   @cart.State isVip: boolean
   @cart.State isNonVIPCheckIn: boolean
   @cart.State refId: string
   @cart.State isReturningCustomer: boolean
-  @user.State returningVipCustomer: boolean
-  @cart.State createRecurringVIP: boolean
+  @user.State isActiveVip: boolean
+  @cart.State createNewVIP: boolean
+  @cart.State subtotal: number
 
   @cart.Getter grandTotal: number
-  @cart.Getter subtotal: number
   @cart.Getter referralCredit: number
   @cart.Getter nonVIPCheckInCredit: number
   @cart.Getter referDiscountEligible: boolean
@@ -135,7 +145,7 @@ export default class CartSummary extends Vue {
   @cart.Mutation removeItem: any
   @cart.Mutation setIsVip: any
   @cart.Mutation setSelectedShippingService: any
-  @cart.Mutation setCreateRecurringVIP: () => void
+  @cart.Mutation setCreateNewVip: (createNewVip: boolean) => void
   @cart.Action updateCart: () => Promise<void>
   @cart.Action fetchCart: () => Promise<void>
   @cart.Action fetchStock: () => Promise<void>
@@ -159,8 +169,8 @@ export default class CartSummary extends Vue {
     this.updateCart()
   }
 
-  toggleVip (isVip: boolean) {
-    this.setIsVip(isVip)
+  setRecurring (isVip: boolean) {
+    this.setCreateNewVip(isVip)
     this.updateCart()
   }
 
@@ -231,6 +241,14 @@ export default class CartSummary extends Vue {
 .discount-amount {
   display: flex;
   justify-content: space-between;
+}
+
+.discount-percent {
+  border: 1px solid #333;
+  font-size: .9rem;
+  border-radius: 3px;
+  padding: .5rem;
+  margin-right: .5rem;
 }
 
 .discount-conditions {

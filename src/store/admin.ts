@@ -4,9 +4,8 @@ import { setToken, logoutToken } from '../utils/storage'
 import { makeFetch } from '../utils/network'
 import upsells from '../utils/upsells'
 import user from './user'
-import Pricing from '../plugins/Pricing'
+import cart from './cart'
 
-Vue.use(Pricing)
 Vue.use(Vuex)
 
 const urlParams = new URLSearchParams(location.search)
@@ -29,7 +28,7 @@ const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHan
 
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
-  modules: { user },
+  modules: { user, cart },
   state: {
     applicationError: null,
     fetching: false,

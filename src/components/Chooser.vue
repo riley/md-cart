@@ -12,34 +12,18 @@
         </div>
       </div>
     </div>
-    <div v-if="!pickerOpen" class="add-more-prompt">
-      <h4 class="add-clothing">Add clothing to your VIP</h4>
-      <div class="add-more-buttons">
-        <!-- <button v-for="clothingType of buyables" class="add-more" :key="clothingType" @click="openPicker(clothingType)">{{ clothingType }} {{ pricing && pricing.nextItemPrice[clothingType].vipItemPrice / 100 }}</button> -->
-        <Upsell
-          class="upsell"
-          v-for="upsell in upsells"
-          :key="upsell.clothingType"
-          :price="getCost(upsell.clothingType)"
-          :upsell="upsell"
-          @select="pickerOpen = true" />
-      </div>
-    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import Upsell from '@/components/Upsell.vue'
 import meta, { addMoreIcons, buyableCategories } from '../utils/product-meta'
 
-@Component({ components: { Upsell } })
+@Component
 export default class Chooser extends Vue {
   @Prop() stock: Product[]
-  @Prop() pricing: Pricing
   @Prop() upsells: any[]
   @Prop({ type: Boolean, default: false }) vipPricing: boolean
-  @Prop({ default: [] }) items: Item[] // the currently selected items
 
   pickerOpen = false
   clothingType: string = 'undershirts'
@@ -92,10 +76,6 @@ export default class Chooser extends Vue {
       this.pickerOpen = false
       this.selectedProps = {}
     }
-  }
-
-  getCost (clothingType: string) {
-    return this.vipPricing ? this.$nextVip(clothingType, this.items.length + 1) : this.$baseSingle(clothingType)
   }
 }
 </script>

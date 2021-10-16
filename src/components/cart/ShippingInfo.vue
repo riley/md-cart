@@ -85,7 +85,6 @@ export default class ShippingInfo extends Vue {
   @cart.State email: string
   @user.State isReturningCustomer: boolean
   @cart.State isVip: boolean
-  @cart.State returningVipCustomer: boolean
   @user.State loginEmailRequested: boolean
   @user.State username: string
   @user.State((state: any) => state.shipping.address) userShipping: Address

@@ -2,7 +2,11 @@
   <div id="send-now" v-if="loggedIn">
     <Heading>Place an Order</Heading>
     <div class="upsells">
-      <Upsell v-for="upsell in upsells" :key="upsell.clothingType" :upsell="upsell" />
+      <Upsell
+        v-for="upsell in upsells"
+        :key="upsell.clothingType"
+        :price="4200"
+        :upsell="upsell" />
     </div>
   </div>
 </template>

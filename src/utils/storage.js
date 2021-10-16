@@ -16,6 +16,25 @@ const sessionStorageTransfer = function (event) {
   }
 }
 
+// Set a Cookie
+function setCookie (name, value, expDays) {
+  let date = new Date()
+  date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000))
+  const expires = `expires=${date.toUTCString()}`
+  document.cookie = `${name}=${value}; ${expires}; path=/`
+}
+
+function getCookie (cName) {
+  const name = cName + '='
+  const cDecoded = decodeURIComponent(document.cookie) // to be careful
+  const cArr = cDecoded.split('; ')
+  let res
+  cArr.forEach(val => {
+    if (val.indexOf(name) === 0) res = val.substring(name.length)
+  })
+  return res
+}
+
 // listen for changes to localStorage
 if (window.addEventListener) {
   window.addEventListener('storage', sessionStorageTransfer, false)
@@ -43,12 +62,13 @@ function isSupported (getStorage) {
 const store = isSupported(() => localStorage) ? localStorage : sessionStorage
 
 export const getToken = () => {
-  return store.getItem('auth_token')
+  return store.getItem('auth_token') || getCookie('md_jwt') || getCookie('jwt')
 }
 
 export const setToken = (token) => {
   try {
     store.setItem('auth_token', token)
+    setCookie('jwt', token, 365)
     return true
   } catch (e) {
     return false
