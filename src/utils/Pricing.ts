@@ -74,6 +74,6 @@ export default class Pricing {
 
   get nextDiscount (): number {
     const discountArr = this.isVip ? vipDiscounts[this.pricingTier] : discounts
-    return discountArr[Math.max(discountArr.length - 1, this.skus.length)]
+    return discountArr[Math.min(discountArr.length - 1, this.skus.length)]
   }
 }

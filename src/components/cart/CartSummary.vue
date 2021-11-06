@@ -2,13 +2,14 @@
   <div class="root">
     <div class="box">
       <div v-if="items.length">
-        <ul class="cart-items">
+        <ul class="cart-items" ref="cart-items">
           <Item v-for="item in items" :key="item.sku" v-bind="item" @increment="incrementItem" :fetching="fetching" />
         </ul>
         <div v-if="fetching" class="spinner-container">
           <Spinner />
         </div>
-        <ul v-else class="totals" ref="totals">
+        <p class="save-percent-upsell">Add one more item & save {{ Math.floor(pricing.nextDiscount * 100) }}% on your order. <span v-if="!isVip && subtotal < freeShippingThreshold" class="free-shipping-upsell">Free US Shipping on orders $29+.</span></p>
+        <ul v-if="!fetching" class="totals" ref="totals">
           <li>
             <span>Full Price</span>
             <span>${{ basePrice / 100 }}</span>
@@ -91,6 +92,7 @@ import CartItemSkeleton from './CartItemSkeleton.vue'
 import ConfirmRecurringVIP from './ConfirmRecurringVIP.vue'
 import Spinner from '../BaseSpinner.vue'
 import VipToggle from './BaseVipToggle.vue'
+import Pricing from '@/utils/Pricing'
 
 const cart = namespace('cart')
 const user = namespace('user')
@@ -124,15 +126,16 @@ export default class CartSummary extends Vue {
   @cart.State((state: any) => state.shipping.service) service: string
   @cart.State((state: any) => state.totalTax / 100) tax: number
   @cart.State basePrice: number
+  @cart.State createNewVIP: boolean
   @cart.State credit: number
   @cart.State discount: number
   @cart.State fetching: boolean
+  @user.State isActiveVip: boolean
   @cart.State isVip: boolean
   @cart.State isNonVIPCheckIn: boolean
-  @cart.State refId: string
   @cart.State isReturningCustomer: boolean
-  @user.State isActiveVip: boolean
-  @cart.State createNewVIP: boolean
+  @cart.State pricing: Pricing
+  @cart.State refId: string
   @cart.State subtotal: number
 
   @cart.Getter grandTotal: number
@@ -151,6 +154,7 @@ export default class CartSummary extends Vue {
   @cart.Action fetchStock: () => Promise<void>
   @user.Action fetchUser: () => Promise<void>
 
+  freeShippingThreshold: number = 2900
   welcomeBackVipDismissed: boolean = false
 
   async mounted () {
@@ -159,8 +163,8 @@ export default class CartSummary extends Vue {
     await this.fetchUser()
 
     if (window.innerWidth <= 850) {
-      const totals = this.$refs['totals'] as HTMLElement
-      totals.scrollIntoView({ behavior: 'smooth' })
+      const list = this.$refs['cart-items'] as HTMLElement
+      list.lastElementChild?.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -195,7 +199,7 @@ export default class CartSummary extends Vue {
 <style scoped>
 .box {
   background: #fff;
-  padding: 1.5rem;
+  padding: 0 1rem;
 }
 
 .continue-shopping {
@@ -210,7 +214,7 @@ export default class CartSummary extends Vue {
 
 .totals {
   padding-top: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: .5rem;
 }
 
 .totals li {
@@ -218,7 +222,7 @@ export default class CartSummary extends Vue {
   justify-content: space-between;
   line-height: 1.5em;
   color: #555;
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .totals li.discount {
@@ -270,5 +274,34 @@ export default class CartSummary extends Vue {
 
 .confirm-recurring {
   margin-bottom: 1rem;
+}
+
+.save-percent-upsell {
+  color: rgba(210, 92, 74, .8);
+  text-align: right;
+  padding-bottom: 0;
+  font-size: .9rem;
+}
+
+.free-shipping-upsell {
+  text-decoration: underline;
+}
+
+.md__dropdown-field-wrapper {
+  margin-bottom: 0;
+}
+
+@media (min-width: 850px) {
+  .box {
+    padding: 1.5rem;
+  }
+
+  .save-percent-upsell {
+    font-size: 1rem;
+  }
+
+  .totals li {
+    font-size: 1.25rem;
+  }
 }
 </style>

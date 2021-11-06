@@ -52,7 +52,7 @@ export default class Dropdown extends Vue {
 
 .md__select {
   display: block;
-  font-size: 1.15rem;
+  font-size: 1.15rem !important;
   line-height: 1.3;
   padding: .25em 0;
   width: 100%;

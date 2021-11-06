@@ -2,6 +2,7 @@ import { getToken, setToken, getRefId, unsetRefId } from '../utils/storage'
 import { identifyTrack } from '../utils/tracking'
 import { makeFetch } from '../utils/network'
 import { env } from '@/utils/computed'
+import Pricing from '@/utils/Pricing'
 
 const supportEmail = '<a href="mailto:support@mrdavis.com?subject=Trouble checking out">support@mrdavis.com</a>'
 
@@ -67,6 +68,7 @@ export default {
     paypalOrderInit: null,
     paypalOrderComplete: null,
     processing: false,
+    pricing: new Pricing(),
     pricingTier: 2,
     processingPaypal: false,
     processingError: null,
@@ -115,6 +117,7 @@ export default {
       const product = state.stock.find((product: Product) => product.sku === sku)
       const item = { sku, quantity: 1, clothingType: product.clothingType }
       state.items = [...state.items, item]
+      state.pricing.selectedItems = state.items
     },
     clearLoginForm (state: any) {
       state.loginFormActive = false
@@ -152,6 +155,7 @@ export default {
     removeItem (state: any, sku: string) {
       const indexToRemove = state.items.findIndex((item: Item) => item.sku === sku)
       state.items = state.items.filter((item: any, index: number) => index !== indexToRemove)
+      state.pricing.selectedItems = state.items
     },
     replaceBillingAddress (state: any, address: Address) {
       state.billing.address = address
@@ -197,9 +201,11 @@ export default {
     },
     setIsVip (state: any, isVip: boolean) {
       state.isVip = isVip
+      state.pricing.isVip = isVip
     },
     setItems (state: any, items: Item[]) {
       state.items = items
+      state.pricing.selectedItems = items
     },
     setPaypalAvailable (state: any, status: boolean) {
       state.paypalAvailable = status
