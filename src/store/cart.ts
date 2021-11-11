@@ -107,7 +107,7 @@ export default {
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
-    referDiscountEligible: (state: any, getters: any) => getters.subtotal >= 4000 && getters.referralCredit > 0 && !state.isReturningCustomer,
+    referDiscountEligible: (state: any, getters: any) => state.subtotal >= 4000 && getters.referralCredit > 0 && !state.isReturningCustomer,
     nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
     referralCredit: (state: any) => typeof state.refId === 'string' && [8, 9, 24].includes(state.refId.length) ? 1000 : 0,
     nonVIPCheckInCredit: (state: any) => state.isNonVIPCheckIn ? 1000 : 0

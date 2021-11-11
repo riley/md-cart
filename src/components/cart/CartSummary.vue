@@ -18,10 +18,6 @@
             <span>Discount</span>
             <span><span class="discount-percent">Saving {{ Math.floor(discount * 100) }}%</span> -${{ Math.abs(subtotal - basePrice) / 100 }}</span>
           </li>
-          <!--<li>
-            <span>Subtotal</span>
-            <span>${{ subtotal / 100 }}</span>
-          </li>-->
           <li>
             <span>Shipping</span>
             <span>{{ postage ? `$${postage}` : 'Free' }}</span>
@@ -30,14 +26,9 @@
             <span>Mr. Davis Rewards</span>
             <span>-${{ credit / 100 }}</span>
           </li>
-          <li v-if="refId" class="discount refer-discount">
-            <div>
-              <div v-if="referDiscountEligible" class="discount-amount">
-                <span>Discount</span>
-                <span>-${{ referralCredit / 100 }}</span>
-              </div>
-              <p class="discount-conditions">$10 discount applies for new customers on orders of $40 or more</p>
-            </div>
+          <li v-if="refId && referDiscountEligible" class="discount">
+            <span>Welcome Discount</span>
+            <span>-$10</span>
           </li>
           <li v-if="nonVipDiscountEligible" class="discount">
             <span>Secret Savings</span>
@@ -51,6 +42,9 @@
           <li class="grandTotal">
             <span>Total</span>
             <span>${{ grandTotal / 100 }}</span>
+          </li>
+          <li v-if="refId && !referDiscountEligible" class="discount refer-discount">
+            <p class="discount-conditions">$10 discount applies for new customers on orders of $40 or more</p>
           </li>
         </ul>
         <Dropdown name="rates" :value="service" label="" :options="rates" @input="handleShippingServiceChange" />
@@ -226,8 +220,10 @@ export default class CartSummary extends Vue {
 }
 
 .totals li.discount {
-  color: #5B7975;
-  display: block;
+  color: #5b7975;
+  background-color: rgba(220,232,221,1);
+  padding: .25rem .5rem;
+  margin: .5rem -.5rem;
 }
 
 .totals li.refer-discount {
@@ -242,11 +238,6 @@ export default class CartSummary extends Vue {
   border-radius: 4px;
 }
 
-.discount-amount {
-  display: flex;
-  justify-content: space-between;
-}
-
 .discount-percent {
   border: 1px solid #333;
   font-size: .9rem;
@@ -256,9 +247,9 @@ export default class CartSummary extends Vue {
 }
 
 .discount-conditions {
-  font-size: .75rem;
+  font-size: .85rem;
   margin: 0;
-  padding: 0;
+  padding: .5rem 1rem !important;
 }
 
 .spinner-container {

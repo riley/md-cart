@@ -1,5 +1,5 @@
 <template>
-  <Card>
+  <Card v-if="loggedIn">
     <div class="row">
       <Heading>Welcome {{ name }}!</Heading>
       <p>{{ username }}</p>
@@ -48,6 +48,8 @@ export default class Home extends Vue {
   @user.State(state => state.billing.address.name) name: string
   @user.State username: string
   @user.State credit: number
+
+  @user.Getter loggedIn: boolean
 }
 </script>
 

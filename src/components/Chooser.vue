@@ -1,6 +1,6 @@
 <template>
   <div class="chooser-root">
-    <div v-if="pickerOpen" class="picker">
+    <div class="picker">
       <div class="chooser-row" v-for="(prop, index) of propsAsTuples" :key="prop.field" :class="{disabled: index > selectedPropCount}">
         <div
           class="chooser-button"
@@ -24,15 +24,17 @@ export default class Chooser extends Vue {
   @Prop() stock: Product[]
   @Prop() upsells: any[]
   @Prop({ type: Boolean, default: false }) vipPricing: boolean
+  @Prop() clothingType: string
 
   pickerOpen = false
-  clothingType: string = 'undershirts'
   selectedProps: { [key: string]: string } = {}
 
   get selectedPropCount () {
     const { clothingType, ...propsWithoutType } = this.selectedProps
     return Object.keys(propsWithoutType).length
   }
+
+  // TODO reset selectedProps when you re-open the chooser
 
   get propsAsTuples () {
     return Object.entries(meta[this.clothingType].props).reduce((carry: any, [field, infos]) => {
@@ -56,12 +58,6 @@ export default class Chooser extends Vue {
     return buyableCategories
   }
 
-  openPicker (clothingType: string) {
-    this.selectedProps = {}
-    this.clothingType = clothingType
-    this.pickerOpen = true
-  }
-
   selectProp (field: string, value: string) {
     console.log(field, value)
     console.log(this.selectedProps)
@@ -73,7 +69,6 @@ export default class Chooser extends Vue {
 
     if (product.length === 1) {
       this.$emit('chosenProduct', product[0])
-      this.pickerOpen = false
       this.selectedProps = {}
     }
   }

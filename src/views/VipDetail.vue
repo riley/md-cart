@@ -35,22 +35,23 @@
               @increment="incrementItem" />
           </ul>
           <Chooser
+            v-if="pickerOpen"
             class="chooser"
             vipPricing
             :upsells="upsells"
             :stock="stock"
+            :clothingType="chooserClothingType"
             @chosenProduct="chosenProduct" />
           <div v-if="!pickerOpen" class="add-more-prompt">
             <h4 class="add-clothing">Add clothing to your VIP</h4>
             <div class="add-more-buttons">
-              <!-- <button v-for="clothingType of buyables" class="add-more" :key="clothingType" @click="openPicker(clothingType)">{{ clothingType }} {{ pricing && pricing.nextItemPrice[clothingType].vipItemPrice / 100 }}</button> -->
               <Upsell
                 class="upsell"
                 v-for="upsell in upsells"
                 :key="upsell.clothingType"
                 :price="getCost(upsell)"
                 :upsell="upsell"
-                @select="pickerOpen = true" />
+                @select="openPicker(upsell.clothingType)" />
             </div>
           </div>
         </div>
@@ -82,7 +83,7 @@ import ButtonTray from '@/components/ButtonTray.vue'
 import Upsell from '@/components/Upsell.vue'
 import Pricing from '../utils/Pricing'
 
-@Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading } })
+@Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading, Upsell } })
 export default class VipDetail extends Vue {
   @State vipMap: VipMap
   @State stock: Product[]
@@ -94,8 +95,10 @@ export default class VipDetail extends Vue {
   @Mutation setStatus: any
   @Action updateVip: (id: string) => Promise<void>
 
+  chooserClothingType: string = 'undershirts'
   confirmingPause = false
 
+  pickerOpen = false
   pricing: Pricing
 
   constructor () {
@@ -188,6 +191,7 @@ export default class VipDetail extends Vue {
       id: this.vip._id,
       item: { quantity: 1, sku: product.sku, clothingType: product.clothingType }
     })
+    this.pickerOpen = false
   }
 
   pauseVIP () {
@@ -202,6 +206,11 @@ export default class VipDetail extends Vue {
     this.pricing.selectedItems = this.vip.items
     this.pricing.pricingTier = this.vip.pricingTier
     return this.pricing.getNextPrice({ item, asVip: true })
+  }
+
+  openPicker (clothingType: string) {
+    this.chooserClothingType = clothingType
+    this.pickerOpen = true
   }
 }
 </script>
