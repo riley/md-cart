@@ -4,7 +4,8 @@
     <Heading>Upcoming Order</Heading>
     <Card>
       <CardContent>
-        <VipDetail v-for="vip of upcomingRebills" :key="vip._id" v-bind="vip" :stock="stock" />
+        <!-- <VipDetail v-for="vip of upcomingRebills" :key="vip._id" v-bind="vip" :stock="stock" /> -->
+        <div v-for="vip of upcomingRebills" :key="vip._id">{{ vip._id }}</div>
       </CardContent>
     </Card>
   </div>

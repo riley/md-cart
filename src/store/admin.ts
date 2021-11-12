@@ -5,6 +5,7 @@ import { makeFetch } from '../utils/network'
 import upsells from '../utils/upsells'
 import user from './user'
 import cart from './cart'
+import vip from './vip'
 
 Vue.use(Vuex)
 
@@ -28,7 +29,7 @@ const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHan
 
 export default new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
-  modules: { user, cart },
+  modules: { user, cart, vip },
   state: {
     applicationError: null,
     fetching: false,
@@ -58,33 +59,33 @@ export default new Vuex.Store({
     },
   },
   mutations: {
-    addItem (state: any, { item, id }: { item: Item, id: string }) {
-      console.log('addItem', id, state.vipMap)
-      state.vipMap[id].items = [...state.vipMap[id].items, item]
-    },
+    // addItem (state: any, { item, id }: { item: Item, id: string }) {
+    //   console.log('addItem', id, state.vipMap)
+    //   state.vipMap[id].items = [...state.vipMap[id].items, item]
+    // },
     clearLoginForm (state: any) {
       state.loginFormActive = false
     },
-    removeItem (state: any, { sku, id }: { sku: string, id: string }) {
-      const index = state.vipMap[id].items.findIndex((item: Item) => item.sku === sku)
-      state.vipMap[id].items.splice(index, 1)
-      state.vipMap[id].items = [...state.vipMap[id].items]
-    },
+    // removeItem (state: any, { sku, id }: { sku: string, id: string }) {
+    //   const index = state.vipMap[id].items.findIndex((item: Item) => item.sku === sku)
+    //   state.vipMap[id].items.splice(index, 1)
+    //   state.vipMap[id].items = [...state.vipMap[id].items]
+    // },
     setApplicationError (state: any, message: string) {
       state.applicationError = message
     },
-    setCycleDays (state: any, { cycleDays, id }: { cycleDays: number, id: string }) {
-      state.vipMap[id].cycleDays = cycleDays
-    },
+    // setCycleDays (state: any, { cycleDays, id }: { cycleDays: number, id: string }) {
+    //   state.vipMap[id].cycleDays = cycleDays
+    // },
     setFetching (state: any, fetching: boolean) {
       state.fetching = fetching
     },
     setFetchingSnooze (state: any, fetching: boolean) {
       state.fetchingSnooze = fetching
     },
-    setNextDelivery (state: any, { nextDelivery, id }: { nextDelivery: Date, id: string }) {
-      state.vipMap[id].nextDelivery = nextDelivery
-    },
+    // setNextDelivery (state: any, { nextDelivery, id }: { nextDelivery: Date, id: string }) {
+    //   state.vipMap[id].nextDelivery = nextDelivery
+    // },
     setOrders (state: any, orders: Order[]) {
       for (const order of orders) {
         order.createdAt = new Date(order.createdAt)
@@ -105,9 +106,9 @@ export default new Vuex.Store({
       vip.nextDelivery = new Date(vip.nextDelivery)
       state.snoozedVIP = vip
     },
-    setStatus (state: any, { status, id }: { status: string, id: string }) {
-      state.vipMap[id].status = status
-    },
+    // setStatus (state: any, { status, id }: { status: string, id: string }) {
+    //   state.vipMap[id].status = status
+    // },
     setStock (state: any, stock: Product[]) {
       state.stock = stock
     },
@@ -197,19 +198,5 @@ export default new Vuex.Store({
 
       commit('setSnoozedVIP', info)
     },
-    // this does not update all vips, just one at a time
-    async updateVip ({ commit, state }: Action, id: string) {
-      console.log('updating vip', state.vipMap, id, state.vipMap[id])
-      const vip = await makeFetch(`/api/vip/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(state.vipMap[id])
-      }).then(res => res.json())
-
-      console.log('updated vip', vip)
-      commit('setVip', vip)
-    }
   }
 })

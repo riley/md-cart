@@ -52,7 +52,7 @@ export default class Pricing {
 
     const discountArr = asVip ? vipDiscounts[this.pricingTier] : discounts
     let discount = skus.length === 0 ? 0 : discountArr[Math.min(discountArr.length - 1, skus.length - 1)]
-    console.log('getPriceOfSkus discount', discount)
+    // console.log('getPriceOfSkus discount', discount)
     return { basePrice, discountedPrice: basePrice * (1 - discount), discount }
   }
 
@@ -61,7 +61,7 @@ export default class Pricing {
 
     const discountArr = this.isVip ? vipDiscounts[this.pricingTier] : discounts
     const index = Math.min(discountArr.length - 1, this.skus.length - 1)
-    console.log('discountArr', discountArr, 'discount index', index, 'value', discountArr[index])
+    // console.log('discountArr', discountArr, 'discount index', index, 'value', discountArr[index])
     return discountArr[index]
   }
 

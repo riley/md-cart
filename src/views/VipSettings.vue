@@ -3,7 +3,13 @@
     <Heading>Vip Settings</Heading>
     <Card>
       <CardContent class="vip-list" v-if="allVips.length > 0">
-        <VipThumb class="vip" v-for="vip of allVips" :key="vip._id" v-bind="vip" :stock="stock"/>
+        <VipThumb
+          class="vip"
+          v-for="vip of allVips"
+          :key="vip._id"
+          v-bind="vip"
+          @vipSelected="showVipDetail"
+          :stock="stock"/>
       </CardContent>
     </Card>
   </div>
@@ -22,8 +28,13 @@ const user = namespace('user')
 @Component({ components: { Heading, Card, CardContent, VipThumb } })
 export default class VipSettings extends Vue {
   @State stock: Product[]
+  @State vipMap: VipMap
   @Getter allVips: VIP[]
   @user.Getter loggedIn: boolean
+
+  showVipDetail (_id: string) {
+    this.$router.push({ name: 'vipDetail', params: { id: _id } })
+  }
 }
 </script>
 
