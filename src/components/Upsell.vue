@@ -6,7 +6,7 @@
         <div><a class="title" :href="upsell.url">{{ upsell.title }}</a></div>
         <p class="tagline">{{ upsell.tagline }}</p>
         <div class="cta">
-          <span class="price">+ ${{ price / 100 }}</span>
+          <span class="price">+ ${{ Math.round(price / 100) }}</span>
           <button class="add-button" title="add" @click="$emit('select')">+ Add</button>
         </div>
       </div>

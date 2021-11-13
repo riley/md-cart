@@ -90,7 +90,6 @@ const vip = namespace('vip')
 @Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading, Upsell } })
 export default class VipDetail extends Vue {
   @State vipMap: VipMap
-  @State vips: string[]
   @State stock: Product[]
   @State upsells: any[]
   @user.Getter loggedIn: boolean
@@ -225,7 +224,7 @@ export default class VipDetail extends Vue {
   getCost (item: Item) {
     this.pricing.selectedItems = this.items
     this.pricing.pricingTier = this.pricingTier
-    return this.pricing.getNextPrice({ item, asVip: true })
+    return this.pricing.getNextPrice({ item, asVip: true }).nextItemPrice
   }
 
   openPicker (clothingType: string) {

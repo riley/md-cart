@@ -49,7 +49,6 @@ export default {
   actions: {
     // this does not update all vips, just one at a time
     async updateVip ({ commit, state }: Action) {
-      console.log('updating vip', state._id)
       const payload = {
         _id: state._id,
         cycleDays: state.cycleDays,
@@ -67,7 +66,6 @@ export default {
         body: JSON.stringify(payload)
       }).then(res => res.json())
 
-      console.log('updated vip', vip)
       commit('setVip', vip)
       commit('setVip', vip, { root: true })
     }
