@@ -74,7 +74,7 @@ export default class PayPal extends Vue {
           }
         },
         onShippingChange: async (data: any, { resolve, reject }: PayPalActions) => {
-          const shippingAcceptable = ['US', 'CA'].includes(data.shipping_address.country_code)
+          const shippingAcceptable = ['US', 'CA', 'GB'].includes(data.shipping_address.country_code)
 
           if (!shippingAcceptable) {
             this.setGlobalError(intlShippingErrorMessage)

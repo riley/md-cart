@@ -35,7 +35,15 @@
         <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" @blur="handleBlur" required label="Province" name="state" autocomplete="address-level1" />
         <TextInput :value="zip" @input="handleZip" @blur="handleBlur" label="Zip code" name="zip" type="country === 'US' ? 'tel' : 'text'" autocomplete="postal-code" />
       </div>
-      <Dropdown :value="country" @input="handleCountry" @blur="handleBlur" required label="Country" :options="countries" name="country" autocomplete="country" />
+      <Dropdown
+        :value="country"
+        @input="handleCountry"
+        @blur="handleBlur"
+        required
+        label="Country"
+        :options="countries"
+        name="country"
+        autocomplete="country" />
     </div>
   </div>
 </template>

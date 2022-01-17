@@ -1,7 +1,7 @@
 <template>
   <router-link :to="path" class="root">
     <component v-bind:is="iconComponent" role="img" class="icon"></component>
-    <span>{{ title }}</span>
+    <span class="title">{{ title }}</span>
   </router-link>
 </template>
 
@@ -35,7 +35,7 @@ export default class ActionPanel extends Vue {
   justify-content: center;
   align-items: center;
   border: 1px solid rgba(133,178,188,0.39);
-  background: rgba(0, 0, 0, .03);
+  background: rgba(0, 0, 0, .065);
   cursor: pointer;
   text-align: center;
   padding: 1rem;
@@ -59,6 +59,22 @@ export default class ActionPanel extends Vue {
   fill: rgba(0, 0, 0, .5);
   margin-bottom: 1rem;
   transition: transform .4s ease-out;
+}
+
+@media (max-width: 50rem) {
+  .root {
+    padding: .5rem;
+    height: 3rem;
+    flex-direction: row;
+    border-bottom-width: 2px;
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0;
+    margin-right: .5rem;
+  }
 }
 
 .root:hover .icon {

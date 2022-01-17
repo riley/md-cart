@@ -65,7 +65,7 @@ export default class VipThumb extends Vue {
   justify-content: center;
   border: 1px solid rgb(46, 132, 89);
   border-radius: 50%;
-  width: 1.875rem;
+  min-width: 1.875rem;
   height: 1.875rem;
   margin-right: 1rem;
 }

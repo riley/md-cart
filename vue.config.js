@@ -8,7 +8,7 @@ module.exports = {
   },
   pages: {
     cart: {
-      entry: 'src/main.ts',
+      entry: 'src/cart.ts',
       template: 'public/cart.html',
       filename: 'cart.html',
       title: 'Your Cart',

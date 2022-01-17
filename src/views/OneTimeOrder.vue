@@ -5,7 +5,7 @@
       <Upsell
         v-for="upsell in upsells"
         :key="upsell.clothingType"
-        :price="4200"
+        :price="getCost(upsell.clothingType, upsell.sku)"
         :upsell="upsell" />
     </div>
   </div>
@@ -16,6 +16,7 @@ import { Vue, Component } from 'vue-property-decorator'
 import { State, Getter, namespace } from 'vuex-class'
 import Heading from '../components/BaseHeading.vue'
 import Upsell from '../components/Upsell.vue'
+import Pricing from '../utils/Pricing'
 
 const user = namespace('user')
 
@@ -23,6 +24,17 @@ const user = namespace('user')
 export default class OneTimeOrder extends Vue {
   @user.Getter loggedIn: boolean
   @State upsells: any[]
+
+  pricing: Pricing
+
+  constructor () {
+    super()
+    this.pricing = new Pricing(false)
+  }
+
+  getCost (clothingType: string, sku: string) {
+    return this.pricing.getBaseSingle({ clothingType, sku })
+  }
 }
 </script>
 
@@ -31,5 +43,12 @@ export default class OneTimeOrder extends Vue {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;
+}
+
+@media (max-width: 50rem) {
+  .upsells {
+    display: flex;
+    flex-direction: column;
+  }
 }
 </style>

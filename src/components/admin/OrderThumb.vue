@@ -79,6 +79,7 @@ export default class OrderThumb extends Vue {
 .meta {
   flex-grow: 2;
   width: 20rem;
+  padding-bottom: 0;
 }
 
 .medium {

@@ -10,22 +10,19 @@
             <input type="date" :value="formattedDate" @change="updateNextDelivery" />
           </div>
           <div>
-            <p>Delivery Frequency</p>
-            <input
-              type="range"
-              min="0"
-              max="100"
+            <p>Delivery Frequency <output style="display: inline-block">Every {{ cycleDays }} days</output></p>
+            <Dropdown
               :value="cycleDays"
-              @input="updateFrequencyVisual"
-              @change="updateFrequency"
-              step="5" />
-            <output style="display: inline-block">Every {{ cycleDays }} days</output>
+              @input="updateFrequency"
+              label="Delivery Frequency"
+              :options="periods"
+              name="Delivery Frequency" />
           </div>
         </div>
       </div>
       <div class="items">
         <h4>Customize Your Delivery</h4>
-        <p><strong>VIP Total</strong> → ${{ vipPrice / 100 }}</p>
+        <p class="vip-total"><strong>VIP Total</strong> → ${{ vipPrice / 100 }}</p>
         <div class="panel">
           <ul class="vip-items">
             <ItemListItem
@@ -78,6 +75,7 @@ import Button from '@/components/BaseButton.vue'
 import Card from '@/components/BaseCard.vue'
 import CardContent from '@/components/BaseCardContent.vue'
 import Chooser from '@/components/Chooser.vue'
+import Dropdown from '@/components/BaseDropdown.vue'
 import ItemListItem from '@/components/ItemListItem.vue'
 import Heading from '@/components/BaseHeading.vue'
 import ButtonTray from '@/components/ButtonTray.vue'
@@ -87,7 +85,7 @@ import Pricing from '../utils/Pricing'
 const user = namespace('user')
 const vip = namespace('vip')
 
-@Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, ItemListItem, Heading, Upsell } })
+@Component({ components: { Button, ButtonTray, Card, CardContent, Chooser, Dropdown, ItemListItem, Heading, Upsell } })
 export default class VipDetail extends Vue {
   @State vipMap: VipMap
   @State stock: Product[]
@@ -115,6 +113,15 @@ export default class VipDetail extends Vue {
 
   pickerOpen = false
   pricing: Pricing
+
+  periods = {
+    'Once a week': 7,
+    'Once a fortnight': 14,
+    'Once a month': 30,
+    'Once every 2 months': 60,
+    'Once a quarter': 90,
+    'Twice a year': 180
+  }
 
   constructor () {
     super()
@@ -180,9 +187,8 @@ export default class VipDetail extends Vue {
     this.setCycleDays(frequency)
   }
 
-  updateFrequency (e: Event) {
-    const target = e.target as HTMLInputElement
-    const frequency = +target.value
+  updateFrequency (value: string) {
+    const frequency = +value
     this.setCycleDays(frequency)
     this.updateVip()
   }
@@ -303,11 +309,16 @@ output {
   background-color: rgba(91, 121, 117, .8);
   color: white;
   padding: .5rem 1rem;
+  margin-left: 1rem;
 }
 
 .delivery-settings, .items {
   padding: 1rem;
   border-bottom: 24px solid rgba(0, 0, 0, .1);
+}
+
+.vip-total {
+  padding-bottom: 0;
 }
 
 .vip-items {
@@ -316,7 +327,21 @@ output {
   width: 50%;
 }
 
+.upsell {
+  margin-bottom: .5rem;
+}
+
 .chooser {
   width: 50%;
+}
+
+@media (max-width: 50rem) {
+  .panel {
+    flex-direction: column;
+  }
+
+  .vip-items {
+    width: auto;
+  }
 }
 </style>

@@ -3,7 +3,6 @@ import Cart from './views/Cart.vue'
 import store from './store/store'
 
 import { setToken } from './utils/storage'
-import Pricing from './utils/Pricing'
 
 Vue.config.productionTip = false
 

@@ -30,8 +30,16 @@ export default class ActionChooser extends Vue {
 <style scoped>
 .choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   grid-gap: 1rem;
   margin-bottom: 1rem;
+}
+
+@media (max-width: 50rem) {
+  .choices {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 0;
+  }
 }
 </style>

@@ -38,5 +38,6 @@ export default class OrderHistory extends Vue {
 <style scoped>
 .order:not(:last-of-type) {
   border-bottom: 1px solid #ccc;
+  padding: .5rem 0;
 }
 </style>

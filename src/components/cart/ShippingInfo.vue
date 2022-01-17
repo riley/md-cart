@@ -55,7 +55,7 @@
           v-bind="address" />
       </fieldset>
     </form>
-    <div class="shipping-delay-warning" v-if="!['US', 'CA'].includes(currentCountry)">
+    <div class="shipping-delay-warning" v-if="!['US', 'CA', 'GB'].includes(currentCountry)">
       Due to pandemic we are seeing significant international delays. We apologize for any inconvenience.
     </div>
   </section>

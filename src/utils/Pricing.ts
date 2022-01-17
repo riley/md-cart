@@ -25,7 +25,7 @@ export default class Pricing {
     this.skus = skus
   }
 
-  getBaseSingle ({ clothingType, sku = '' }: Item): number {
+  getBaseSingle ({ clothingType, sku = '' }: { clothingType: string, sku: string }): number {
     if (clothingType === 'bag') return bySku[sku]
 
     return basePrices[clothingType]

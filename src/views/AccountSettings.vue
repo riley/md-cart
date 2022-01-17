@@ -212,7 +212,7 @@ export default class AccountSettings extends Vue {
 }
 
 .personal-info > div:not(:last-of-type) {
-  border-bottom: 24px solid rgba(0, 0, 0, .03);
+  border-bottom: 24px solid rgba(0, 0, 0, .065);
 }
 
 .medium {
@@ -270,5 +270,11 @@ export default class AccountSettings extends Vue {
   right: 0;
   bottom: 0;
   left: 0;
+}
+
+@media (max-width: 50rem) {
+  .billing, .shipping {
+    flex-direction: column;
+  }
 }
 </style>
