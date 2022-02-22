@@ -2,6 +2,7 @@ export default {
   'AB - Alberta': 'AB',
   'BC - British Columbia': 'BC',
   'MB - Manitoba': 'MB',
+  'NB - New Brunswick': 'NB',
   'NL - Newfoundland and Labrador': 'NL',
   'NS - Nova Scotia': 'NS',
   'NT - Northwest Territories': 'NT',
