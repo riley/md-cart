@@ -1,7 +1,7 @@
 <template>
   <Card>
     <CardContent>
-      <p>Since you’re already a VIP we are treating this as a one-time purchase with VIP pricing. If you want to create a new subscription for this order check the box below.</p>
+      <p>Since you’re already a VIP we are treating this as a <span class="one-time">one-time</span> purchase with VIP pricing. If you want to create a new subscription for this order check the box below.</p>
       <Checkbox @input="$emit('updateRecurring', $event)" label="Make recurring" :checked="makeRecurring" />
     </CardContent>
   </Card>
@@ -17,3 +17,9 @@ export default {
   props: { makeRecurring: Boolean }
 }
 </script>
+
+<style scoped>
+.one-time {
+  font-weight: bold;
+}
+</style>

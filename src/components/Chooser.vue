@@ -1,14 +1,21 @@
 <template>
-  <div class="chooser-root">
-    <div class="picker">
-      <div class="chooser-row" v-for="(prop, index) of propsAsTuples" :key="prop.field" :class="{disabled: index > selectedPropCount}">
-        <div
-          class="chooser-button"
-          v-for="variant of prop.info"
-          :key="variant.label"
-          :class="{tagged: selectedProps[prop.field] === variant.value}"
-          @click="selectProp(prop.field, variant.value)">
-          {{ variant.label }}
+  <div>
+    <p class="chooser-cta">Select your variant below. Pick your preferred option to add it to your next VIP shipment.</p>
+    <p class="abort" @click="$emit('abort')">Cancel [ × ]</p>
+    <div class="chooser-root">
+      <div class="picker">
+        <div v-for="(prop, index) of propsAsTuples" :key="prop.field" :class="{disabled: index > selectedPropCount}">
+          <p class="picker-label">Step {{ index + 1 }}: Select the {{ prop.field }}{{ getExtraFirstPrompt(index) }}</p>
+          <div class="chooser-row">
+            <div
+              class="chooser-button"
+              v-for="variant of prop.info"
+              :key="variant.label"
+              :class="{tagged: selectedProps[prop.field] === variant.value}"
+              @click="selectProp(prop.field, variant.value)">
+              {{ variant.label }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -63,22 +70,45 @@ export default class Chooser extends Vue {
     console.log(this.selectedProps)
     this.selectedProps = { ...this.selectedProps, clothingType: this.clothingType, [field]: value }
 
-    const product = this.stock.filter((product: any) => {
+    const products = this.stock.filter((product: any) => {
       return Object.keys(this.selectedProps).every((key: string) => this.selectedProps[key] === product[key])
     })
 
-    if (product.length === 1) {
-      this.$emit('chosenProduct', product[0])
+    console.log('Chooser products', products)
+
+    if (products.length === 1) {
+      this.$emit('chosenProduct', products[0])
       this.selectedProps = {}
     }
+  }
+
+  getExtraFirstPrompt (index: number) {
+    return index === 0 ? ` of your next ${meta[this.clothingType].prompt}` : ''
   }
 }
 </script>
 
 <style scoped>
+.chooser-cta {
+  padding-bottom: 1rem;
+}
+
+.abort {
+  text-align: right;
+  font-size: .9em;
+  color: #5b7975;
+  margin: 0;
+  padding: 0;
+}
+
+.abort:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .chooser-root {
   display: flex;
-  background-color: rgba(91, 121, 117, .2);
+  background-color: rgba(91, 121, 117, .1);
   padding: 1rem;
 }
 
@@ -87,6 +117,12 @@ export default class Chooser extends Vue {
   background-color: #5b7975;
   margin: 0 0 .5rem;
   padding: 1rem;
+}
+
+.picker-label {
+  font-size: 1.4em;
+  padding-bottom: .15rem;
+  margin-left: .5rem;
 }
 
 .chooser-row {
@@ -104,13 +140,21 @@ export default class Chooser extends Vue {
   align-items: center;
   flex: 1;
   text-align: center;
-  margin: 0 4px 12px !important;
+  margin: 0 2px 12px !important;
   text-transform: uppercase;
   font-family: Open Sans,sans-serif;
   cursor: pointer;
   min-height: 55px;
   border: 2px solid #e7e7e7;
   background: #fff;
+}
+
+.chooser-button:first-child {
+  margin-left: 0 !important;
+}
+
+.chooser-button:last-child {
+  margin-right: 0 !important;
 }
 
 .chooser-button.tagged {

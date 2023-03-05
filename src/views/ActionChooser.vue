@@ -1,11 +1,12 @@
 <template>
   <div id="action-chooser">
     <div class="choices">
-      <ActionPanel v-if="upcomingRebills.length > 0" title="See Upcoming Order" path="/upcoming-orders" icon="parcel" />
-      <ActionPanel title="Make a New Order" path="/send-now" icon="add" />
+      <!-- <ActionPanel v-if="upcomingRebills.length > 0" title="See Upcoming Order" path="/upcoming-orders" icon="parcel" /> -->
+      <ActionPanel v-if="vips.length > 0" title="VIP Settings" path="/vip-settings" icon="settings" />
+      <ActionPanel v-if="vips.length > 0" title="Place a One-Time Order" path="/send-now" icon="add" />
       <ActionPanel title="Change Account Settings" path="/account-settings" icon="account" />
       <ActionPanel title="See Past Orders" path="/past-orders" icon="list" />
-      <ActionPanel v-if="vips.length > 0" title="Change Vip Settings" path="/vip-settings" icon="settings" />
+      <ActionPanel title="Refer For Rewards" path="/refer" icon="share" />
     </div>
   </div>
 </template>

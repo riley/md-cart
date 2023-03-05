@@ -54,7 +54,7 @@ export default class Dropdown extends Vue {
   display: block;
   font-size: 1.15rem !important;
   line-height: 1.3;
-  padding: .25em 0;
+  padding: .5rem;
   width: 100%;
   filter: none;
   max-width: 100%;

@@ -38,7 +38,7 @@
           <span>Total</span>
           <span>${{ grandTotal / 100 }}</span>
         </li>
-      </ul>
+    </ul>
     </div>
   </div>
 </template>
@@ -149,9 +149,11 @@ export default class OrderItemSummary extends Vue {
 
   updated () {
     if (this.orderLoadedOnce && this.stock.length && !this.checkoutTracked) {
+      const totalInDollars = (this.grandTotal / 100).toFixed(2)
+
       window.woopra && window.woopra.track('checkout', {
         id: this.id,
-        amount: (this.grandTotal / 100).toFixed(2),
+        amount: totalInDollars,
         time: Date.now(),
         category: 'undershirts',
         type: this.bundles.some((bundle: Bundle) => bundle.isVip) ? 'vip' : 'standard'
@@ -175,7 +177,7 @@ export default class OrderItemSummary extends Vue {
 
       window.gtag('event', 'purchase', {
         currency: 'USD',
-        value: (this.grandTotal / 100).toFixed(2),
+        value: totalInDollars,
         transaction_id: this.id,
         tax: (this.totalTax / 100).toFixed(2),
         shipping: (this.postage / 100).toFixed(2),
@@ -214,7 +216,7 @@ export default class OrderItemSummary extends Vue {
 
       if (window.fbq) {
         window.fbq && window.fbq('track', 'Purchase', {
-          value: (this.grandTotal / 100).toFixed(2),
+          value: totalInDollars,
           content_ids: this.bundles[0].skus.map(item => item.sku).join(),
           num_items: this.bundles[0].skus.length,
           content_type: 'product',
@@ -229,10 +231,15 @@ export default class OrderItemSummary extends Vue {
       }
 
       window.obApi && window.obApi('track', 'Purchase', {
-        orderValue: (this.grandTotal / 100).toFixed(2),
+        orderValue: totalInDollars,
         currency: 'USD',
         orderId: this.id
       })
+
+      const script = document.createElement('script')
+      script.src = `https://secure.adnxs.com/px?id=1621302&seg=31264984&order_id=${this.id}&other=${totalInDollars}&t=1`
+      script.type = 'text/javascript'
+      document.body.appendChild(script)
 
       this.checkoutTracked = true
     }

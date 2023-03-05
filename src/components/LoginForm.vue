@@ -45,7 +45,7 @@ export default class LoginForm extends Vue {
   @Prop() clearLoginForm: Function
   @Prop() setEmail: Function
   @user.Action requestLoginEmail: Function
-  @user.Action login: Function
+  @user.Action login: ({ username, magicCode }: { username: string, magicCode: string }) => Promise<string>
 
   magicCode = ''
 
@@ -64,7 +64,12 @@ export default class LoginForm extends Vue {
 
   async attemptLogin () {
     console.log('attemptLogin')
-    await this.login({ username: this.email.trim(), magicCode: this.magicCode })
+    const loginState = await this.login({ username: this.email.trim(), magicCode: this.magicCode })
+    console.log('loginState', loginState, loginState === 'success')
+    if (loginState === 'success') {
+      console.log('emitting event')
+      this.$emit('loginSuccess')
+    }
   }
 
   handleEmail (username: string) {
@@ -90,6 +95,7 @@ export default class LoginForm extends Vue {
   justify-content: center;
   background: #efefef;
   z-index: 100;
+  padding: 3rem;
 }
 
 .login-content {

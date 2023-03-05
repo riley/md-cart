@@ -1,13 +1,13 @@
 <template>
   <Card>
-    <div class="layout">
+    <div class="layout" @click="$emit('select')">
       <div class="thumb" :style="{'background-image': `url(${upsell.thumb})`}"/>
       <div class="info">
-        <div><a class="title" :href="upsell.url">{{ upsell.title }}</a></div>
+        <div><a class="title" :href="upsell.path">{{ upsell.title }}</a></div>
         <p class="tagline">{{ upsell.tagline }}</p>
         <div class="cta">
-          <span class="price">+ ${{ Math.round(price / 100) }}</span>
-          <button class="add-button" title="add" @click="$emit('select')">+ Add</button>
+          <span class="price">${{ Math.round(price / 100) }} | Save ${{ Math.round((1 - price / retailPrice) * 100) }}%</span>
+          <button class="add-button" title="add">{{ cta }}</button>
         </div>
       </div>
     </div>
@@ -16,13 +16,14 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
-import Pricing from '../utils/Pricing'
 import Card from './BaseCard.vue'
 
 @Component({ components: { Card } })
 export default class Upsell extends Vue {
   @Prop() upsell: any
+  @Prop() cta: string
   @Prop() price: number
+  @Prop() retailPrice: number
 }
 </script>
 
@@ -32,6 +33,7 @@ export default class Upsell extends Vue {
 }
 
 .layout {
+  cursor: pointer;
   display: flex;
 }
 
@@ -74,7 +76,8 @@ export default class Upsell extends Vue {
 
 .cta {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
+  gap: .5rem;
 }
 
 .add-button {
@@ -84,7 +87,6 @@ export default class Upsell extends Vue {
   border: 0.09375rem solid rgb(109, 128, 180);
   border-radius: 0.75rem;
   background-color: rgb(255, 255, 255);
-  cursor: pointer;
   font-size: .8rem;
   text-decoration: none;
 }

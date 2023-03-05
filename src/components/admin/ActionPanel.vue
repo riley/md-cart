@@ -12,14 +12,15 @@ import add from '../icons/add.vue'
 import list from '../icons/list.vue'
 import parcel from '../icons/parcel.vue'
 import settings from '../icons/settings.vue'
+import share from '../icons/share.vue'
 
-@Component({ components: { account, add, list, parcel, settings } })
+@Component({ components: { account, add, list, parcel, settings, share } })
 export default class ActionPanel extends Vue {
   @Prop() title!: string
   @Prop() path!: string
   @Prop() icon!: string
 
-  icons: any = { account, add, list, parcel, settings }
+  icons: any = { account, add, list, parcel, settings, share }
 
   get iconComponent () {
     return this.icons[this.icon]
@@ -46,7 +47,7 @@ export default class ActionPanel extends Vue {
 }
 
 .root.router-link-active {
-  border-bottom-color: hsla(8,100%,70%,.99);
+  border-bottom-color: #d06b64;
 }
 
 .root:hover {

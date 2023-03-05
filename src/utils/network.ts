@@ -4,7 +4,6 @@ import { getToken } from './storage'
 export const makeFetch = (path = '', { method = 'GET', headers = {}, body = undefined }: RequestInit = {}) => {
   const homeHost = new URL(host)
   const token = getToken()
-  console.log('token for request', token)
   const options: RequestInit = {
     method,
     headers: {

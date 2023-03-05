@@ -24,9 +24,10 @@ export default class BaseButton extends Vue {
   @Prop({ default: 'none' }) position: string;
   @Prop({ type: Boolean, default: false }) loading!: boolean;
   @Prop() variant: ButtonVariant
-  @Prop() type: string
+  @Prop() type: string // disabled, primary, success, warning, danger
 
-  handleClick () {
+  handleClick (e: MouseEvent) {
+    e.stopPropagation()
     this.$emit('click')
   }
 }
@@ -43,6 +44,7 @@ button, a {
   border-radius: 0.375rem;
   cursor: pointer;
   -moz-user-select: none;
+  user-select: none;
   transition: background-color 0.15s ease-out 0s, color .15s ease-out 0s;
   -moz-appearance: none;
   display: flex;
@@ -51,7 +53,7 @@ button, a {
   width: 100%;
   padding: 0.75rem 0.75rem 0.8125rem;
   color: rgb(255, 255, 255);
-  background: rgba(210, 92, 74, .8);
+  background-color: rgba(210, 92, 74, .8);
   font-size: 1.25rem;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.0625rem 0px, rgba(0, 0, 5, 0.1) 0px 0.0625rem 0.125rem, rgba(0, 0, 0, 0.05) 0px 0.3125rem 0.9375rem;
   text-decoration: none;
@@ -71,7 +73,7 @@ a.small, button.small {
   margin: 0;
   display: inline-block;
   width: auto;
-  background: transparent;
+  background-color: transparent;
   color: rgba(210, 92, 74, .8);
   box-shadow: none;
   padding: .5rem 1rem;
@@ -85,7 +87,7 @@ button:focus,
 a:hover,
 a:focus {
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0.3125rem 0.9375rem, rgba(0, 0, 0, 0.1) 0px 0.3125rem 0.3125rem, rgba(0, 0, 0, 0.05) 0px 0.125rem 0.3125rem;
-  background: hsla(8,100%,70%,.99);
+  background-color: hsla(8,100%,70%,.99);
 }
 
 button.loading {
@@ -126,13 +128,13 @@ button.loading {
 }
 
 .disabled {
-  background: #ccc !important;
+  background-color: #ccc !important;
   color: #666 !important;
   border: 1px solid #aaa;
 }
 
 .primary {
-  background-color: #007bff;;
+  background-color: #007bff;
   color: white;
 }
 
@@ -140,12 +142,21 @@ button.loading {
   background-color: #0069d9
 }
 
+.plain {
+  background-color: #333;
+  color: white;
+}
+
+.plain:focus, .plain:hover, .plain:active {
+  background-color: #222;
+}
+
 .success {
-  background-color: #28a745;
+  background-color: #6B7D79;
 }
 
 .success:focus, .success:hover, .success:active {
-  background-color: #218838;
+  background-color: #4a5b57;
 }
 
 .warning {
@@ -230,7 +241,7 @@ button.inlineBlock:focus,
 a.inlineBlock:hover,
 a.inlineBlock:focus {
   box-shadow: none;
-  background: rgba(210, 92, 74, .2);
+  background-color: rgba(210, 92, 74, .2);
 }
 
 .primary.inlineBlock:focus,
@@ -241,7 +252,20 @@ a.inlineBlock:focus {
 }
 
 .brand.inlineBlock {
+  background-color: transparent;
   color: rgb(91, 121, 117);
+}
+
+.plain.inlineBlock {
+  background-color: transparent;
+  color: rgb(51, 51, 51);
+}
+
+.plain.inlineBlock:hover,
+.plain.inlineBlock:focus,
+a.plain.inlineBlock:hover,
+a.plain.inlineBlock:focus {
+  background-color: rgba(51, 51, 51, .2);
 }
 
 .brand.inlineBlock:hover,
@@ -252,6 +276,7 @@ a.brand.inlineBlock:focus {
 }
 
 .success.inlineBlock {
+  background-color: transparent;
   color: rgb(40, 167, 69);
 }
 

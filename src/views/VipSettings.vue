@@ -1,6 +1,7 @@
 <template>
   <div id="vip-settings" v-if="loggedIn">
-    <Heading>Vip Settings</Heading>
+    <Heading>VIP Settings</Heading>
+    <p>Below you will find a list of your VIP subscriptions. By clicking “Edit” you can change your frequency, stop your VIP subscription, or modify the contents of future orders.</p>
     <Card>
       <CardContent class="vip-list" v-if="allVips.length > 0">
         <VipThumb

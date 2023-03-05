@@ -21,6 +21,7 @@ export default {
     loginEmailRequested: false,
     loginErrorMessage: '',
     paypalPayerId: null,
+    pricingTier: 2,
     refId: '',
     shipping: {
       address: null,
@@ -75,6 +76,7 @@ export default {
       state.cardMeta = user.cardMeta
       state.credit = user.credit
       state.paypalPayerId = user.paypalPayerId
+      state.pricingTier = user.pricingTier
       state.refId = user.refId
       state.stripeId = user.stripeId
       state.isReturningCustomer = user.orders.length > 0
@@ -97,7 +99,7 @@ export default {
     },
   },
   actions: {
-    async fetchUser ({ commit }: Action) {
+    async fetchUser ({ commit, dispatch }: Action) {
       try {
         const response = await makeFetch('/api/user')
 
@@ -108,11 +110,17 @@ export default {
         const user = await response.json()
 
         commit('setUser', user)
-        commit('cart/loginCart', user, { root: true })
+        commit('cart/login', user, { root: true })
+        // might need to calculate sales tax now that we know the shipping address
+        console.log('update cart from user module')
+        dispatch('cart/updateCart', null, { root: true })
+        console.log('setUserFailedToFetch to false')
         commit('setUserFailedToFetch', false)
+        return true
       } catch (e) {
         console.error(e)
         commit('setUserFailedToFetch', true)
+        return false
       }
     },
     async requestLoginEmail ({ commit, state }: Action, username: string) {
@@ -151,10 +159,11 @@ export default {
         }).then(response => response.json())
       } catch (e) {
         commit('loginFailure', 'Something went wrong with our login service. Please try again in a few minutes, or contact us at <a href="mailto:support@mrdavis.com">support@mrdavis.com</a>. Sorry for the trouble.')
-        return
+        return 'failure'
       }
 
       if (info.cart) {
+        console.log('user module setting cart', info.cart)
         commit('cart/setIsVip', info.cart.bundles[0].isVip, { root: true })
         commit('cart/setItems', info.cart.bundles[0].skus, { root: true })
         commit('cart/setShipping', info.cart.shipping, { root: true })
@@ -168,26 +177,34 @@ export default {
       if (info.token) {
         commit('setUser', info.user)
         setToken(info.token)
-        commit('cart/loginCart', info.user, { root: true })
+        commit('cart/login', info.user, { root: true })
         commit('cart/toggleLoginForm', false, { root: true })
-        commit('admin/toggleLoginForm', false, { root: true })
+        commit('toggleLoginForm', false, { root: true }) // this is the admin store...sometimes?
         identifyTrack({ email: info.user.username, name: info.user.shippingAddress.name })
-        return true
+
+        if (window.location.pathname === '/user' && info.user?.vips?.length > 0) {
+          console.log('redirecting to vip page')
+        }
+
+        return 'success'
       } else {
         commit('loginFailure', info.error)
         window.woopra && window.woopra.track('login-failure', { username, message: info.error })
-        return false
+        return 'failure'
       }
     },
     async logout ({ commit, state }: Action) {
       commit('logout')
 
-      commit('cart/logoutCart', null, { root: true })
+      commit('vip/logout', null, { root: true })
+      commit('order/logout', null, { root: true })
+      commit('cart/logout', null, { root: true })
 
-      const response = await makeFetch('/api/logout-cart', { method: 'POST', })
+      const response = await makeFetch('/api/logout', { method: 'POST', })
       const { token, cart } = await response.json()
 
       if (cart) {
+        console.log('user module setting cart: logout', cart)
         commit('cart/setIsVip', cart.bundles[0].isVip, { root: true })
         commit('cart/setItems', cart.bundles[0].skus, { root: true })
         commit('cart/setShipping', cart.shipping, { root: true })

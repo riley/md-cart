@@ -8,3 +8,8 @@ export default Vue.extend({
   props: { }
 })
 </script>
+
+<style scoped>
+h2 {
+  font-size: 2rem;
+}

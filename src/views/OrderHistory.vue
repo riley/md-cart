@@ -8,7 +8,7 @@
           v-for="order in allOrders"
           :key="order.id"
           v-bind="order"
-          @reorder="beginReorder"
+          @reorder="reorder"
           :stock="stock" />
       </CardContent>
     </Card>
@@ -31,13 +31,25 @@ export default class OrderHistory extends Vue {
   @Getter allOrders: Order[]
   @user.Getter loggedIn: boolean
   @State stock: Product[]
-  @cart.Action beginReorder: (items: Item[]) => Promise<void>
+  @cart.Action beginReorder: (orderId: string) => Promise<void>
+
+  reorder (orderId: string) {
+    this.beginReorder(orderId)
+  }
 }
 </script>
 
 <style scoped>
+.order {
+  padding-top: .5rem;
+}
+
 .order:not(:last-of-type) {
   border-bottom: 1px solid #ccc;
   padding: .5rem 0;
+}
+
+.order:first-of-type {
+  padding-top: 0;
 }
 </style>

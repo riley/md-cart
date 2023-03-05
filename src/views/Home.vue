@@ -9,12 +9,12 @@
       <p>${{ (credit / 100).toFixed(2) }}</p>
     </div>
     <div class="row">
-      <p class="what-is-vip">What is VIP Membership?</p>
+      <p class="what-is-vip">The benefits of your VIP subscription</p>
       <ul class="vip-perks">
         <li>
           <Money class="icon" />
-          <p>Save</p>
-          <p>Subscribe and save with automatic shipments every 2 months.</p>
+          <p>Best Pricing</p>
+          <p>Active VIP members lock in our lowest prices.</p>
         </li>
         <li>
           <Calendar class="icon" />
@@ -23,8 +23,8 @@
         </li>
         <li>
           <Bento class="icon" />
-          <p>Something</p>
-          <p>If more than 2 products ordered, only your first 2 items are subscribed.</p>
+          <p>Free Shipping</p>
+          <p>VIP Subscribers receive free US shipping on any order, including one-time orders.</p>
         </li>
       </ul>
     </div>
@@ -56,7 +56,7 @@ export default class Home extends Vue {
 <style scoped>
 .row {
   border-bottom: 1rem solid #f0f0f0;
-  padding: 1rem
+  padding: 1rem;
 }
 
 .row:last-child {
@@ -67,11 +67,13 @@ export default class Home extends Vue {
   border: 1px solid gray;
   border-radius: 50px;
   padding: 10px;
+  box-sizing: content-box;
 }
 
 .vip-perks {
   padding: 0;
   text-align: center;
+  display: flex;
 }
 
 .vip-perks li p:first-of-type {
@@ -94,5 +96,6 @@ export default class Home extends Vue {
   text-align: center;
   font-weight: bold;
   font-size: 1.4em;
+  text-transform: capitalize;
 }
 </style>

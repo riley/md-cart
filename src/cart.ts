@@ -52,6 +52,7 @@ declare global {
   }
 
   interface Bundle {
+    discount: number
     skus: Item[]
     recurringSkus: Item[]
     isVip: boolean
@@ -75,13 +76,39 @@ declare global {
   interface Order {
     _id: string
     id: string
+    billingAddress: {
+      address_1: string
+      address_2: string
+      city: string
+      state: string
+      zip: string
+      country: string
+    }
     bundles: Bundle[],
     createdAt: Date
+    email: string
+    estimatedDeliveryDate: string
+    paypalOrderId: string
+    refId: string
+    shippingAddress: {
+      address_1: string
+      address_2: string
+      city: string
+      state: string
+      zip: string
+      country: string
+    }
+    stripeCharge: any
     totalPrice: number
     totalTax: number
     shipping: {
       postage: number
+      service: string
     }
+    status: string
+    subtotal: number
+    totalDiscount: number
+    userId: string
   }
 
   interface PayPalOrderInit {
@@ -106,6 +133,13 @@ declare global {
     admin_area_1: string
     postal_code: string
     country_code: string
+  }
+
+  interface PricingSpec {
+    discounts: number[]
+    vipDiscounts: number[][]
+    basePrices: { [clothingType: string]: number },
+    bySku: { [sku: string]: number }
   }
 
   interface Product {
@@ -168,6 +202,7 @@ declare global {
     orders: string[],
     vips: string[],
     paypalPayerId?: string
+    pricingTier: number
     stripeId?: string
     refId: string
     shippingAddress: Address
@@ -238,10 +273,12 @@ declare global {
   interface ProductMeta {
     [clothingType: string]: {
       prompt: string
+      cta: string
       props: {
         [key: string]: (string|{label: string, value: string})[]
       },
       addMore: string[]
+      url?: string
     }
   }
 
@@ -283,5 +320,13 @@ declare global {
     object: string
     type: string
     used: boolean
+  }
+
+  interface UpsellData {
+    clothingType: string
+    title: string
+    tagline: string
+    path: string
+    thumb: string
   }
 }

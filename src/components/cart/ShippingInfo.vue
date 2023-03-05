@@ -116,7 +116,7 @@ export default class ShippingInfo extends Vue {
       value: $event.value,
     })
 
-    if ($event.name === 'country') {
+    if ($event.name === 'country' || $event.name === 'state') {
       this.updateCart()
     }
   }
@@ -133,10 +133,7 @@ export default class ShippingInfo extends Vue {
   }
 
   handleBlur (name: string, value: string) {
-    if (name === 'zip') {
-      // does this work?
-      this.updateCart()
-    } else if (name === 'name') {
+    if (name === 'name') {
       this.identifyTrack({ name: value })
       this.sendCheckoutStartEvent()
     }

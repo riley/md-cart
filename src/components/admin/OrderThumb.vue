@@ -12,7 +12,8 @@
       <span class="medium">Order {{ id }} - {{ status }}</span><br>
       Placed {{ formattedDate(createdAt) }}<br>
       {{ bundles[0].skus.length }} items
-      <Button @click="$emit('reorder', bundles[0].skus)" inline class="reorder">Order Again</Button>
+      <Button @click="$emit('reorder', _id)" inline class="reorder">Order Again</Button>
+      <Button href="https://mrdavis.com/returns" inline variant="plain">Initiate Return</Button>
     </p>
     <div class="detail">›</div>
   </div>

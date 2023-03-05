@@ -11,8 +11,8 @@ export default Vue.extend({
 
 <style scoped>
 .thumbnail {
-  min-width: 4rem;
-  min-height: 4rem;
+  min-width: 5rem;
+  min-height: 5rem;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;

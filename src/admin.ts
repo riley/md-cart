@@ -6,6 +6,7 @@ import AccountSettings from './views/AccountSettings.vue'
 import OneTimeOrder from './views/OneTimeOrder.vue'
 import OrderDetail from './views/OrderDetail.vue'
 import OrderHistory from './views/OrderHistory.vue'
+import Refer from './views/Refer.vue'
 import Snoozed from './views/Snoozed.vue'
 import UpcomingOrders from './views/UpcomingOrders.vue'
 import VipDetail from './views/VipDetail.vue'
@@ -15,18 +16,19 @@ import store from './store/admin'
 
 const routes = [
   { path: '/', name: 'home', component: Home },
-  { path: '/account-settings', component: AccountSettings },
-  { path: '/upcoming-orders', component: UpcomingOrders },
+  { path: '/account-settings', name: 'accountSettings', component: AccountSettings },
+  // { path: '/upcoming-orders', component: UpcomingOrders },
   { path: '/send-now', component: OneTimeOrder },
-  { path: '/past-orders', component: OrderHistory },
-  { path: '/vip-settings', component: VipSettings },
+  { path: '/past-orders', name: 'orderHistory', component: OrderHistory },
+  { path: '/vip-settings', name: 'vipList', component: VipSettings },
   { path: '/order/:id', name: 'orderDetail', component: OrderDetail },
   { path: '/vip/:id', name: 'vipDetail', component: VipDetail },
   { path: '/snooze', name: 'snooze', component: Snoozed },
+  { path: '/refer', name: 'refer', component: Refer },
   { path: '*', redirect: '/' }
 ]
 
-const base = window.location.hostname !== 'localhost' ? '/account-staging-area' : '/admin.html'
+const base = window.location.hostname !== 'localhost' ? '/user' : '/admin.html'
 
 const router = new VueRouter({
   mode: 'history',

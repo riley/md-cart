@@ -35,6 +35,11 @@ function getCookie (cName) {
   return res
 }
 
+function unsetCookie (name) {
+  const domain = process.env.NODE_ENV === 'production' ? '.mrdavis.com' : '.backmatic.com'
+  document.cookie = `${name}=;path=/;domain=${domain};expires=Thu, 01 Jan 1970 00:00:01 GMT;`
+}
+
 // listen for changes to localStorage
 if (window.addEventListener) {
   window.addEventListener('storage', sessionStorageTransfer, false)
@@ -62,7 +67,9 @@ function isSupported (getStorage) {
 const store = isSupported(() => localStorage) ? localStorage : sessionStorage
 
 export const getToken = () => {
-  return store.getItem('auth_token') || getCookie('md_jwt') || getCookie('jwt')
+  const authToken = store.getItem('auth_token')
+  return authToken
+  // return store.getItem('auth_token') || getCookie('md_jwt') || getCookie('jwt')
 }
 
 export const setToken = (token) => {
@@ -78,10 +85,26 @@ export const setToken = (token) => {
 export const unsetToken = () => {
   try {
     store.removeItem('auth_token')
-    return true
   } catch (e) {
+    console.error(e)
     return false
   }
+
+  try {
+    unsetCookie('md_jwt')
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+
+  try {
+    unsetCookie('jwt')
+  } catch (e) {
+    console.error(e)
+    return false
+  }
+
+  return true
 }
 
 export const getRefId = () => {

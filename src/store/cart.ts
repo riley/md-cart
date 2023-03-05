@@ -102,6 +102,14 @@ export default {
     grandTotal: (state: any, getters: any) => {
       const calculatedReferralCredit = getters.referDiscountEligible ? getters.referralCredit : 0
       const calculatedNonVIPCheckInCredit = getters.nonVipDiscountEligible ? getters.nonVIPCheckInCredit : 0
+      console.dir({
+        calculatedNonVIPCheckInCredit,
+        calculatedReferralCredit,
+        subtotal: state.subtotal,
+        shipping: state.shipping.postage,
+        totalTax: state.totalTax,
+        credit: state.credit
+      })
       return Math.max(state.subtotal + state.shipping.postage + state.totalTax - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0)
     },
     isStoredInfo: (state: any) => {
@@ -134,7 +142,7 @@ export default {
       state.useStoredBillingInfo = false
       state.useStoredPaymentInfo = false
     },
-    loginCart (state: any, user: StoredUser) {
+    login (state: any, user: StoredUser) {
       state.billing.address = user.billingAddress
       state.shipping.address = user.shippingAddress
       state.email = user.username
@@ -145,7 +153,7 @@ export default {
       state.isReturningCustomer = true
       state.loginFormActive = false
     },
-    logoutCart (state: any) {
+    logout (state: any) {
       state.credit = 0
       state.useStoredShippingInfo = false
       state.useStoredBillingInfo = false
@@ -311,6 +319,7 @@ export default {
     * update the cart upon user input
     */
     async updateCart ({ commit, state }: Action) {
+      console.log('>>> updateCart')
       commit('setFetching', true)
       try {
         const { cart, token } = await makeFetch('/api/cart', {
@@ -453,7 +462,7 @@ export default {
 
       const event = {
         '$event_id': state.cartId,
-        '$value': getters.subtotal / 100,
+        '$value': state.subtotal / 100,
         'Item Names': state.items.map((item: Item) => {
           const product = state.stock.find((product: Product) => product.sku === item.sku)
           return product.title
@@ -540,13 +549,64 @@ export default {
       unsetRefId()
       location.href = '/thankyou'
     },
-    async beginReorder ({ commit, state, dispatch }: Action, items: Item[]) {
-      // const cart = await makeFetch('/api/cart').then(handleJSONResponse({ errorString: 'failed to fetch cart' }))
+    async beginReorder ({ commit, state, dispatch }: Action, orderId: string) {
+      commit('setFetching', true)
 
-      dispatch('fetchCart')
-      for (const item of items) {
-        commit('addItem', item.sku)
-      }
+      const { token, cart, isActiveVip } = await makeFetch('/api/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId })
+      }).then(res => res.json())
+
+      setToken(token)
+      commit('setFetching', false)
+      commit('setCartId', cart._id)
+      commit('setBasePrice', cart.bundles[0].basePrice)
+      commit('setEmail', cart.email)
+      commit('setShippingAddress', cart.shippingAddress)
+      commit('setBillingAddress', cart.billingAddress)
+      commit('setRefId', cart.refId)
+      commit('setNonVipCheckIn', cart.isNonVIPCheckIn)
+      commit('setIsVip', cart.bundles[0].isVip)
+      commit('setItems', cart.bundles[0].skus)
+      commit('setShipping', cart.shipping)
+      commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
+      commit('setPricingTier', cart.pricingTier)
+      commit('setSubtotal', cart.subtotal)
+      commit('setDiscount', cart.bundles[0].discount)
+      commit('setTax', cart.totalTax)
+      commit('user/setIsActiveVip', isActiveVip, { root: true })
+
+      dispatch('updateCart')
+      // redirect to cart page?
+      location.href = env === 'development' ? '/cart.html' : '/cart'
+    },
+    async populateFromVIP ({ commit, state, dispatch }: Action, vipId: string) {
+      const { token, cart, isActiveVip } = await makeFetch('/api/send-more', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vipId })
+      }).then(res => res.json())
+
+      setToken(token)
+      commit('setFetching', false)
+      commit('setCartId', cart._id)
+      commit('setBasePrice', cart.bundles[0].basePrice)
+      commit('setEmail', cart.email)
+      commit('setShippingAddress', cart.shippingAddress)
+      commit('setBillingAddress', cart.billingAddress)
+      commit('setRefId', cart.refId)
+      commit('setNonVipCheckIn', cart.isNonVIPCheckIn)
+      commit('setIsVip', cart.bundles[0].isVip)
+      commit('setItems', cart.bundles[0].skus)
+      commit('setShipping', cart.shipping)
+      commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
+      commit('setPricingTier', cart.pricingTier)
+      commit('setSubtotal', cart.subtotal)
+      commit('setDiscount', cart.bundles[0].discount)
+      commit('setTax', cart.totalTax)
+      commit('user/setIsActiveVip', isActiveVip, { root: true })
+
       dispatch('updateCart')
       // redirect to cart page?
       location.href = env === 'development' ? '/cart.html' : '/cart'

@@ -17,7 +17,6 @@ export default class BaseSnackbar extends Vue {
 
   @Watch('active')
   async onActiveChanged (value: boolean, oldValue: boolean) {
-    console.log('value', value, 'old', oldValue)
     if (value) {
       // create snackbar
       await createSnackbar(this.duration, this)

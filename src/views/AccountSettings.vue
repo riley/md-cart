@@ -1,6 +1,7 @@
 <template>
   <div id="account-settings" v-if="loggedIn">
-    <Heading>Account Settings</Heading>
+    <Heading>Billing & Shipping Settings</Heading>
+    <p>Modify your shipping, billing or contact information below. Changes automatically save once you make them.</p>
     <Card class="personal-info">
       <div class="username" :class="{ processing: processingUsername }">
         <p class="medium">Personal Information</p>
@@ -16,6 +17,7 @@
             type="email" />
           <a v-if="!editingUsername" href="#" class="edit" @click="toggleEditUsername">Edit</a>
           <Button v-if="editingUsername" inline @click="handleSaveUsername">Save</Button>
+          <Button v-if="editingUsername" inline @click="toggleEditUsername">Cancel</Button>
         </div>
         <div v-if="processingUsername" class="roadblock">
           <Spinner />
@@ -48,7 +50,7 @@
         <Snackbar :active.sync="confirmedPaymentUpdate">Payment preference updated!</Snackbar>
       </div>
       <div class="addresses" :class="{ processing: processingShipping }">
-        <p class="medium">Shipping & Billing Address</p>
+        <p class="medium">Shipping Address</p>
         <Alert v-if="shippingError" variant="warning">{{ shippingError }}</Alert>
         <div class="shipping">
           <p>Shipping</p>
@@ -83,11 +85,12 @@ import StripeTokenUpdate from '../components/admin/StripeTokenUpdate.vue'
 import ButtonTray from '../components/ButtonTray.vue'
 import Spinner from '../components/BaseSpinner.vue'
 import Alert from '../components/BaseAlert.vue'
+import ReferPrompt from '../components/ReferPrompt.vue'
 import Snackbar from '../components/snackbar/BaseSnackbar.vue'
 
 const user = namespace('user')
 
-@Component({ components: { Address, Alert, Button, ButtonTray, Card, Heading, Snackbar, Spinner, StripeTokenUpdate, TextInput } })
+@Component({ components: { Address, Alert, Button, ButtonTray, Card, Heading, ReferPrompt, Snackbar, Spinner, StripeTokenUpdate, TextInput } })
 export default class AccountSettings extends Vue {
   @State paymentError: string
   @State shippingError: string
@@ -95,6 +98,7 @@ export default class AccountSettings extends Vue {
   @user.State((state: any) => state.shipping.address) shippingAddress: Address
   @user.State username: string
   @user.State cardMeta: any
+  @user.State refId: string
   @user.Getter loggedIn: boolean
   @Mutation setPaymentError: (error: string | null) => void
   @Mutation setShippingUpdateError: (error: string | null) => void
@@ -139,7 +143,7 @@ export default class AccountSettings extends Vue {
 
       setTimeout(() => { this.confirmedUsernameUpdate = false }, 2000)
     } catch (e) {
-      this.setUsernameError(e.message)
+      if (e instanceof Error) this.setUsernameError(e.message)
     }
 
     this.processingUsername = false
@@ -161,7 +165,7 @@ export default class AccountSettings extends Vue {
 
       setTimeout(() => { this.confirmedPaymentUpdate = false }, 2000)
     } catch (e) {
-      this.setPaymentError(e.message)
+      if (e instanceof Error) this.setPaymentError(e.message)
     }
     this.processingPayment = false
   }
@@ -177,7 +181,7 @@ export default class AccountSettings extends Vue {
 
       setTimeout(() => { this.confirmedShippingUpdate = false }, 2000)
     } catch (e) {
-      this.setShippingUpdateError(e.message)
+      if (e instanceof Error) this.setShippingUpdateError(e.message)
     }
 
     this.processingShipping = false
@@ -203,6 +207,10 @@ export default class AccountSettings extends Vue {
 </script>
 
 <style scoped>
+.panel {
+  display: flex;
+}
+
 .personal-info {
   border: 1px solid #dcdcdc;
 }
@@ -275,6 +283,14 @@ export default class AccountSettings extends Vue {
 @media (max-width: 50rem) {
   .billing, .shipping {
     flex-direction: column;
+  }
+
+  .panel {
+    flex-direction: column;
+  }
+
+  .email, .refer-prompt {
+    width: auto;
   }
 }
 </style>

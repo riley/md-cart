@@ -1,13 +1,15 @@
 <template>
   <div class="admin-root">
-    <p class="login-prompt">
+    <div class="login-prompt">
       <span v-if="!loggedIn">Returning?
         <Button inline @click="toggleLoginForm(true)">Login</Button>
       </span>
       <span v-else>Welcome back {{ username }}
+        <span v-if="credit > 0"><br />You have ${{ credit / 100 }} in Mr. Davis rewards</span>
         <Button inline @click="logout">Logout</Button>
       </span>
-    </p>
+      <router-link v-if="!atHome && loggedIn" to="/">← Home</router-link>
+    </div>
     <ActionChooser v-if="loggedIn" />
     <Banner v-if="applicationError" title="Application Error" variant="warning">
       <template v-slot:copy>
@@ -17,13 +19,15 @@
     </Banner>
     <router-view />
     <LoginForm
-      v-if="loginFormActive"
+      :style="{ display: loginFormActive ? 'flex' : 'none' }"
       :email="username"
       :loginErrorMessage="loginErrorMessage"
       :loginEmailRequested="loginEmailRequested"
       :setEmail="setUsername"
       :clearLoginForm="clearLoginForm"
-      @close="clearLoginForm" />
+      @loginSuccess="onLoginSuccess"
+      @close="clearLoginForm"
+    />
   </div>
 </template>
 
@@ -41,12 +45,14 @@ const user = namespace('user')
 export default class Admin extends Vue {
   @State loginFormActive: boolean
   @State applicationError: string
+  @user.State credit: number
   @user.State loginEmailRequested: boolean
   @user.State loginErrorMessage: string
   @user.State username: string
   @user.State failedToFetchUser: boolean
   @user.State userLoginFailed: boolean | null
 
+  @Getter allVips: VIP[]
   @user.Getter loggedIn: boolean
 
   @Mutation setApplicationError: (message: string) => void
@@ -55,32 +61,61 @@ export default class Admin extends Vue {
   @user.Mutation setUsername: any
 
   @user.Action logout: () => Promise<void>
-  @user.Action fetchUser: () => Promise<void>
+  @user.Action fetchUser: () => Promise<boolean>
   @Action fetchStock: () => Promise<void>
   @Action fetchVips: () => Promise<void>
   @Action fetchOrders: () => Promise<void>
 
-  @Watch('loggedIn')
-  handleLogin () {
-    this.fetchEverything()
-  }
-
-  async mounted () {
+  async created () {
     this.fetchStock()
-    // when the user is already logged in on page load
-    this.fetchEverything()
+
+    const user = await this.fetchUser()
+    if (user) {
+      Promise.all([
+        this.fetchVips(),
+        this.fetchOrders()
+      ])
+    }
   }
 
   async fetchEverything () {
     console.log('fetchEverything')
     try {
-      this.fetchUser()
-      this.fetchVips()
-      this.fetchOrders()
+      return Promise.all([
+        this.fetchUser(),
+        this.fetchVips(),
+        this.fetchOrders()
+      ])
     } catch (e) {
       console.error(e)
-      this.setApplicationError(e.message)
+      if (e instanceof Error) {
+        this.setApplicationError(e.message)
+      }
     }
+  }
+
+  async onLoginSuccess () {
+    await this.fetchEverything()
+
+    if (this.allVips.length > 0) {
+      this.$router.push({ name: 'vipList' })
+    }
+  }
+
+  get atHome () {
+    return this.$route.name === 'home'
   }
 }
 </script>
+
+<style scoped>
+.admin-root {
+  min-height: 100vw;
+}
+
+.login-prompt {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+</style>

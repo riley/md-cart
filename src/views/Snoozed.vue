@@ -6,12 +6,21 @@
     <Card v-if="snoozedVIP">
       <CardContent>
         <Heading>Snooze Confirmation ✔</Heading>
-        <p>You have successfully snoozed your VIP for {{ snoozedVIP.cycleDays }} days until {{ shortDate(snoozedVIP.nextDelivery) }}.</p>
+        <p>You have successfully snoozed your VIP for {{ snoozedVIP.cycleDays }} days until {{ snoozedVIP.nextDelivery.toDateString() }}.</p>
+        <ItemRow v-for="item of groupProducts(snoozedVIP.items)" :key="item.sku" :item="item" class="grouped-item" />
         <p>Check out some of our other products if you're not familiar with them yet</p>
         <div class="other-categories">
-          <CategoryCard v-for="info of otherCategories" :key="info.category" :info="info" />
+          <Upsell
+            class="upsell"
+            v-for="upsell of otherCategories"
+            :key="upsell.clothingType"
+            :price="getCost(upsell)"
+            :retailPrice="getItemRetailCost(upsell)"
+            :upsell="upsell"
+            cta="Shop"
+            @select="redirectToStore(upsell)"
+          />
         </div>
-        <Button inline @click="$emit('dismiss')">Close</Button>
       </CardContent>
     </Card>
     <div v-if="fetchingSnooze">
@@ -21,45 +30,57 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import { State, Mutation, Action } from 'vuex-class'
-import Alert from '../components/BaseAlert.vue'
-import Button from '../components/BaseButton.vue'
-import Heading from '../components/BaseHeading.vue'
-import Card from '../components/BaseCard.vue'
-import CardContent from '../components/BaseCardContent.vue'
-import CategoryCard from '../components/BaseCategoryCard.vue'
-import Spinner from '../components/BaseSpinner.vue'
-import { shortDate } from '../utils/dates'
+import { Vue, Watch, Component } from 'vue-property-decorator'
+import { State, Mutation, Action, namespace } from 'vuex-class'
+import Alert from '@/components/BaseAlert.vue'
+import Button from '@/components/BaseButton.vue'
+import Heading from '@/components/BaseHeading.vue'
+import Card from '@/components/BaseCard.vue'
+import CardContent from '@/components/BaseCardContent.vue'
+import ItemRow from '@/components/admin/ItemRow.vue'
+import Pricing from '../utils/Pricing'
+import Spinner from '@/components/BaseSpinner.vue'
+import Upsell from '@/components/Upsell.vue'
 
-@Component({ components: { Alert, Button, Heading, CategoryCard, Card, CardContent, Spinner } })
+const vip = namespace('vip')
+
+@Component({ components: { Alert, Button, Card, CardContent, Heading, ItemRow, Spinner, Upsell } })
 export default class Snoozed extends Vue {
+  @State vipMap: VipMap
+  @State stock: Product[]
+  @State upsells: UpsellData[]
   @State snoozeError: string
   @State fetchingSnooze: boolean
   @State snoozedVIP: VIP
-  @Action snoozeByHash: (id: string) => Promise<void>
+  @Mutation setSnoozedVIP: (vip: VIP) => void
+  @vip.State items: Item[]
 
-  shortDate = shortDate
-
-  clothingTypes = {
-    'undershirts': 'https://mrdavis.com/best-undershirt/',
-    'underwear': 'https://mrdavis.com/best-underwear/',
-    'performance-socks': 'https://mrdavis.com/best-dress-socks',
-    'everyday-socks': 'https://mrdavis.com/best-everyday-socks/',
-    'longjohns': 'https://mrdavis.com/best-long-john-underwear/',
-    'no-show-socks': 'https://mrdavis.com/best-no-show-socks/',
-    'lounge-shirt': 'https://mrdavis.com/comfortable-lounge-shirt/',
-    'everyday-tee-crew': 'https://mrdavis.com/best-everyday-tee-shirt/',
-    'tank-top': 'https://mrdavis.com/best-womens-tank-top/',
-    'deep-v': 'https://mrdavis.com/best-womens-undershirt/',
-    'camisole': 'https://mrdavis.com/best-womens-camisole/',
-  }
+  pricing: Pricing = new Pricing(true)
 
   async mounted () {
-    if (typeof this.$route.query.s_id === 'string') {
-      this.snoozeByHash(this.$route.query.s_id)
+    console.log('Snoozed mounted', this.$route.query)
+    const url = new URL(window.location.href)
+    console.log(url, url.searchParams, url.searchParams.get('id'))
+    if (typeof this.$route.query.id === 'string') {
+      const vip = this.vipMap[this.$route.query.id]
+      console.log('Snoozed mounted', vip)
+      if (vip) {
+        this.setSnoozedVIP(vip)
+      }
     } else {
       // show an error about a malformed url?
+    }
+  }
+
+  @Watch('vipMap')
+  displaySnoozedVip () {
+    console.log('displaySnoozedVip', this.$route.query)
+    if (typeof this.$route.query.id === 'string') {
+      const vip = this.vipMap[this.$route.query.id]
+      console.log('displaySnoozedVip', vip)
+      if (vip) {
+        this.setSnoozedVIP(vip)
+      }
     }
   }
 
@@ -68,10 +89,43 @@ export default class Snoozed extends Vue {
 
     console.log(this.snoozedVIP.nextDelivery, 'nextDelivery')
     const vipCategories = this.snoozedVIP.items.map((item: Item) => item.clothingType)
-    return Object.entries(this.clothingTypes)
-      .filter((info: string[]) => !vipCategories.includes(info[0]))
-      .map((info: string[]) => ({ type: info[0], link: info[1] }))
+    const upsells = this.upsells
+      .filter((upsell: UpsellData) => !vipCategories.includes(upsell.clothingType))
       .slice(0, 3)
+    console.log('otherCategories', upsells)
+    return upsells
+  }
+
+  groupProducts (items: Item[]) {
+    return items.reduce((carry: any, item: Item) => {
+      const index = carry.findIndex((p: {sku: string}) => p.sku === item.sku)
+      if (index !== -1) {
+        carry[index].quantity += 1
+      } else {
+        const product = this.stock.find((product: Product) => product.sku === item.sku)
+        carry.push({ ...product, quantity: item.quantity, cost: item.cost })
+      }
+      return carry
+    }, []).sort((a: {sku: string}, b: {sku: string}) => {
+      if (a.sku < b.sku) return -1
+      if (a.sku > b.sku) return 1
+      return 0
+    })
+  }
+
+  getCost (item: Item) {
+    console.log('Snoozed.getCost', item)
+    this.pricing.pricingTier = this.snoozedVIP.pricingTier
+    return this.pricing.getNextPrice({ item, asVip: true }).nextItemPrice
+  }
+
+  getItemRetailCost (item: Item) {
+    console.log('Snoozed.getItemRetailCost', item)
+    return this.pricing.getBaseSingle({ clothingType: item.clothingType, sku: '' })
+  }
+
+  redirectToStore (item: UpsellData) {
+    window.location.href = item.path
   }
 }
 </script>
@@ -82,5 +136,9 @@ export default class Snoozed extends Vue {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
   clear: both;
+}
+
+.grouped-item:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4)
 }
 </style>

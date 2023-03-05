@@ -26,8 +26,6 @@ export default class Pricing {
   }
 
   getBaseSingle ({ clothingType, sku = '' }: { clothingType: string, sku: string }): number {
-    if (clothingType === 'bag') return bySku[sku]
-
     return basePrices[clothingType]
   }
 
@@ -39,14 +37,11 @@ export default class Pricing {
   // and the cost of the first item
   get fullPrice (): number {
     return this.skus.reduce((carry: number, item: Item) => {
-      if (item.clothingType === 'bag') return carry + bySku[item.sku]
-
       return carry + basePrices[item.clothingType]
     }, 0)
   }
   getPriceOfSkus ({ skus, asVip = false, pricingTier = 2 }: PriceArgs): { basePrice: number, discountedPrice: number, discount: number } {
     const basePrice = skus.reduce((carry: number, item: Item) => {
-      if (item.clothingType === 'bag') return carry + bySku[item.sku]
       return carry + basePrices[item.clothingType]
     }, 0)
 

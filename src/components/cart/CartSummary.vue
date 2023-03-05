@@ -8,14 +8,14 @@
         <div v-if="fetching" class="spinner-container">
           <Spinner />
         </div>
-        <p class="save-percent-upsell">Add one more item & save {{ Math.floor(pricing.nextDiscount * 100) }}% on your order. <span v-if="!isVip && subtotal < freeShippingThreshold" class="free-shipping-upsell">Free US Shipping on orders $29+.</span></p>
+        <p class="save-percent-upsell">Add one more item & save {{ nextDiscount }}% on your order. <span v-if="!isVip && subtotal < freeShippingThreshold" class="free-shipping-upsell">Free US Shipping on orders $29+.</span></p>
         <ul v-if="!fetching" class="totals" ref="totals">
           <li>
             <span>Full Price</span>
             <span>${{ basePrice / 100 }}</span>
           </li>
           <li v-if="subtotal !== basePrice">
-            <span>Discount</span>
+            <span>{{ isVip ? 'VIP ' : '' }} Discount</span>
             <span><span class="discount-percent">Saving {{ Math.floor(discount * 100) }}%</span> -${{ Math.abs(subtotal - basePrice) / 100 }}</span>
           </li>
           <li>
@@ -129,6 +129,7 @@ export default class CartSummary extends Vue {
   @cart.State isNonVIPCheckIn: boolean
   @cart.State isReturningCustomer: boolean
   @cart.State pricing: Pricing
+  @cart.State pricingTier: number
   @cart.State refId: string
   @cart.State subtotal: number
 
@@ -140,7 +141,6 @@ export default class CartSummary extends Vue {
 
   @cart.Mutation addItem: any
   @cart.Mutation removeItem: any
-  @cart.Mutation setIsVip: any
   @cart.Mutation setSelectedShippingService: any
   @cart.Mutation setCreateNewVip: (createNewVip: boolean) => void
   @cart.Action updateCart: () => Promise<void>
@@ -152,6 +152,7 @@ export default class CartSummary extends Vue {
   welcomeBackVipDismissed: boolean = false
 
   async mounted () {
+    console.log('CartSummary mounted')
     await this.fetchStock()
     await this.fetchCart()
     await this.fetchUser()
@@ -162,6 +163,8 @@ export default class CartSummary extends Vue {
     }
   }
 
+  // when isVip or pricingTier is updated, modify the pricing object to get the new next discount?
+
   handleShippingServiceChange ($value: string) {
     this.setSelectedShippingService($value)
     this.updateCart()
@@ -170,6 +173,12 @@ export default class CartSummary extends Vue {
   setRecurring (isVip: boolean) {
     this.setCreateNewVip(isVip)
     this.updateCart()
+  }
+
+  get nextDiscount () {
+    this.pricing.isVip = this.isVip
+    this.pricing.pricingTier = this.pricingTier
+    return Math.floor(this.pricing.nextDiscount * 100)
   }
 
   incrementItem ({ amount, sku }: { amount: number, sku: string }) {
