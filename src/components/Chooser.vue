@@ -5,15 +5,16 @@
     <div class="chooser-root">
       <div class="picker">
         <div v-for="(prop, index) of propsAsTuples" :key="prop.field" :class="{disabled: index > selectedPropCount}">
-          <p class="picker-label">Step {{ index + 1 }}: Select the {{ prop.field }}{{ getExtraFirstPrompt(index) }}</p>
-          <div class="chooser-row">
+          <p class="picker-label"><strong>Step {{ index + 1 }}:</strong> Select the {{ prop.field }}{{ getExtraFirstPrompt(index) }}</p>
+          <div class="chooser-row" :class="{ skuGrid: prop.field === 'sku' }" :style="{ gridTemplateColumns: Array(getColumnCount(prop.field)).fill('1fr').join(' ') }">
             <div
               class="chooser-button"
               v-for="variant of prop.info"
               :key="variant.label"
-              :class="{tagged: selectedProps[prop.field] === variant.value}"
+              :class="{ [prop.field]: true, tagged: selectedProps[prop.field] === variant.value}"
+              :style="{ backgroundImage: prop.field === 'sku' ? `url(https://mrdavis.com/img/swatches/${variant.value}.jpg)` : '' }"
               @click="selectProp(prop.field, variant.value)">
-              {{ variant.label }}
+              {{ prop.field !== 'sku' ? variant.label : '' }}
             </div>
           </div>
         </div>
@@ -39,6 +40,12 @@ export default class Chooser extends Vue {
   get selectedPropCount () {
     const { clothingType, ...propsWithoutType } = this.selectedProps
     return Object.keys(propsWithoutType).length
+  }
+
+  getColumnCount (field: string) {
+    const maxColumns = window.screen.width > 768 ? 5 : 3
+
+    return Math.min(maxColumns, meta[this.clothingType].props[field].length)
   }
 
   // TODO reset selectedProps when you re-open the chooser
@@ -126,7 +133,17 @@ export default class Chooser extends Vue {
 }
 
 .chooser-row {
-  display: flex;
+  display: grid;
+  gap: .25rem;
+}
+
+.chooser-row.skuGrid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.chooser-row.skuGrid .chooser-button {
+  margin-bottom: 0;
+  background-size: cover;
 }
 
 .chooser-row.disabled {
@@ -140,7 +157,7 @@ export default class Chooser extends Vue {
   align-items: center;
   flex: 1;
   text-align: center;
-  margin: 0 2px 12px !important;
+  margin-bottom: 1rem;
   text-transform: uppercase;
   font-family: Open Sans,sans-serif;
   cursor: pointer;

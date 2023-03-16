@@ -98,7 +98,7 @@ export default {
     useStoredShippingInfo: false,
   },
   getters: {
-    discountPercent: (state: any) => Math.round((1 - state.discount) * 100),
+    discountPercent: (state: any) => Math.round(state.discount * 100),
     grandTotal: (state: any, getters: any) => {
       const calculatedReferralCredit = getters.referDiscountEligible ? getters.referralCredit : 0
       const calculatedNonVIPCheckInCredit = getters.nonVipDiscountEligible ? getters.nonVIPCheckInCredit : 0
@@ -302,6 +302,7 @@ export default {
         commit('setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount)
         commit('setPricingTier', cart.pricingTier)
         commit('setSubtotal', cart.subtotal)
+        commit('setCreateNewVip', cart.createNewVip)
         commit('setDiscount', cart.bundles[0].discount)
         commit('setTax', cart.totalTax)
         commit('user/setIsActiveVip', cart.user?.isActiveVip, { root: true })

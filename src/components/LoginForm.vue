@@ -21,7 +21,7 @@
         <Button class="login-button" @click="requestCode" type="button" v-if="!loginEmailRequested">Tap to Log In</Button>
         <p class="code-warning">If you don't receive an email within a minute, please let us know at <a href="mailto:support@mrdavis.com?subject=Missing login email">support@mrdavis.com</a> or just check out using your email address and we’ll link the order to your account.</p>
       </form>
-      <span class="close-button" @click="emitClose">×</span>
+      <span class="login-close-x" @click="emitClose">×</span>
     </div>
   </div>
 </template>
@@ -122,7 +122,7 @@ export default class LoginForm extends Vue {
   font-size: 14px;
 }
 
-.close-button {
+.login-close-x {
   position: absolute;
   top: 10px;
   right: 10px;

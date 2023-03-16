@@ -8,7 +8,7 @@
         <div v-if="fetching" class="spinner-container">
           <Spinner />
         </div>
-        <p class="save-percent-upsell">Add one more item & save {{ nextDiscount }}% on your order. <span v-if="!isVip && subtotal < freeShippingThreshold" class="free-shipping-upsell">Free US Shipping on orders $29+.</span></p>
+        <p class="save-percent-upsell">Add one more item & save {{ nextDiscount }}% on your order.<br /><span v-if="!isVip && subtotal < freeShippingThreshold" class="free-shipping-upsell">Free US Shipping on orders $29+.</span></p>
         <ul v-if="!fetching" class="totals" ref="totals">
           <li>
             <span>Full Price</span>
@@ -16,7 +16,7 @@
           </li>
           <li v-if="subtotal !== basePrice">
             <span>{{ isVip ? 'VIP ' : '' }} Discount</span>
-            <span><span class="discount-percent">Saving {{ Math.floor(discount * 100) }}%</span> -${{ Math.abs(subtotal - basePrice) / 100 }}</span>
+            <span><span class="discount-percent">Saving {{ discountPercent }}%</span> -${{ Math.abs(subtotal - basePrice) / 100 }}</span>
           </li>
           <li>
             <span>Shipping</span>
@@ -133,6 +133,7 @@ export default class CartSummary extends Vue {
   @cart.State refId: string
   @cart.State subtotal: number
 
+  @cart.Getter discountPercent: number
   @cart.Getter grandTotal: number
   @cart.Getter referralCredit: number
   @cart.Getter nonVIPCheckInCredit: number

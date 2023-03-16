@@ -25,7 +25,7 @@ const meta: ProductMeta = {
     cta: 'Select L/S Undershirt',
     props: {
       cut: ['v neck', 'crew'],
-      color: ['white', 'grey', 'black'],
+      color: ['white', 'grey', 'black', 'tone'],
       size: ['xs', { label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl']
     },
     addMore: ['lounge-shirt', 'undershirts', 'underwear', 'performance-socks', 'longjohns'],
@@ -36,7 +36,7 @@ const meta: ProductMeta = {
     cta: 'Select bamboo undies',
     props: {
       cut: ['standard', 'trunks'],
-      color: ['tone', 'grey', 'navy', 'black'],
+      color: ['tone', 'grey', 'forest', 'sage', 'navy', 'wine', 'black', 'aqua'],
       size: [{ label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl'],
     },
     addMore: ['underwear', 'undershirts', 'longjohns', 'performance-socks', 'lounge-shirt'],
@@ -65,7 +65,7 @@ const meta: ProductMeta = {
     prompt: 'shirt',
     cta: 'Select everyday crew',
     props: {
-      color: ['charcoal', 'navy', 'crimson'],
+      color: ['charcoal', 'navy', 'crimson', 'rust', 'moss'],
       size: ['xs', { label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl']
     },
     addMore: ['everyday-tee-crew', 'undershirts', 'underwear', 'everyday-tee', 'everyday-socks'],
@@ -75,7 +75,7 @@ const meta: ProductMeta = {
     prompt: 'deep-v',
     cta: 'Select women\'s deep v',
     props: {
-      color: ['tone', 'white', 'black'],
+      color: ['tone', 'white', 'black', 'grey'],
       size: ['xs', { label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl']
     },
     addMore: ['deep-v', 'tank-top', 'camisole'],
@@ -135,6 +135,15 @@ const meta: ProductMeta = {
     },
     addMore: ['everyday-socks', 'performance-socks', 'undershirts', 'underwear', 'everyday-tee-crew'],
     url: 'https://mrdavis.com/best-everyday-socks/'
+  },
+  'athletic-socks': {
+    prompt: 'sock',
+    cta: 'Select Athletic Socks',
+    props: {
+      color: ['black', 'white', 'navy', { label: 'light grey', value: 'lt-grey' }]
+    },
+    addMore: ['performance-socks', 'undershirts'],
+    url: 'https://mrdavis.com/best-athletic-sock/'
   },
   'dress-socks': {
     prompt: 'pair',

@@ -542,7 +542,7 @@ output {
     flex-direction: column;
   }
 
-  .vip-items, .add-more-prompt {
+  .vip-items, .add-more-prompt, .chooser {
     width: auto;
   }
 

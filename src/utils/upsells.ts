@@ -42,6 +42,13 @@ export default [
     thumb: 'https://mk0mrdavisqex6hvv99l.kinstacdn.com/wp-content/uploads/2018/11/Everyday-Solid-Navy.png'
   },
   {
+    clothingType: 'athletic-socks',
+    title: 'Athletic Socks',
+    tagline: 'Our athletic socks are designed to keep your feet dry and comfortable during your most intense workouts.',
+    path: '/best-athletic-sock',
+    thumb: 'https://mrdavis.com/wp-content/uploads/2021/05/as_navy_lifestyle.jpg'
+  },
+  {
     clothingType: 'no-show-socks',
     title: 'Performance No Shows',
     tagline: 'The last no show socks you\'ll ever buy. They stay on, they last forever, they wick moisture. Five sizes for the perfect fit',

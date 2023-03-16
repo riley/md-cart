@@ -44,6 +44,10 @@ export default class VipSettings extends Vue {
   margin-right: 1rem;
 }
 
+.vip {
+  padding-bottom: 1rem;
+}
+
 .vip:not(:last-of-type) {
   border-bottom: 1px solid #ccc;
   margin-bottom: 1rem;

@@ -165,6 +165,7 @@ export default {
       if (info.cart) {
         console.log('user module setting cart', info.cart)
         commit('cart/setIsVip', info.cart.bundles[0].isVip, { root: true })
+        commit('cart/setDiscount', info.cart.bundles[0].discount, { root: true })
         commit('cart/setItems', info.cart.bundles[0].skus, { root: true })
         commit('cart/setShipping', info.cart.shipping, { root: true })
         commit('cart/setCredit', info.cart.priceModification.userCredit.amount + info.cart.priceModification.ks.amount, { root: true })
@@ -209,6 +210,7 @@ export default {
         commit('cart/setItems', cart.bundles[0].skus, { root: true })
         commit('cart/setShipping', cart.shipping, { root: true })
         commit('cart/setCredit', cart.priceModification.userCredit.amount + cart.priceModification.ks.amount, { root: true })
+        commit('cart/setDiscount', cart.bundles[0].discount, { root: true })
         commit('cart/setPricingTier', cart.pricingTier, { root: true })
         commit('cart/setCreateNewVip', cart.createNewVip, { root: true })
         commit('cart/setSubtotal', cart.subtotal, { root: true })
