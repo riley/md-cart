@@ -210,7 +210,7 @@ input, input:invalid, input:required {
   font-size: 1.15rem !important;
   background: white;
   outline: currentColor none 0;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: Jost, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 .border {

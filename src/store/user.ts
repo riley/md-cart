@@ -84,7 +84,7 @@ export default {
 
       window.woopra && window.woopra.identify({
         email: user.username,
-        name: user.shippingAddress.name
+        name: `${user.shippingAddress.givenName} ${user.shippingAddress.familyName}`,
       })
       window.woopra && window.woopra.track()
     },

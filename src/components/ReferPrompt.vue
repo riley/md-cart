@@ -79,7 +79,7 @@ export default class ReferPrompt extends Vue {
 .refer-callout-bubbles {
   position: relative;
   height: 180px;
-  font-family: "Open Sans", sans-serif;
+  font-family: Jost, sans-serif;
 }
 
 .cta {

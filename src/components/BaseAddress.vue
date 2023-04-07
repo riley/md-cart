@@ -4,11 +4,14 @@
   <div>
     <div v-if="!editMode">
       <address>
-        {{ name }}<br>{{ address_1 }} {{ address_2 }}<br>{{ city }}, {{ state }} {{ zip }}<br>{{ country }}
+        {{ givenName }} {{ familyName }}<br>{{ address_1 }} {{ address_2 }}<br>{{ city }}, {{ state }} {{ zip }}<br>{{ country }}
       </address>
     </div>
     <div v-if="editMode">
-      <TextInput autocomplete="name" :value="name" @input="handleName" @blur="handleBlur" required type="text" name="name" label="Name" />
+      <div class="name-holder">
+        <TextInput autocomplete="given-name" :value="givenName" @input="handleGivenName" @blur="handleBlur" required type="text" name="givenName" label="First Name" />
+        <TextInput autocomplete="family-name" :value="familyName" @input="handleFamilyName" @blur="handleBlur" required type="text" name="familyName" label="Last Name" />
+      </div>
       <TextInput
         placesEnabled
         required
@@ -33,7 +36,7 @@
         <Dropdown v-if="country === 'US'" :value="state" @input="handleState" @blur="handleBlur" required label="State" :options="states" name="state" autocomplete="address-level1" />
         <Dropdown v-if="country === 'CA'" :value="state" @input="handleState" @blur="handleBlur" label="Province" :options="provinces" name="state" autocomplete="address-level1" />
         <TextInput v-if="country !== 'US' && country !== 'CA'" :value="state" @input="handleState" @blur="handleBlur" required label="Province" name="state" autocomplete="address-level1" />
-        <TextInput :value="zip" @input="handleZip" @blur="handleBlur" label="Zip code" name="zip" type="country === 'US' ? 'tel' : 'text'" autocomplete="postal-code" />
+        <TextInput :value="zip" @input="handleZip" @blur="handleBlur" label="Zip code" name="zip" :type="country === 'US' ? 'tel' : 'text'" autocomplete="postal-code" />
       </div>
       <Dropdown
         :value="country"
@@ -61,7 +64,9 @@ import countries from '../utils/countries'
 })
 export default class BaseAddress extends Vue {
   @Prop({ type: Boolean, default: false }) editMode: boolean
-  @Prop() name: string
+  // @Prop() name: string
+  @Prop() givenName: string
+  @Prop() familyName: string
   @Prop() address_1: string
   @Prop() address_2: string
   @Prop() city: string
@@ -79,7 +84,9 @@ export default class BaseAddress extends Vue {
   handleGooglePlaceChange (value: GooglePlace) {
     console.log('google place', value)
     const address: Address = {
-      name: this.name,
+      // name: this.name,
+      givenName: this.givenName,
+      familyName: this.familyName,
       address_1: (value.streetNumber && value.route) ? `${value.streetNumber} ${value.route}` : '',
       address_2: '',
       city: value.city,
@@ -90,8 +97,12 @@ export default class BaseAddress extends Vue {
     this.$emit('replaceAddress', address)
   }
 
-  handleName (value: string) {
-    this.$emit('input', { name: 'name', value })
+  handleGivenName (value: string) {
+    this.$emit('input', { name: 'givenName', value })
+  }
+
+  handleFamilyName (value: string) {
+    this.$emit('input', { name: 'familyName', value })
   }
 
   handleAddress1 (value: string) {
@@ -119,7 +130,6 @@ export default class BaseAddress extends Vue {
   }
 
   handleBlur (name: string, value: string) {
-    console.log('handle address blur', name, value)
     this.$emit('blur', name, value)
   }
 }
@@ -131,12 +141,12 @@ address {
   line-height: 1.6em;
 }
 
-.state-zip-holder {
+.state-zip-holder, .name-holder {
   display: flex;
+  gap: 1rem;
 }
 
 .state-zip-holder > div:first-child {
-  margin-right: 1rem;
   flex-grow: 1;
 }
 </style>

@@ -159,7 +159,7 @@ export default class Chooser extends Vue {
   text-align: center;
   margin-bottom: 1rem;
   text-transform: uppercase;
-  font-family: Open Sans,sans-serif;
+  font-family: Jost, sans-serif;
   cursor: pointer;
   min-height: 55px;
   border: 2px solid #e7e7e7;

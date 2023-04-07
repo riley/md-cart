@@ -13,7 +13,7 @@
           </div>
           order {{ id }}<br>
         </div>
-        <h3>Thank you {{ billing.name.trim() }}!</h3>
+        <h3>Thank you {{ thankedPerson }}!</h3>
         <div v-if="shipping.country !== 'US'" class="shipping-delay-warning">
           We are currently experiencing higher than normal delays in customs due to the ongoing pandemic. Thank you for your patience and understanding.
         </div>
@@ -79,6 +79,18 @@ export default class OrderDetails extends Vue {
   @order.State(state => state.shipping.service) shippingMethod: string
   @order.State(state => state.billing.address) billing: Address
   @order.State paymentMethod: string
+
+  get thankedPerson () {
+    if (this.billing) {
+      return `${this.billing.givenName.trim()} ${this.billing.familyName.trim()}`
+
+    } else if (this.shipping) {
+      return `${this.shipping.givenName.trim()} ${this.shipping.familyName.trim()}`
+
+    } else {
+      return 'friend'
+    }
+  }
 }
 </script>
 

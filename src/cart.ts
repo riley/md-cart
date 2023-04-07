@@ -77,6 +77,8 @@ declare global {
     _id: string
     id: string
     billingAddress: {
+      givenName: string
+      familyName: string
       address_1: string
       address_2: string
       city: string
@@ -91,6 +93,8 @@ declare global {
     paypalOrderId: string
     refId: string
     shippingAddress: {
+      givenName: string
+      familyName: string
       address_1: string
       address_2: string
       city: string
@@ -180,7 +184,8 @@ declare global {
     price: string
   }
   interface Address {
-    name: string;
+    givenName: string,
+    familyName: string,
     address_1: string;
     address_2: string;
     city: string;

@@ -38,6 +38,8 @@ export default {
     billing: {
       address: {
         name: '',
+        givenName: '',
+        familyName: '',
         address_1: '',
         address_2: '',
         city: '',
@@ -76,6 +78,8 @@ export default {
     shipping: {
       address: {
         name: '',
+        givenName: '',
+        familyName: '',
         address_1: '',
         address_2: '',
         city: '',
@@ -115,6 +119,7 @@ export default {
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
     },
+    fullName: (state: any) => state.billing.address.givenName + ' ' + state.billing.address.familyName,
     referDiscountEligible: (state: any, getters: any) => state.subtotal >= 4000 && getters.referralCredit > 0 && !state.isReturningCustomer,
     nonVipDiscountEligible: (state: any, getters: any) => getters.subtotal >= 5000 && getters.nonVIPCheckInCredit > 0,
     referralCredit: (state: any) => typeof state.refId === 'string' && [8, 9, 24].includes(state.refId.length) ? 1000 : 0,
@@ -308,7 +313,7 @@ export default {
         commit('user/setIsActiveVip', cart.user?.isActiveVip, { root: true })
 
         if (cart.email) {
-          identifyTrack({ email: cart.email, name: cart.shippingAddress.name })
+          identifyTrack({ email: cart.email, name: `${cart.shippingAddress.givenName} ${cart.shippingAddress.familyName}` })
         }
         dispatch('sendCheckoutStartEvent')
       } catch (e) {

@@ -54,7 +54,7 @@ export default class Dropdown extends Vue {
   display: block;
   font-size: 1.15rem !important;
   line-height: 1.3;
-  padding: .5rem;
+  padding: 6px;
   width: 100%;
   filter: none;
   max-width: 100%;
@@ -87,7 +87,7 @@ export default class Dropdown extends Vue {
 }
 .md__select option {
   font-weight: normal;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: Jost, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 .md__dropdown-field-wrapper {

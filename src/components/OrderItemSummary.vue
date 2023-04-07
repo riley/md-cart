@@ -90,11 +90,11 @@ export default class OrderItemSummary extends Vue {
     return this.bundles && this.bundles[0] ? this.bundles[0].recurringPrice : 0
   }
 
-  getItems (recurring: boolean) {
+  getItems (recurring: boolean): Product[] {
     let items = []
     const set = recurring ? 'recurringSkus' : 'skus'
 
-    if (this.bundles.length === 0) return
+    if (this.bundles.length === 0) return []
 
     items = this.bundles[0][set].reduce((carry: any[], item) => {
       const product = this.stock.find((product: Product) => product.sku === item.sku)
@@ -164,7 +164,8 @@ export default class OrderItemSummary extends Vue {
       /* eslint-disable camelcase */
       window.enhanced_conversion_data = {
         email: this.email,
-        first_name: this.shippingAddress.name,
+        first_name: this.shippingAddress.givenName,
+        last_name: this.shippingAddress.familyName,
         home_address: {
           street: `${this.shippingAddress.address_1} ${this.shippingAddress.address_2}`,
           city: this.shippingAddress.city,

@@ -59,7 +59,7 @@ export default class PaymentInfo extends Vue {
       hidePostalCode: true,
       style: {
         base: {
-          fontFamily: '"Open Sans", "Helvetica Neue", Helvetica, sans-serif',
+          fontFamily: 'Jost, "Helvetica Neue", Helvetica, sans-serif',
           fontSize: '18px',
         }
       }

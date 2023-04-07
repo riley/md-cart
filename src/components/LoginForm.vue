@@ -107,7 +107,7 @@ export default class LoginForm extends Vue {
 
 .welcome-back {
   text-align: center;
-  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: Jost, 'Helvetica Neue', Helvetica, sans-serif;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;

@@ -126,7 +126,7 @@ export default {
     setOrder (state: any, order: Order) {
       state.billing.address = order.billingAddress
       state.bundles = order.bundles
-      state.createdAt = order.createdAt
+      state.createdAt = new Date(order.createdAt)
       state.email = order.email
       if (order.estimatedDeliveryDate) {
         state.estimatedDeliveryDate = order.estimatedDeliveryDate

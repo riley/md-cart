@@ -91,6 +91,7 @@ export default class ShippingInfo extends Vue {
   @cart.State loginFormActive: boolean
   @user.State loginErrorMessage: string
   @cart.State useStoredShippingInfo: boolean
+  @cart.Getter fullName: string
 
   @user.Getter loggedIn: string
 
@@ -133,8 +134,8 @@ export default class ShippingInfo extends Vue {
   }
 
   handleBlur (name: string, value: string) {
-    if (name === 'name') {
-      this.identifyTrack({ name: value })
+    if (name === 'givenName' || name === 'familyName') {
+      this.identifyTrack({ name: this.fullName })
       this.sendCheckoutStartEvent()
     }
   }
