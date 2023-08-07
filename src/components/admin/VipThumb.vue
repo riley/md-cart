@@ -23,7 +23,7 @@
     <div :data-id="_id" class="delivery-info">
       <span class="next-order-date" v-if="status === 'active'">Next Order</span>
       <span class="next-order-date" v-if="status === 'paused'">Paused</span>
-      <span class="next-order-date" v-if="status === 'stopped'">Stopped</span>
+      <span class="next-order-date stopped" v-if="status === 'stopped'">Stopped</span>
       <span class="next-order-date" v-if="status === 'error'">Please update your <a href="/user/account-settings" @click="handleBillingInfoUpdate" class="update-billing-cta">credit card information</a>.</span>
       <br>
       <span v-if="status === 'active' || status === 'paused'"><span v-if="status === 'active'">{{ months[nextDelivery.getMonth()] }} {{ nextDelivery.getDate() }}, {{ nextDelivery.getFullYear() }} - </span></span>{{ items.length }} items
@@ -153,6 +153,10 @@ export default class VipThumb extends Vue {
   color: #5b7975;
   margin-bottom: .5rem;
   display: inline-block;
+}
+
+.next-order-date.stopped {
+  color: hsla(8,100%,70%,.99);
 }
 
 .edit {

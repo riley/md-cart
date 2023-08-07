@@ -7,7 +7,7 @@
         <div class="panel">
           <div>
             <label class="delivery-date-label">
-              <span class="label-text">Edit Next Delivery Date</span>
+              <span class="label-text">Edit Next Processing Date</span>
               <input
                 placeholder="yyyy-mm-dd"
                 class="next-delivery"

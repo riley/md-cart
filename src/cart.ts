@@ -153,6 +153,7 @@ declare global {
     deprecated: boolean
     size: string
     forceLowStock: boolean
+    disabled: boolean
     nextDelivery: string
     clothingType: string
     description: string

@@ -11,8 +11,8 @@
               class="chooser-button"
               v-for="variant of prop.info"
               :key="variant.label"
-              :class="{ [prop.field]: true, tagged: selectedProps[prop.field] === variant.value}"
-              :style="{ backgroundImage: prop.field === 'sku' ? `url(https://mrdavis.com/img/swatches/${variant.value}.jpg)` : '' }"
+              :class="{ [prop.field]: true, tagged: selectedProps[prop.field] === variant.value, hide: prop.field === 'sku' && !shouldShowSwatchButton(variant)}"
+              :style="{ backgroundImage: prop.field === 'sku' ? getSwatch(variant) : '' }"
               @click="selectProp(prop.field, variant.value)">
               {{ prop.field !== 'sku' ? variant.label : '' }}
             </div>
@@ -89,6 +89,25 @@ export default class Chooser extends Vue {
     }
   }
 
+  shouldShowSwatchButton (variant: any) {
+    const product = this.stock.find((product: any) => product.sku === variant.value)
+    console.log('shouldShowSwatchButton', variant, product)
+    if (!product) return false
+
+    let shouldShow = true
+    if ((product?.quantity < 5 && product?.deprecated) || product?.disabled || product?.forceLowStock) {
+      shouldShow = false
+    }
+    console.log('shouldShowSwatchButton', shouldShow)
+
+    return shouldShow
+  }
+
+  getSwatch (variant: any) {
+    const host = window.location.hostname
+    return `url(https://${host}/img/swatches/${variant.value}.jpg)`
+  }
+
   getExtraFirstPrompt (index: number) {
     return index === 0 ? ` of your next ${meta[this.clothingType].prompt}` : ''
   }
@@ -138,12 +157,13 @@ export default class Chooser extends Vue {
 }
 
 .chooser-row.skuGrid {
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(7, 1fr) !important;
 }
 
 .chooser-row.skuGrid .chooser-button {
   margin-bottom: 0;
   background-size: cover;
+  min-height: 100px;
 }
 
 .chooser-row.disabled {
@@ -177,6 +197,10 @@ export default class Chooser extends Vue {
 .chooser-button.tagged {
   background-color: #5b7975;
   color: white;
+}
+
+.chooser-button.hide {
+  display: none;
 }
 
 .add-more-buttons {
