@@ -42,6 +42,17 @@ const meta: ProductMeta = {
     addMore: ['underwear', 'undershirts', 'longjohns', 'performance-socks', 'lounge-shirt'],
     url: 'https://mrdavis.com/best-underwear/'
   },
+  'sport-underwear-air': {
+    prompt: 'pair',
+    cta: 'Select sport undies',
+    props: {
+      cut: ['standard', 'trunks'],
+      color: ['navy'],
+      size: [{ label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl'],
+    },
+    addMore: ['sport-underwear-air', 'undershirts', 'underwear', 'performance-socks', 'lounge-shirt'],
+    url: 'https://mrdavis.com/airmotion-sport-underwear/',
+  },
   longjohns: {
     prompt: 'pair',
     cta: 'Select long johns',
@@ -96,22 +107,26 @@ const meta: ProductMeta = {
     cta: 'Select dress socks',
     props: {
       sku: [
+        'Dress-Future-Argyle-MagRoseTan-OS',
+        'Dress-Future-Argyle-SleetBrwn-OS',
+        'Dress-Future-Argyle-BlueGry-OS',
+        'Dress-Lines-Nvy-Sleet-OS',
+        'Dress-Lines-Blk-Mag-OS',
+        'Dress-SportStripe-Navy-OS',
+        'Dress-Dots-MagRose-OS',
+        'Dress-Dots-NvySleet-OS',
+        'Dress-Dots-BlkAlm-OS',
         'Dress-Dots-Gry-Lime-OS',
         'Dress-Stripes-Nvy-Gren-OS',
         'Dress-Stripes-Nvy-NtGrey-OS',
         'Dress-Stripes2-Nvy-Port-OS',
         'Dress-Stripes2-Gry-Marina-OS',
+        'Dress-Stripes2-Nvy-Sleet-OS',
         'Dress-Stripes2-Blk-NvyPeony-OS',
         'Dress-Solid-Blk-Gold-OS',
         'Dress-Solid-Nvy-Gold-OS',
         'Dress-Solid-DrkGrey-Gold-OS',
         'Dress-Solid-Oat-Port-OS',
-        'Dress-Argyle-Nvy-Grey-OS',
-        'Dress-Argyle-Burg-Grey-OS',
-        'Dress-Future-Argyle-BlueGry-OS',
-        'Dress-1Stripe-DrkGren-OS',
-        'Dress-4Stripe-GryGreen-OS',
-        'Dress-SportStripe-Navy-OS',
       ]
     },
     addMore: ['performance-socks', 'everyday-socks', 'underwear', 'undershirts', 'no-show-socks'],
@@ -168,6 +183,7 @@ const meta: ProductMeta = {
 export const buyableCategories = [
   'undershirts',
   'underwear',
+  'sport-underwear-air',
   'performance-socks',
   'everyday-socks',
   'longjohns',
@@ -182,6 +198,7 @@ export const buyableCategories = [
 export const addMoreIcons = {
   'everyday-tee': 'mens_everyday_tee_grey.png',
   undershirts: 'mens_ushirt_trad_v_tone.png',
+  'sport-underwear-air': '',
   'lounge-shirt': 'mens_lounge_shirt_grey.png',
   underwear: 'mens_uwear_std_grey.png',
   longjohns: 'mens_longjohns_black.png',
