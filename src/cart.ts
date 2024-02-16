@@ -246,6 +246,7 @@ declare global {
     postage: number
     rates: any[]
     service: string
+    modified: boolean
   }
   interface ShippingRate {
     rate: number | string;
@@ -281,10 +282,11 @@ declare global {
       prompt: string
       cta: string
       props: {
-        [key: string]: (string|{label: string, value: string})[]
+        [key: string]: (string|{label: string, value: string, isNew?: boolean})[]
       },
       addMore: string[]
       url?: string
+      hideButton?: (selectedProps: any, value: string) => boolean
     }
   }
 

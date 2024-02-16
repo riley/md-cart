@@ -31,6 +31,12 @@ const handleJSONResponse = ({ errorString }: {errorString: string}): ResponseHan
   }
 }
 
+const africa = ['DZ','AO','BJ','BW','BF','BI','CM','CV','CF','TD','KM','CG','CD','CI','DJ','EG','GQ','ER','ET','GA','GM','GH','GN','GW','KE','LS','LR','LY','MG','ML','MW','MR','MU','YT','MA','MZ','NA','NE','NG','RE','RW','ST','SN','SC','SL','SO','ZA','SS','SD','SZ','TZ','TG','TN','UG','EH','ZM','ZW']
+const middleEast = ['IL','AE','EG','IR','TR','LB','BH','JO','YE','SA','QA','IQ','KW','OM','SY','PS','CY']
+const russiaUkraine = ['RU','UA']
+// allow Israel
+middleEast.shift()
+
 export default {
   namespaced: true,
   state: {
@@ -93,6 +99,7 @@ export default {
       rates: [], // first class, priority, etc
       service: null,
     },
+    shippingInvalidCountries: africa.concat(middleEast).concat(russiaUkraine),
     stock: [],
     subtotal: null,
     token: null,
@@ -259,6 +266,7 @@ export default {
       state.shipping.intlDiscount = shipping.intlDiscount
       state.shipping.rates = shipping.rates
       state.shipping.service = shipping.service
+      state.shipping.modified = shipping.modified
     },
     setShippingAddress (state: any, address: Address) {
       state.shipping.address = address

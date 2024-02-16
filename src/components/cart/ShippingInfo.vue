@@ -55,8 +55,11 @@
           v-bind="address" />
       </fieldset>
     </form>
-    <div class="shipping-delay-warning" v-if="!['US', 'CA', 'GB'].includes(currentCountry)">
+    <div class="shipping-delay-warning" v-if="!['US', 'CA', 'GB'].includes(currentCountry) && !shippingInvalidCountries.includes(currentCountry)">
       Due to pandemic we are seeing significant international delays. We apologize for any inconvenience.
+    </div>
+    <div class="shipping-prohibited-warning" v-if="shippingInvalidCountries.includes(currentCountry)">
+      We are not currently shipping to {{ getCountryName(currentCountry) }}. We apologize for any inconvenience.
     </div>
   </section>
 </template>
@@ -73,6 +76,7 @@ import Chip from '../BaseChip.vue'
 import Instructions from '../BaseInstructions.vue'
 import LoginForm from '../LoginForm.vue'
 import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
+import countries from '@/utils/countries'
 
 const cart = namespace('cart')
 const user = namespace('user')
@@ -82,6 +86,7 @@ const user = namespace('user')
 })
 export default class ShippingInfo extends Vue {
   @cart.State((state: any) => state.shipping.address) address: Address
+  @cart.State shippingInvalidCountries: string[]
   @cart.State email: string
   @user.State isReturningCustomer: boolean
   @cart.State isVip: boolean
@@ -147,6 +152,11 @@ export default class ShippingInfo extends Vue {
 
     return this.address.country
   }
+
+  getCountryName (code: string) {
+    const name = countries.find(tuple => tuple[1] === code)
+    return Array.isArray(name) ? name[0] : code
+  }
 }
 </script>
 
@@ -202,6 +212,13 @@ legend {
 }
 
 .shipping-delay-warning {
+  color: #5b7975;
+  background-color: rgba(220,232,221,1);
+  padding: 1rem;
+  line-height: 1.6em;
+}
+
+.shipping-prohibited-warning {
   background-color: #fee;
   color: #721c24;
   padding: 1rem;
