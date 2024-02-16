@@ -1,9 +1,10 @@
 <template>
-  <div class="thumbnail" :style="{'background-image': `url(https://mrdavis.com/img/icons/${icon}`, display: icon ? 'block' : 'none'}" />
+  <div class="thumbnail" :style="{'background-image': `url(/img/icons/${icon})`, display: icon ? 'block' : 'none'}" />
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+
 export default Vue.extend({
   props: ['icon']
 })
