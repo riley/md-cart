@@ -29,7 +29,7 @@ export default class VipDetail extends Vue {
 
   getIcon (sku: string) {
     const product = this.stock.find((product: Product) => product.sku === sku)
-    return product ? `https://mrdavis.com/img/icons/${product.icon}` : ''
+    return product ? `https://${window.location.host}/img/icons/${product.icon}` : ''
   }
 
   get groupedProducts () {

@@ -19,13 +19,14 @@ import Overlay from '../Overlay.vue'
 import Spinner from '../BaseSpinner.vue'
 
 const cart = namespace('cart')
-const intlShippingErrorMessage = 'Due to pandemic we are seeing significant international delays. We are limiting international shipping to Canada only for the time being. We apologize for any inconvenience.'
+const intlShippingErrorMessage = 'Due to pandemic we are seeing significant international delays. We are limiting international shipping for the time being. We apologize for any inconvenience.'
 
 @Component({ components: { Overlay, Spinner } })
 export default class PayPal extends Vue {
   @cart.State processingPaypal: boolean
   @cart.State paypalCapturing: boolean
   @cart.State paypalOrderInit: PayPalOrderInit
+  @cart.State shippingInvalidCountries: string[]
   @cart.Mutation setPaypalAvailable: (status: boolean) => void
   @cart.Mutation setProcessingPaypal: (status: boolean) => void
   @cart.Mutation setPaypalCapturing: (status: boolean) => void
@@ -74,7 +75,7 @@ export default class PayPal extends Vue {
           }
         },
         onShippingChange: async (data: any, { resolve, reject }: PayPalActions) => {
-          const shippingAcceptable = ['US', 'CA', 'GB'].includes(data.shipping_address.country_code)
+          const shippingAcceptable = !this.shippingInvalidCountries.includes(data.shipping_address.country_code)
 
           if (!shippingAcceptable) {
             this.setGlobalError(intlShippingErrorMessage)

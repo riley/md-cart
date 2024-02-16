@@ -45,7 +45,7 @@
         </div>
         <div v-if="order.totalDiscount > 0" class="info-row">
           <p>Mr. Davis Credits</p>
-          <p>-${{ order.totalDiscount }}</p>
+          <p>-${{ order.totalDiscount / 100 }}</p>
         </div>
         <div class="info-row">
           <p>Shipping</p>

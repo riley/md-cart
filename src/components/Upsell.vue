@@ -3,7 +3,7 @@
     <div class="layout" @click="$emit('select')">
       <div class="thumb" :style="{'background-image': `url(${upsell.thumb})`}"/>
       <div class="info">
-        <div><a class="title" :href="upsell.path">{{ upsell.title }}</a></div>
+        <div><span class="title" :href="upsell.path">{{ upsell.title }}</span></div>
         <p class="tagline">{{ upsell.tagline }}</p>
         <div class="cta">
           <span class="price">${{ Math.round(price / 100) }} | Save ${{ Math.round((1 - price / retailPrice) * 100) }}%</span>
@@ -61,6 +61,7 @@ export default class Upsell extends Vue {
   border-bottom: 0.0625rem solid rgba(33, 43, 100, 0.25);
   transition: all 0.2s ease 0s;
   margin-bottom: .5rem;
+  color: #5b7975;
 }
 
 .title:hover {
