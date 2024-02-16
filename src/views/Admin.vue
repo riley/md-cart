@@ -5,10 +5,11 @@
         <Button inline @click="toggleLoginForm(true)">Login</Button>
       </span>
       <span v-else>Welcome back {{ username }}
-        <span v-if="credit > 0"><br />You have ${{ credit / 100 }} in Mr. Davis rewards</span>
+        <span v-if="credit > 0"><br />You have ${{ credit / 100 }} in Mr. Davis rewards!</span>
+        <span v-else><br />Mr. Davis Rewards $0 - Refer friends to earn rewards! <a href="#" @click="goRefer">Learn more →</a></span>
         <Button inline @click="logout">Logout</Button>
       </span>
-      <router-link v-if="!atHome && loggedIn" to="/">← Home</router-link>
+      <router-link v-if="!atHome && loggedIn" to="/">←&nbsp;Home</router-link>
     </div>
     <ActionChooser v-if="loggedIn" />
     <Banner v-if="applicationError" title="Application Error" variant="warning">
@@ -100,6 +101,11 @@ export default class Admin extends Vue {
     if (this.allVips.length > 0) {
       this.$router.push({ name: 'vipList' })
     }
+  }
+
+  goRefer (e: Event) {
+    e.preventDefault()
+    this.$router.push({ name: 'refer' })
   }
 
   get atHome () {
