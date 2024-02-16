@@ -16,27 +16,28 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import { State, Getter, Action, namespace } from 'vuex-class'
+import Vue from 'vue'
+import { mapGetters, mapState, mapActions } from 'vuex'
 import Card from '../components/BaseCard.vue'
 import CardContent from '../components/BaseCardContent.vue'
 import Heading from '../components/BaseHeading.vue'
 import OrderThumb from '../components/admin/OrderThumb.vue'
 
-const user = namespace('user')
-const cart = namespace('cart')
-
-@Component({ components: { Card, CardContent, Heading, OrderThumb } })
-export default class OrderHistory extends Vue {
-  @Getter allOrders: Order[]
-  @user.Getter loggedIn: boolean
-  @State stock: Product[]
-  @cart.Action beginReorder: (orderId: string) => Promise<void>
-
-  reorder (orderId: string) {
-    this.beginReorder(orderId)
+export default Vue.extend({
+  name: 'OrderHistory',
+  components: { Card, CardContent, Heading, OrderThumb },
+  computed: {
+    ...mapGetters(['allOrders']),
+    ...mapGetters('user', ['loggedIn']),
+    ...mapState(['stock']),
+  },
+  methods: {
+    ...mapActions('cart', ['beginReorder']),
+    reorder (orderId: string) {
+      this.beginReorder(orderId)
+    }
   }
-}
+})
 </script>
 
 <style scoped>

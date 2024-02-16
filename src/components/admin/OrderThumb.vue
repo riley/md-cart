@@ -20,41 +20,47 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import Vue, { PropType } from 'vue'
 import Thumb from '../BaseSkuThumb.vue'
 import Button from '@/components/BaseButton.vue'
 
-@Component({ components: { Button, Thumb } })
-export default class OrderThumb extends Vue {
-  @Prop() id: string
-  @Prop() _id: string
-  @Prop() status: string
-  @Prop() bundles: Bundle[]
-  @Prop() createdAt: Date
-  @Prop() stock: Product[]
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-  get groupedProducts () {
-    return this.bundles[0].skus.reduce((carry: any, item: Item) => {
-      const product = this.stock.find((product: Product) => product.sku === item.sku)
-      if (carry[item.sku]) {
-        carry[item.sku].quantity += 1
-      } else {
-        carry[item.sku] = { ...product, quantity: 1 }
-      }
-      return carry
-    }, {})
+export default Vue.extend({
+  name: 'OrderThumb',
+  components: { Button, Thumb },
+  props: {
+    id: String,
+    _id: String,
+    status: String,
+    bundles: Array as PropType<Bundle[]>,
+    createdAt: Date,
+    stock: Array as PropType<Product[]>,
+  },
+  computed: {
+    groupedProducts: function () {
+      return this.bundles[0].skus.reduce((carry: any, item: Item) => {
+        const product = this.stock.find((product: Product) => product.sku === item.sku) as Product
+        if (carry[item.sku]) {
+          carry[item.sku].quantity += 1
+          carry[item.sku].cost += item.cost
+        } else {
+          carry[item.sku] = { ...product, quantity: 1, cost: item.cost }
+        }
+        return carry
+      }, {})
+    }
+  },
+  methods: {
+    formattedDate: function (d: Date): string {
+      return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+    },
+    showOrderDetail () {
+      this.$router.push({ name: 'orderDetail', params: { id: this._id } })
+    }
   }
+})
 
-  formattedDate (d: Date) {
-    return `${this.months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
-  }
-
-  showOrderDetail () {
-    this.$router.push({ name: 'orderDetail', params: { id: this._id } })
-  }
-}
 </script>
 
 <style scoped>
