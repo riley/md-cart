@@ -12,7 +12,7 @@ const meta: ProductMeta = {
     prompt: 'shirt',
     cta: 'Select undershirt',
     props: {
-      color: ['tone', 'white', 'grey', 'black'],
+      color: ['tone', 'white', 'grey', 'black', 'brown'],
       style: ['v neck', 'crew'],
       cut: ['tailored', 'traditional'],
       size: ['xs', { label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl', 'xxxl']
@@ -37,17 +37,21 @@ const meta: ProductMeta = {
     props: {
       cut: ['standard', 'trunks'],
       color: ['tone', 'grey', 'forest', 'sage', 'navy', 'wine', 'black', 'aqua'],
-      size: [{ label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl'],
+      size: [{ label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl', 'xxxl'],
     },
     addMore: ['underwear', 'undershirts', 'longjohns', 'performance-socks', 'lounge-shirt'],
-    url: 'https://mrdavis.com/best-underwear/'
+    url: 'https://mrdavis.com/best-underwear/',
+    hideButton: (selectedProps, value) => {
+      const shouldHide = ['tone', 'sage', 'forest', 'aqua', 'wine'].includes(selectedProps.color) && value === 'xxxl'
+      return shouldHide
+    }
   },
   'sport-underwear-air': {
     prompt: 'pair',
     cta: 'Select sport undies',
     props: {
       cut: ['standard', 'trunks'],
-      color: ['navy'],
+      color: ['navy', { label: 'black', value: 'black', isNew: true }],
       size: [{ label: 'S', value: 'small' }, { label: 'M', value: 'medium' }, { label: 'L', value: 'large' }, 'xl', 'xxl'],
     },
     addMore: ['sport-underwear-air', 'undershirts', 'underwear', 'performance-socks', 'lounge-shirt'],
@@ -146,6 +150,7 @@ const meta: ProductMeta = {
         'ED-Socks-Pixel-LtGrey-OS',
         'ED-Socks-Pixel-Black-OS',
         'ED-Socks-Solid-Oat-Green-OS',
+        'ED-Socks-Pixel-Wine-OS',
       ]
     },
     addMore: ['everyday-socks', 'performance-socks', 'undershirts', 'underwear', 'everyday-tee-crew'],
@@ -155,7 +160,7 @@ const meta: ProductMeta = {
     prompt: 'sock',
     cta: 'Select Athletic Socks',
     props: {
-      color: ['black', 'white', 'navy', { label: 'light grey', value: 'lt-grey' }]
+      color: ['black', 'white', 'navy', { label: 'light grey', value: 'lt-grey' }, { label: 'wine pixel', value: 'wine', isNew: true }]
     },
     addMore: ['performance-socks', 'undershirts'],
     url: 'https://mrdavis.com/best-athletic-sock/'

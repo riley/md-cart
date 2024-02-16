@@ -11,7 +11,12 @@
               class="chooser-button"
               v-for="variant of prop.info"
               :key="variant.label"
-              :class="{ [prop.field]: true, tagged: selectedProps[prop.field] === variant.value, hide: prop.field === 'sku' && !shouldShowSwatchButton(variant)}"
+              :class="{
+                [prop.field]: true,
+                tagged: selectedProps[prop.field] === variant.value,
+                hide: prop.field === 'sku' && !shouldShowSwatchButton(variant) || shouldHide(selectedProps, variant.value),
+                'new-highlight': variant.isNew
+              }"
               :style="{ backgroundImage: prop.field === 'sku' ? getSwatch(variant) : '' }"
               @click="selectProp(prop.field, variant.value)">
               {{ prop.field !== 'sku' ? variant.label : '' }}
@@ -103,9 +108,14 @@ export default class Chooser extends Vue {
     return shouldShow
   }
 
+  shouldHide (selectedProps: any, variant: any) {
+    return meta[this.clothingType].hideButton?.(selectedProps, variant)
+  }
+
   getSwatch (variant: any) {
     const host = window.location.hostname
-    return `url(https://${host}/img/swatches/${variant.value}.jpg)`
+    const swatchFile = this.stock.find((product: any) => product.sku === variant.value)?.swatch
+    return `url(https://${host}/img/swatches/${swatchFile})`
   }
 
   getExtraFirstPrompt (index: number) {
@@ -184,6 +194,8 @@ export default class Chooser extends Vue {
   min-height: 55px;
   border: 2px solid #e7e7e7;
   background: #fff;
+  padding: 5px;
+  position: relative;
 }
 
 .chooser-button:first-child {
@@ -201,6 +213,18 @@ export default class Chooser extends Vue {
 
 .chooser-button.hide {
   display: none;
+}
+
+.chooser-button.new-highlight::after {
+  position: absolute;
+  content: 'NEW';
+  color: white;
+  background-color: #c2644a;
+  padding: 0px 6px;
+  font-size: 10px;
+  border-radius: 2px;
+  bottom: -8px;
+  right: -8px;
 }
 
 .add-more-buttons {
