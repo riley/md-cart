@@ -121,7 +121,7 @@ export default {
         totalTax: state.totalTax,
         credit: state.credit
       })
-      return Math.max(state.subtotal + state.shipping.postage + state.totalTax - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0)
+      return Math.max(state.subtotal + state.shipping.postage - state.credit - calculatedReferralCredit - calculatedNonVIPCheckInCredit, 0) + state.totalTax
     },
     isStoredInfo: (state: any) => {
       return state.useStoredShippingInfo && state.useStoredBillingInfo && state.useStoredPaymentInfo
